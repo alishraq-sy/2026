@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-bs-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>معتمرو حملة الإشراق</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Reem+Kufi:wght@500;700&family=Amiri+Quran&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./ishraq-ui.css">
+<meta name="theme-color" content="#0b0b0c">
+<style>
+/* قواعد وظيفية يعتمد عليها umrah.js (لا تحذفها) */
+.tab-off{display:none!important}
+#app.role-sheikh>:not(#sheikhBox){display:none!important}
+</style>
+</head>
+<body class="ix no-nav">
+<div id="banner" class="u-banner d-none"></div>
+<header class="ix-top ">
+  <div class="ix-wrap fixed-top in">
+    <a class="logo" href="./index.html" aria-label="إشراق"><img src="./5b862b4281f64fd884b11984846f0e97.png" alt="إشراق"></a>
+    <span class="sp"></span>
+    <a href="./index.html" class="btn btn-gold-outline btn-sm px-3"><i class="bi bi-house-door ms-1"></i>الرئيسية</a>
+  </div>
+</header>
+
+<main class="ix-wrap mt-5" style="max-width:760px;padding-top:26px;padding-bottom:48px">
+  <div class="text-center mb-4">
+    <div class="ix-hello">UMRAH · 2026</div>
+    <h1 class="ix-login-h mb-2">أهلًا بمعتمري <span class="ol">حملة الإشراق</span></h1>
+    <p class="desc-text mb-0">تابع رحلتك الإيمانية معنا، وسجّل برقمك للدخول إلى بياناتك.</p>
+  </div>
+
+  <!-- يظهر دائمًا: الدخول وبطاقة المعتمر -->
+  <section class="u-box mb-3" id="pilgrimBox">
+    <h2><i class="bi bi-person-badge ms-2"></i><span id="boxTitle">بطاقة المعتمر</span></h2>
+    <form id="loginForm">
+      <div class="d-flex gap-2 flex-wrap">
+        <input id="code" class="form-control u-in" style="flex:2 1 11rem" placeholder="الرقم السري الذي زوّدتك به الحملة" autocomplete="off" autocapitalize="characters" required>
+        <button class="btn btn-gold-solid px-4">دخول</button>
+      </div>
+      <small class="d-block mt-2" style="color:#d3d3c7">أدخل الرقم السري الذي زوّدتك به الحملة. بعد 5 محاولات خاطئة يُوقَف الدخول من الجهاز ولا يعود إلا بتفعيل من المشرف.</small>
+    </form>
+    <div id="loginMsg" class="small text-danger mt-2"></div>
+    <div id="ticket"></div>
+  </section>
+  
+  <!-- لا يظهر إلا بعد إدخال رقم معتمر صحيح -->
+  <div id="app" class="d-none">
+    <section id="sheikhBox" class="u-box mb-3 d-none"><h2><i class="bi bi-book ms-2"></i>لوحة الشيخ</h2><div id="sh"></div></section>
+    <section id="adminBox" class="u-box mb-3 d-none"><h2><i class="bi bi-speedometer2 ms-2"></i>لوحة المشرف</h2><div id="adm"></div></section>
+    <section id="lostBox" class="u-box mb-3 d-none" style="border-color:#dc3545"></section>
+    <div id="notifyBar" class="text-center mb-3 d-none"><button type="button" id="notifyBtn" class="btn btn-sm btn-gold-outline rounded-pill"><i class="bi bi-bell ms-1"></i>تفعيل تنبيهات التعديلات</button></div>
+
+    <section class="u-box u-next mb-3" id="nextBox">
+      <h2><i class="bi bi-alarm ms-2"></i>النشاط القادم</h2>
+      <div id="nextTitle" class="h5 text-light mb-2">جارٍ التحميل...</div>
+      <div class="countdown-box d-inline-flex gap-2 p-2 rounded" dir="ltr">
+        <div class="time-unit"><span id="cdD" class="time-num">00</span><span class="time-label">يوم</span></div><span class="time-colon">:</span>
+        <div class="time-unit"><span id="cdH" class="time-num">00</span><span class="time-label">ساعة</span></div><span class="time-colon">:</span>
+        <div class="time-unit"><span id="cdM" class="time-num">00</span><span class="time-label">دقيقة</span></div><span class="time-colon">:</span>
+        <div class="time-unit"><span id="cdS" class="time-num">00</span><span class="time-label">ثانية</span></div>
+      </div>
+    </section>
+
+    <!-- علامات التبويب (للمعتمر فقط) -->
+    <div id="tabsBar" class="d-none"><ul class="nav nav-pills flex-nowrap gap-1 mb-3" id="tabs" style="overflow-x:auto;padding-bottom:.25rem"></ul></div>
+
+    <section id="busBox" class="u-box mb-3 d-none" data-sec="bus"></section>
+    <section id="mySupBox" class="u-box mb-3 d-none" data-sec="sup"></section>
+    <section id="hotelBox" class="u-box mb-3 d-none" data-sec="hotel"></section>
+
+    <section class="mb-3" data-sec="prog"><h2 class="gold h5 fw-bold mb-3"><i class="bi bi-calendar-event ms-2"></i>برنامج الرحلة</h2><div id="events"></div></section>
+    <section id="doneBox" class="mb-3 d-none" data-sec="prog"></section>
+
+    <section class="u-box mb-3" id="askBox" data-sec="ask">
+      <h2><i class="bi bi-chat-dots ms-2"></i>ملاحظات واستفسارات</h2>
+      <form id="askForm">
+        <div class="row g-2 mb-2 who"></div>
+        <textarea id="askMsg" class="form-control u-in mb-2" rows="3" placeholder="اكتب ملاحظتك أو استفسارك" required></textarea>
+        <button class="btn btn-gold-solid w-100">إرسال</button>
+      </form>
+      <div id="myInq"></div>
+    </section>
+
+    <section class="u-box mb-3" id="fatwaBox" data-sec="fatwa"></section>
+
+    <section class="u-box mb-5" id="rateBox" data-sec="rate">
+      <h2><i class="bi bi-star ms-2"></i>قيّم رحلتك</h2>
+      <div class="stars text-center" id="stars" dir="ltr"></div>
+      <div id="starText" class="text-center gold mb-3" style="min-height:1.6rem"></div>
+      <form id="rateForm">
+        <div class="row g-2 mb-2 who"></div>
+        <textarea id="rateMsg" class="form-control u-in mb-2" rows="2" placeholder="رسالة اختيارية"></textarea>
+        <button class="btn btn-gold-solid w-100">إرسال التقييم</button>
+      </form>
+    </section>
+  </div>
+</main>
+
+<!-- نافذة التأكيد -->
+<div class="modal fade" id="cfm" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="background:#1b1b18;border:1px solid rgba(237,206,160,.3);border-radius:16px">
+      <div class="modal-body text-center p-4">
+        <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size:2.6rem"></i>
+        <h5 id="cfmT" class="mt-2 text-light"></h5>
+        <p id="cfmB" class="desc-text"></p>
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-danger fw-bold flex-grow-1" id="cfmY"></button>
+          <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">إلغاء</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="position-fixed start-50 translate-middle-x bottom-0 mb-4 px-4 py-2 d-none text-center" style="z-index:2000;max-width:92vw"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="./umrah.js"></script>
+<script src="./admin.js"></script>
+<script src="./sheikh.js"></script>
+</body>
+</html>
