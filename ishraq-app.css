@@ -510,3 +510,14 @@ html[data-accent]:not([data-accent="gold"]){filter:hue-rotate(var(--ix-hue))}
 .ix .hx-card .hx-bar{height:8px;border-radius:8px;background:var(--c3);overflow:hidden;margin-bottom:8px}.ix .hx-card .hx-bar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#cf9f52,#ecd09a)}
 .ix .hx-card .hx-st{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--t)}
 .ix .hx-card .hx-go{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:linear-gradient(135deg,#ecd09a,#cf9f52);color:#1c1405;font-weight:700;font-size:.78rem}
+
+/* v23: الجامع والمستطيل بنفس اللون الصلب بالثيم الداكن (بدون تداخل) */
+html:not([data-theme="light"]) .ix.app .prayer-card::before{opacity:1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120'%3E%3Cg fill='%23b88f4e'%3E%3Crect x='14' y='96' width='172' height='24'/%3E%3Cpath d='M60 96V74A40 40 0 0 1 140 74V96Z'/%3E%3Crect x='99' y='24' width='2' height='12'/%3E%3Ccircle cx='100' cy='20' r='4'/%3E%3Cpath d='M26 96V86A17 17 0 0 1 60 86V96Z'/%3E%3Cpath d='M140 96V86A17 17 0 0 1 174 86V96Z'/%3E%3Crect x='4' y='44' width='12' height='76'/%3E%3Cpath d='M3 44L10 22 17 44Z'/%3E%3Crect x='184' y='44' width='12' height='76'/%3E%3Cpath d='M183 44L190 22 197 44Z'/%3E%3C/g%3E%3C/svg%3E")}
+html:not([data-theme="light"]) .ix.app .countdown-box{background:#b88f4e!important}
+/* v23: هيدر مثبت دائماً أثناء النزول */
+.app-bar{position:fixed!important;top:0;left:0;right:0;width:100%}
+body.ix.app:has(>.app-bar){padding-top:88px}
+body.focus-reading-mode.ix.app:has(>.app-bar){padding-top:0}
+/* ألوان التمييز: دوائر المعاينة تحتفظ بلونها الحقيقي */
+html[data-accent] .fx-s i{filter:hue-rotate(calc(var(--ix-hue,0deg) * -1))}
+html[data-accent] .ix-tile,html[data-accent] .m-row{filter:hue-rotate(calc(var(--ix-hue,0deg) * -1))}
