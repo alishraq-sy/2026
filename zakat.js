@@ -1,5 +1,5 @@
 (function () {
-  var tab = "mal", G = 85, S = 595;
+  var tab = "gold", G = 85, S = 595;
   function v(id) { return parseFloat($("#" + id).value) || 0; }
   function fmt(n) { return n.toLocaleString("en-US", { maximumFractionDigits: 2 }); }
   function calc() {

@@ -31,17 +31,17 @@
 
     <main class="pb-5"><div class="ix-wrap fx">
 
-<div class="fx-tabs" id="zk-t"><button class="fx-tab on" data-t="mal">مال وعروض تجارة</button><button class="fx-tab" data-t="gold">ذهب</button><button class="fx-tab" data-t="silver">فضة</button></div>
+<div class="fx-tabs" id="zk-t"><button class="fx-tab on" data-t="gold">ذهب</button><button class="fx-tab" data-t="silver">فضة</button><button class="fx-tab" data-t="mal">مال وعروض تجارة</button></div>
 <div class="fx-card"><h3>أسعار المعادن</h3><p class="fx-m" id="zk-src">جارٍ جلب سعر الذهب والفضة...</p>
 <div class="fx-row"><div><label class="fx-lb">سعر غرام الذهب</label><input id="zk-pg" class="fx-in" type="number" step="any" inputmode="decimal" /></div><div><label class="fx-lb">سعر غرام الفضة</label><input id="zk-ps" class="fx-in" type="number" step="any" inputmode="decimal" /></div></div>
 <p class="fx-m" style="margin:8px 0 0">اكتب الأسعار بعملتك نفسها، فالأسعار الآلية بالدولار الأمريكي.</p></div>
-<div id="zk-mal" class="fx-card"><h3>أموالك</h3>
+<div id="zk-mal" class="fx-card" style="display:none"><h3>أموالك</h3>
 <label class="fx-lb">النقد والودائع</label><input id="zk-cash" class="fx-in" type="number" step="any" inputmode="decimal" />
 <label class="fx-lb">قيمة بضائع التجارة</label><input id="zk-trade" class="fx-in" type="number" step="any" inputmode="decimal" />
 <label class="fx-lb">ديون لك مرجوّة السداد</label><input id="zk-due" class="fx-in" type="number" step="any" inputmode="decimal" />
 <label class="fx-lb">ديون عليك حالّة</label><input id="zk-debt" class="fx-in" type="number" step="any" inputmode="decimal" />
 <label class="fx-lb">النصاب بحسب</label><select id="zk-nb" class="fx-sel"><option value="silver">الفضة (الأحوط للفقراء)</option><option value="gold">الذهب</option></select></div>
-<div id="zk-gold" class="fx-card" style="display:none"><h3>ذهبك</h3><label class="fx-lb">وزن الذهب بالغرام (غير المستعمل للزينة المباحة)</label><input id="zk-gg" class="fx-in" type="number" step="any" inputmode="decimal" /></div>
+<div id="zk-gold" class="fx-card"><h3>ذهبك</h3><label class="fx-lb">وزن الذهب بالغرام (غير المستعمل للزينة المباحة)</label><input id="zk-gg" class="fx-in" type="number" step="any" inputmode="decimal" /></div>
 <div id="zk-silver" class="fx-card" style="display:none"><h3>فضتك</h3><label class="fx-lb">وزن الفضة بالغرام</label><input id="zk-sg" class="fx-in" type="number" step="any" inputmode="decimal" /></div>
 <div class="fx-card fx-hero"><small id="zk-st"></small><div class="fx-big" id="zk-res">0</div><small id="zk-sub"></small></div>
 <p class="fx-m">النصاب: 85 غراماً من الذهب أو 595 غراماً من الفضة، والمقدار 2.5% بعد مرور حول هجري كامل. هذه الحاسبة للاستئناس، وللحالات الخاصة راجع عالماً ثقة.</p>

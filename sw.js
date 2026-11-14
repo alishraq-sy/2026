@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ishraq-cache-v28';
+const CACHE_NAME = 'ishraq-cache-v29';
 const assetsToCache = [
   './',
   './index.html',
@@ -49,16 +49,12 @@ const assetsToCache = [
   './ibadat.js',
   './zakat.html',
   './zakat.js',
-  './nawawi.html',
-  './nawawi.js',
   './challenge.html',
   './challenge.js',
-  './badges.html',
-  './badges.js',
+  './challenge-data.js',
+  './hadith.js',
   './themes.html',
   './themes.js',
-  './live.html',
-  './live.js',
   './ishraq-feat.css',
   './ishraq-feat.js',
   './ramadan.html',

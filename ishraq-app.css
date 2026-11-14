@@ -495,3 +495,18 @@ html[data-ramadan="1"][data-theme="dark"] body.ix{--k:#08130f;--c1:#0e1c16;--c2:
 html[data-ramadan="1"] body.ix::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;background:radial-gradient(1.5px 1.5px at 12% 18%,#f6e7bf,transparent),radial-gradient(1px 1px at 78% 10%,#f6e7bf,transparent),radial-gradient(1.5px 1.5px at 55% 32%,#f6e7bf,transparent),radial-gradient(1px 1px at 90% 44%,#f6e7bf,transparent),radial-gradient(1px 1px at 30% 60%,#f6e7bf,transparent),radial-gradient(1.5px 1.5px at 8% 82%,#f6e7bf,transparent)}
 html[data-accent]:not([data-accent="gold"]) img,html[data-accent]:not([data-accent="gold"]) video,html[data-accent]:not([data-accent="gold"]) canvas{filter:hue-rotate(calc(var(--ix-hue) * -1))}
 html[data-accent]:not([data-accent="gold"]){filter:hue-rotate(var(--ix-hue))}
+
+/* رابط البحث بالكلمة داخل صفحة القرآن */
+.ix .qs-link{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:13px 14px;border-radius:18px;text-decoration:none;color:var(--t);background:linear-gradient(135deg,color-mix(in srgb,var(--a) 16%,var(--c1)),var(--c1));border:1px solid color-mix(in srgb,var(--a) 45%,var(--c3))}
+.ix .qs-link>i:first-child{font-size:1.4rem;color:var(--a)}.ix .qs-link>i:last-child{color:var(--m)}
+.ix .qs-link span{flex:1}.ix .qs-link b{display:block;font-size:.92rem;color:var(--a2)}.ix .qs-link small{color:var(--m);font-size:.74rem}
+/* كروت الرئيسية: العبادات والتحدي */
+.ix .hx-row{display:grid;grid-template-columns:1fr;gap:12px}
+.ix .hx-card{position:relative;overflow:hidden;display:block;text-decoration:none;color:var(--t);padding:18px 18px 16px;border-radius:24px;border:1px solid color-mix(in srgb,var(--a) 50%,var(--c3));background:radial-gradient(circle at 12% 0%,color-mix(in srgb,var(--a) 26%,transparent),transparent 58%),linear-gradient(160deg,var(--c2),var(--c1))}
+.ix .hx-card .hx-bg{position:absolute;inset-inline-start:-14px;bottom:-22px;font-size:7.5rem;color:var(--a);opacity:.11;line-height:1}
+.ix .hx-card .hx-k{font-size:.74rem;letter-spacing:.06em;color:var(--a);font-weight:700;display:flex;align-items:center;gap:6px}
+.ix .hx-card h3{margin:6px 0 4px;font-size:1.25rem;color:var(--a2);font-weight:700}
+.ix .hx-card p{margin:0 0 12px;color:var(--m);font-size:.82rem;line-height:1.7;max-width:80%}
+.ix .hx-card .hx-bar{height:8px;border-radius:8px;background:var(--c3);overflow:hidden;margin-bottom:8px}.ix .hx-card .hx-bar i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#cf9f52,#ecd09a)}
+.ix .hx-card .hx-st{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;color:var(--t)}
+.ix .hx-card .hx-go{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:linear-gradient(135deg,#ecd09a,#cf9f52);color:#1c1405;font-weight:700;font-size:.78rem}

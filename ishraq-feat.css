@@ -48,3 +48,5 @@
 .fx-who{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;background:var(--c2);border:1px solid var(--c3);margin-bottom:7px;font-size:.9rem}
 .fx-who b{flex:1}.fx-who small{color:var(--m)}
 #fx-map{height:300px;border-radius:18px;border:1px solid var(--c3);margin-bottom:10px}
+body.ix.app>main{width:100%;min-width:0}
+.fx,.fx-card,.fx-tabs{min-width:0;max-width:100%}

@@ -83,3 +83,14 @@
   renderRamadan(); renderAsma();
   document.addEventListener("visibilitychange", function () { if (!document.hidden) { renderRamadan(); } });
 })();
+
+/* إحصاءات كروت الرئيسية: العبادات والتحدي */
+(function () {
+  function g(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+  function day() { var d = new Date(), m = d.getMonth() + 1, x = d.getDate(); return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (x < 10 ? "0" : "") + x; }
+  var t = day(), custom = g("ix_ibadat_items", []), total = 7 + custom.length, rec = g("ix_ibadat", {})[t] || {}, n = Object.keys(rec).filter(function (k) { return rec[k]; }).length;
+  var e1 = document.getElementById("hx-ib-t"), b = document.getElementById("hx-ib-bar");
+  if (e1) { e1.textContent = n ? "أتممت " + n + " من " + total + " عبادات اليوم" : "ابدأ يومك بأول عبادة"; if (b) b.style.width = Math.min(100, n / total * 100) + "%"; }
+  var c = g("ix_chal", { days: {} }), e2 = document.getElementById("hx-ch-t");
+  if (e2) e2.textContent = c.days && c.days[t] ? "نتيجتك اليوم " + c.days[t].s + " / 5 — تدرّب أكثر" : "أسئلة اليوم بانتظارك";
+})();
