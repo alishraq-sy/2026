@@ -102,7 +102,7 @@
     if (b.dataset.s != null) { var i = +b.dataset.s, p = d.s.indexOf(i); if (p > -1) d.s.splice(p, 1); else d.s.push(i); }
     else if (b.dataset.g != null) { var x = d.gear[+b.dataset.g]; if (x) x.on = x.on ? 0 : 1; }
     else if (b.dataset.x != null) { d.gear.splice(+b.dataset.x, 1); }
-    else if (b.dataset.r) { if (!confirm("إعادة القوائم لوضعها الأصلي؟")) return; d = {}; }
+    else if (b.dataset.r) { ixAsk("إعادة القوائم لوضعها الأصلي؟", { danger: 1, ok: "إعادة" }).then(function (ok) { if (ok) { store({}); buzz(14); buildRites(); } }); return; }
     else return;
     store(d); buzz(14); buildRites();
   });

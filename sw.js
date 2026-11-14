@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ishraq-cache-v30';
+const CACHE_NAME = 'ishraq-cache-v32';
 const assetsToCache = [
   './',
   './index.html',
@@ -41,6 +41,7 @@ const assetsToCache = [
   './settings.js',
   './azkar.js',
   './asma.html',
+  './hadith.html',
   './khatma.html',
   './khatma.js',
   './qsearch.html',
@@ -55,6 +56,9 @@ const assetsToCache = [
   './hadith.js',
   './themes.html',
   './themes.js',
+  './offline.html',
+  './offline.js',
+  './ishraq-time.js',
   './ishraq-feat.css',
   './ishraq-feat.js',
   './ramadan.html',
@@ -93,7 +97,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
+          if (key !== CACHE_NAME && key !== 'ishraq-offline' && key !== 'ishraq-ext') {
             return caches.delete(key);
           }
         })
@@ -110,13 +114,29 @@ self.addEventListener('fetch', (event) => {
   // ولا في الطلبات الخارجية (Firebase وGoogle Apps Script وخطوط Google وغيرها)،
   // ولا في صفحات منصة المعتمر (مجلد umrah-platform) لأنها تدير نفسها.
   const url = new URL(req.url);
-  if (
-    req.method !== 'GET' ||
-    url.origin !== self.location.origin ||
-    url.pathname.includes('/umrah-platform/')
-  ) {
+  if (req.method !== 'GET') return;
+
+  // القرآن (alquran.cloud): الشبكة أولاً، وعند انقطاعها نقرأ من التنزيلات المحفوظة
+  if (url.hostname === 'api.alquran.cloud') {
+    event.respondWith(
+      fetch(req).then((res) => {
+        if (res && res.ok && !url.pathname.includes('/search/')) { const c = res.clone(); caches.open('ishraq-offline').then((ch) => ch.put(req, c)); }
+        return res;
+      }).catch(() => caches.match(req))
+    );
     return;
   }
+  // الخطوط والمكتبات الخارجية: نخزنها عند أول استعمال لتعمل بدون إنترنت
+  if (['fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com'].includes(url.hostname)) {
+    event.respondWith(
+      caches.open('ishraq-ext').then((ch) => ch.match(req).then((hit) => {
+        const net = fetch(req).then((res) => { if (res && (res.ok || res.type === 'opaque')) ch.put(req, res.clone()); return res; }).catch(() => hit);
+        return hit || net;
+      }))
+    );
+    return;
+  }
+  if (url.origin !== self.location.origin || url.pathname.includes('/umrah-platform/')) return;
 
   event.respondWith(
     fetch(req)

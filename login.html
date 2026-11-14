@@ -63,6 +63,15 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
 @media(max-width:480px){.brand-name{font-size:2.8rem}.login-card{padding:26px 18px 22px}}
 @media(prefers-reduced-motion:reduce){.brand-symbol::before{animation:none}}
   input,select,button,.btn{border-radius:14px!important}
+.lg-tabs{display:flex;gap:6px;padding:4px;margin-bottom:22px;background:var(--k);border:1px solid var(--c3);border-radius:16px!important}
+.lg-tabs button{flex:1;border:0;background:transparent;color:var(--m);padding:9px;font:700 .92rem Cairo,sans-serif;border-radius:12px!important}
+.lg-tabs button.on{background:linear-gradient(135deg,#edcea0,#d6ac52);color:#1c1405}
+.lg-or{display:flex;align-items:center;gap:10px;margin:20px 0 14px;color:var(--m);font-size:.8rem}
+.lg-or::before,.lg-or::after{content:"";flex:1;height:1px;background:var(--c3)}
+.google-button{width:100%;min-height:52px;display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid var(--c3);background:var(--k);color:var(--t);font:700 .95rem Cairo,sans-serif;border-radius:18px!important}
+.google-button:hover{border-color:var(--a)}
+.google-button:disabled{opacity:.6;cursor:wait}
+.mb-reg{display:none}.reg .mb-reg{display:block}.reg .only-login{display:none}
 </style>
     <link rel="stylesheet" href="./ishraq-light.css" />
     <script src="./ishraq-theme.js"></script>
@@ -86,9 +95,13 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
       </header>
 
       <section class="login-card">
+        <div class="lg-tabs" role="tablist">
+          <button type="button" id="tabLogin" class="on">تسجيل الدخول</button>
+          <button type="button" id="tabReg">حساب جديد</button>
+        </div>
         <div class="card-heading">
-          <h1>أهلًا بك في الإشراق</h1>
-          <p>سجّل دخولك وتابع رحلتك الإيمانية</p>
+          <h1 id="lgTitle">أهلًا بك في الإشراق</h1>
+          <p id="lgSub">سجّل دخولك وتابع رحلتك الإيمانية</p>
         </div>
 
         <form id="loginForm">
@@ -130,6 +143,14 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
             </div>
           </div>
 
+          <div class="mb-reg mt-3">
+            <label for="password2" class="form-label">تأكيد كلمة المرور</label>
+            <div class="input-wrapper">
+              <i class="bi bi-shield-lock input-icon"></i>
+              <input type="password" id="password2" class="ishraq-input" placeholder="أعد كتابة كلمة المرور" autocomplete="new-password">
+            </div>
+          </div>
+
           <div id="loginError" class="login-error" role="alert"></div>
 
           <button type="submit" id="loginButton" class="login-button">
@@ -137,6 +158,12 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
             تسجيل الدخول
           </button>
         </form>
+
+        <div class="lg-or"><span>أو</span></div>
+        <button type="button" id="googleButton" class="google-button">
+          <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>
+          <span id="googleLabel">المتابعة بحساب غوغل</span>
+        </button>
       </section>
 
       <footer class="login-footer">
@@ -151,7 +178,13 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
     import {
       getAuth,
-      signInWithEmailAndPassword
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInWithRedirect,
+      getRedirectResult,
+      sendEmailVerification
     } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -186,39 +219,84 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
       );
     });
 
+    const card = document.querySelector(".login-card");
+    const pass2 = document.getElementById("password2");
+    let reg = false;
+    const setMode = (r) => {
+      reg = r;
+      card.classList.toggle("reg", r);
+      document.getElementById("tabLogin").classList.toggle("on", !r);
+      document.getElementById("tabReg").classList.toggle("on", r);
+      document.getElementById("lgTitle").textContent = r ? "انضم إلى الإشراق" : "أهلًا بك في الإشراق";
+      document.getElementById("lgSub").textContent = r ? "أنشئ حسابك وابدأ رحلتك الإيمانية" : "سجّل دخولك وتابع رحلتك الإيمانية";
+      button.innerHTML = r ? '<i class="bi bi-person-plus ms-1"></i> إنشاء الحساب' : '<i class="bi bi-box-arrow-in-left ms-1"></i> تسجيل الدخول';
+      passwordInput.autocomplete = r ? "new-password" : "current-password";
+      pass2.required = r;
+      errorBox.classList.remove("show");
+    };
+    document.getElementById("tabLogin").onclick = () => setMode(false);
+    document.getElementById("tabReg").onclick = () => setMode(true);
+    if (location.hash === "#register") setMode(true);
+
+    const MSG = {
+      "auth/invalid-credential": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+      "auth/invalid-email": "يرجى إدخال بريد إلكتروني صحيح.",
+      "auth/user-disabled": "هذا الحساب معطّل.",
+      "auth/too-many-requests": "محاولات كثيرة. حاول مرة أخرى بعد قليل.",
+      "auth/network-request-failed": "تعذّر الاتصال بالإنترنت. تحقق من اتصالك.",
+      "auth/email-already-in-use": "هذا البريد مسجّل مسبقًا، جرّب تسجيل الدخول.",
+      "auth/weak-password": "كلمة المرور ضعيفة، استخدم 6 أحرف على الأقل.",
+      "auth/popup-closed-by-user": "أُغلقت نافذة غوغل قبل إكمال التسجيل.",
+      "auth/cancelled-popup-request": "أُغلقت نافذة غوغل قبل إكمال التسجيل.",
+      "auth/account-exists-with-different-credential": "هذا البريد مسجّل بطريقة أخرى، سجّل الدخول بها.",
+      "auth/unauthorized-domain": "هذا النطاق غير مصرّح له في إعدادات Firebase.",
+      "auth/operation-not-allowed": "هذه الطريقة غير مفعّلة بعد في إعدادات Firebase."
+    };
+    const fail = (e) => { console.error("Auth error:", e); errorBox.textContent = MSG[e.code] || "تعذّرت العملية. حاول مرة أخرى."; errorBox.classList.add("show"); };
+
+    const gBtn = document.getElementById("googleButton");
+    gBtn.addEventListener("click", async () => {
+      errorBox.classList.remove("show"); gBtn.disabled = true;
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      try {
+        await signInWithPopup(auth, provider);
+        window.location.replace("./index.html");
+      } catch (e) {
+        if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") {
+          try { await signInWithRedirect(auth, provider); return; } catch (e2) { fail(e2); }
+        } else fail(e);
+        gBtn.disabled = false;
+      }
+    });
+    getRedirectResult(auth).then((r) => { if (r && r.user) window.location.replace("./index.html"); }).catch(fail);
+
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       errorBox.classList.remove("show");
+      if (reg) {
+        if (passwordInput.value.length < 6) return fail({ code: "auth/weak-password" });
+        if (passwordInput.value !== pass2.value) { errorBox.textContent = "كلمتا المرور غير متطابقتين."; errorBox.classList.add("show"); return; }
+      }
 
       const originalButton = button.innerHTML;
       button.disabled = true;
       button.innerHTML =
-        '<span class="spinner-border spinner-border-sm ms-2"></span> جارٍ تسجيل الدخول...';
+        '<span class="spinner-border spinner-border-sm ms-2"></span> جارٍ المعالجة...';
 
       try {
-        await signInWithEmailAndPassword(
-          auth,
-          emailInput.value.trim(),
-          passwordInput.value
-        );
+        if (reg) {
+          const cr = await createUserWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
+          try { await sendEmailVerification(cr.user); } catch (e) {}
+        } else {
+          await signInWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
+        }
 
         window.location.replace("./index.html");
       } catch (error) {
         console.error("Login error:", error);
 
-        const messages = {
-          "auth/invalid-credential": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
-          "auth/invalid-email": "يرجى إدخال بريد إلكتروني صحيح.",
-          "auth/user-disabled": "هذا الحساب معطّل.",
-          "auth/too-many-requests": "محاولات كثيرة. حاول مرة أخرى بعد قليل.",
-          "auth/network-request-failed": "تعذّر الاتصال بالإنترنت. تحقق من اتصالك."
-        };
-
-        errorBox.textContent =
-          messages[error.code] ||
-          "تعذّر تسجيل الدخول. حاول مرة أخرى.";
-
-        errorBox.classList.add("show");
+        fail(error);
         button.disabled = false;
         button.innerHTML = originalButton;
       }

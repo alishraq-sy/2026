@@ -150,7 +150,7 @@ function addToList(no, name) {
 $('clr').onclick = async () => {
   const label = getLabel(), key = $('key').value.trim();
   if (!label || !key) return show('bad', 'أدخل رمز المشرف واختر الباص أولًا');
-  if (!confirm(`مسح جميع الحضور المسجَّل في «${label}»؟ سيُحذف من تبويب الحضور أيضًا ولا يمكن التراجع.`)) return;
+  if (!(await ixAsk(`مسح جميع الحضور المسجَّل في «${label}»؟ سيُحذف من تبويب الحضور أيضًا ولا يمكن التراجع.`, { danger: 1, ok: "مسح" }))) return;
   try {
     const r = await call({ action: 'scan_remove', key, label, all: true });
     if (!r.ok) return show('bad', r.error === 'key' ? '🔒 رمز المشرف غير صحيح' : '❌ تعذّر المسح — إن تكرر ذلك انشر Code.gs بنسخة جديدة');
@@ -165,7 +165,7 @@ const rmBtn = (no, name) => `<br><button type="button" class="btn btn-sm btn-lig
 async function removeOne(no, name) {
   const label = getLabel(), key = $('key').value.trim();
   if (!label || !key) return show('bad', 'أدخل رمز المشرف واختر الباص أولًا');
-  if (!confirm(`إزالة ${name} من «${label}»؟`)) return;
+  if (!(await ixAsk(`إزالة ${name} من «${label}»؟`, { danger: 1, ok: "إزالة" }))) return;
   try {
     const r = await call({ action: 'scan_remove', key, label, pilgrimNo: no });
     if (!r.ok) return show('bad', r.error === 'key' ? '🔒 رمز المشرف غير صحيح' : '❌ تعذّرت الإزالة — إن تكرر ذلك انشر Code.gs بنسخة جديدة');

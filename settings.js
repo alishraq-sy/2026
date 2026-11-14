@@ -153,10 +153,9 @@ function exportBackup() {
 function importBackup(file) {
     if (!file) return;
 
-    if (!confirm("سيتم استبدال بياناتك الحالية بالنسخة المستوردة. هل تريد المتابعة؟")) {
-        return;
-    }
-
+    ixAsk("سيتم استبدال بياناتك الحالية بالنسخة المستوردة. هل تريد المتابعة؟", { danger: 1, ok: "استبدال" }).then(function (ok) { if (ok) doImport(file); });
+}
+function doImport(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
         try {
@@ -211,13 +210,14 @@ async function shareApp() {
                 console.error("فشل النسخ", clipErr);
             }
         }
-        prompt("انسخ الرابط يدوياً:", window.location.href);
+        alert("انسخ الرابط يدوياً:\n" + window.location.href);
     }
 }
 
 // 15. مسح جميع بيانات التطبيق نهائياً
 function clearAppStorage() {
-    if (confirm("هل أنت متأكد من مسح جميع بيانات التطبيق والإعدادات؟ هذا الإجراء لا يمكن التراجع عنه.")) {
+    ixAsk("هل أنت متأكد من مسح جميع بيانات التطبيق والإعدادات؟ هذا الإجراء لا يمكن التراجع عنه.", { danger: 1, ok: "مسح الكل" }).then(function (ok) {
+      if (!ok) return;
         localStorage.clear();
         if ('caches' in window) {
             caches.keys().then(names => {
@@ -225,8 +225,8 @@ function clearAppStorage() {
             });
         }
         alert("تم مسح البيانات بنجاح، سيتم إعادة تحميل الصفحة.");
-        window.location.reload();
-    }
+        setTimeout(function () { window.location.reload(); }, 1200);
+    });
 }
 
 // 16. تهيئة الحالة عند فتح الصفحة (ضبط كل عناصر التحكم بقيمها المحفوظة فعلياً)

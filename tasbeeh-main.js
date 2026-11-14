@@ -77,12 +77,12 @@ function renderBeads() {
 
 // تصفير العداد يدوياً بالكامل (الدورة الحالية)
 function resetCounter() {
-    if (confirm('هل تريد تصفير العداد الحالي؟')) {
+    ixAsk('هل تريد تصفير العداد الحالي؟', { danger: 1, ok: 'تصفير' }).then(function (ok) { if (!ok) return;
         currentCount = 0;
         roundsCount = 0; // إذا أردت تصفير الدورات أيضاً، أو تركها كإحصائية (فيك تخليها أو تصفرها)
         updateDisplay();
         renderBeads();
-    }
+    });
 }
 
 // تغيير نص الذكر المعروض

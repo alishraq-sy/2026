@@ -102,6 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetBtn = document.getElementById("reset-category-btn");
 
   let activeCategoryId = categories[0].id;
+  try { const q = new URLSearchParams(location.search).get("cat"); if (q && categories.some(c => c.id === q)) activeCategoryId = q; } catch (e) {}
   let currentFontSize = parseFloat(localStorage.getItem("eshraq_font_size")) || 1.6;
 
   function getFontFamilyCss() {

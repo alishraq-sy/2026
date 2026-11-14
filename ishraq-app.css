@@ -527,3 +527,16 @@ html,html body.ix{overflow-x:clip!important}
 body.focus-reading-mode.ix.app.reader .reader-bar{top:0}
 button.ix-tile{font:inherit;width:100%;cursor:pointer}
 @media(max-width:767.98px){body.focus-reading-mode.ix.app .ix-player,body.focus-reading-mode.ix.app #hz-bar{bottom:calc(10px + env(safe-area-inset-bottom,0px))!important}}
+
+/* أذكار الوقت وسنن اليوم */
+.ix .tm-zk{position:relative;overflow:hidden;display:block;text-decoration:none;color:var(--t);padding:18px;border-radius:24px;margin-bottom:10px;border:1px solid color-mix(in srgb,var(--a) 50%,var(--c3));background:radial-gradient(circle at 90% 0%,color-mix(in srgb,var(--a) 24%,transparent),transparent 60%),linear-gradient(160deg,var(--c2),var(--c1))}
+.ix .tm-zk .tm-bg{position:absolute;inset-inline-start:-12px;bottom:-20px;font-size:6.5rem;color:var(--a);opacity:.12}
+.ix .tm-k{font-size:.7rem;color:var(--a);font-weight:700;letter-spacing:.08em}
+.ix .tm-zk b{display:block;font-size:1.25rem;color:var(--a2);margin:4px 0}.ix .tm-zk small{display:block;color:var(--m);font-size:.8rem;line-height:1.7;max-width:85%;margin-bottom:12px}
+.ix .tm-go{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:linear-gradient(135deg,#ecd09a,#cf9f52);color:#1c1405;font-weight:700;font-size:.78rem}
+.ix .tm-list{display:flex;flex-direction:column;gap:8px}
+.ix .tm-it{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;text-decoration:none;color:var(--t);background:var(--c1);border:1px solid var(--c3)}
+.ix .tm-it>i:first-child{font-size:1.3rem;color:var(--a);flex:none}.ix .tm-it span{flex:1;min-width:0}
+.ix .tm-it b{display:block;font-size:.9rem;color:var(--a2)}.ix .tm-it small{display:block;color:var(--m);font-size:.74rem;line-height:1.6}.ix .tm-ch{color:var(--m)}
+body.ix.app>main{width:100%;min-width:0}
+#steps-container{min-width:0;max-width:100%}

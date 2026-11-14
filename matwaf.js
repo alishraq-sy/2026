@@ -70,33 +70,7 @@
      
       if (!container || !stepsContainer) return;
 
-      // إذا كان المستخدم قد اختر وضع الحج، سنعرض واجهة التطوير
-      if (ritualMode === "hajj") {
-        stepsContainer.innerHTML = `
-          <div class="step-indicator text-center ">
-            
-            
-          </div>
-        `;
-        if (counterText) counterText.textContent = "";
-        if (prevBtn) prevBtn.classList.add("d-none");
-
-        container.innerHTML = `
-          <div class="text-center py-">
-            <div class="mb-3">
-              <i class="bi bi-tools gold fs-1"></i>
-            </div>
-            <h4 class="gold fw-bold mb-3">مناسك الحج </h4>
-            <p class="text-light opacity-85 px-3 mb-4" style="font-size: ${currentFontSize}px;">
-           نعمل حالياً على تطوير هذا القسم بعناية ليقدم لك دليلاً متكاملاً لمناسك الحج.
-            </p>
-            <div class="p-3 rounded-3 bg-dark-subtle border border-gold-subtle text-center">
-              <p class="text-warning fw-bold mb-0"><i class="bi bi-clock-history me-1"></i> ترقبونا قريباً في التحديث القادم!</p>
-            </div>
-          </div>
-        `;
-        return;
-      }
+      if (ritualMode === "hajj") { renderHajj(container, stepsContainer, prevBtn, counterText); return; }
 
       // عرض مراحل العمرة الاعتيادية (5 مراحل)
       let stages = umrahStages;
@@ -269,12 +243,13 @@
     }
 
     function confirmReset() {
-      if (confirm("هل أنت متأكد من رغبتك في إعادة ضبط التقدم والبدء من جديد؟")) {
+      ixAsk("هل أنت متأكد من رغبتك في إعادة ضبط التقدم والبدء من جديد؟", { danger: 1, ok: "إعادة الضبط" }).then(function (ok) {
+        if (!ok) return;
         currentStage = 1;
         currentLap = 1;
         saveProgress();
         renderMutawwifStage();
-      }
+      });
     }
 
     function saveToHistory() {
@@ -310,21 +285,99 @@
 
     // حذف إنجاز واحد بعينه من الأرشيف (وليس السجل كاملاً)
     function deleteHistoryItem(index) {
-      if (!confirm("هل تريد حذف هذا الإنجاز من الأرشيف؟")) return;
-      let history = JSON.parse(localStorage.getItem("mutawwif_history")) || [];
-      history.splice(index, 1);
-      localStorage.setItem("mutawwif_history", JSON.stringify(history));
-      loadHistory();
+      ixAsk("هل تريد حذف هذا الإنجاز من الأرشيف؟", { danger: 1, ok: "حذف" }).then(function (ok) {
+        if (!ok) return;
+        let history = JSON.parse(localStorage.getItem("mutawwif_history")) || [];
+        history.splice(index, 1);
+        localStorage.setItem("mutawwif_history", JSON.stringify(history));
+        loadHistory();
+      });
     }
 
     function clearHistory() {
-      if (confirm("هل تريد مسح سجل الإنجازات بالكامل؟")) {
+      ixAsk("هل تريد مسح سجل الإنجازات بالكامل؟", { danger: 1, ok: "مسح" }).then(function (ok) {
+        if (!ok) return;
         localStorage.removeItem("mutawwif_history");
         loadHistory();
-      }
+      });
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       renderMutawwifStage();
       loadHistory();
     });
+
+    /* ===================== دليل الحج (التمتع) ===================== */
+    const HAJJ = [
+      { n: "الإحرام", t: "الإحرام بالحج — 8 ذو الحجة", icon: "bi-person-heart",
+        steps: ["اغتسل وتطيّب في بدنك (لا في ثوب الإحرام) والبس الإزار والرداء للرجل، وللمرأة لباسها الساتر بلا نقاب ولا قفازين.", "انوِ الإحرام بالحج من مكان إقامتك قبل التوجه إلى منى.", "أكثِر من التلبية إلى أن ترمي جمرة العقبة يوم النحر."],
+        dua: "لبيك اللهم حجاً\n\nلبيك اللهم لبيك، لبيك لا شريك لك لبيك، إن الحمد والنعمة لك والملك، لا شريك لك" },
+      { n: "منى", t: "يوم التروية — المبيت بمنى", icon: "bi-houses",
+        steps: ["توجّه إلى منى قبل الظهر أو بعده في 8 ذو الحجة.", "صلِّ بها الظهر والعصر والمغرب والعشاء والفجر، وتُقصر الرباعية (ركعتين) دون جمع.", "اشتغل بالذكر والدعاء والتلبية وتلاوة القرآن."],
+        dua: "اللهم هذا منى فامنن علينا بما مننت به على أوليائك وأهل طاعتك" },
+      { n: "عرفة", t: "الوقوف بعرفة — 9 ذو الحجة", icon: "bi-geo-alt-fill",
+        steps: ["بعد طلوع الشمس توجّه إلى عرفة، وتأكد من حدودها فلا وقوف في وادي عرنة.", "صلِّ الظهر والعصر جمع تقديم وقصراً (ركعتين ركعتين) بأذان وإقامتين.", "تفرّغ للدعاء والذكر مستقبل القبلة رافعاً يديك إلى غروب الشمس.", "لا تنصرف قبل الغروب، فالوقوف بعرفة هو ركن الحج الأعظم."],
+        dua: "خير الدعاء دعاء يوم عرفة، وخير ما قلت أنا والنبيون من قبلي:\n\nلا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير\n\nربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار" },
+      { n: "مزدلفة", t: "المبيت بمزدلفة — ليلة العاشر", icon: "bi-moon-stars",
+        steps: ["انصرف من عرفة بعد الغروب بسكينة ووقار، وأنت تلبّي.", "صلِّ المغرب والعشاء جمعاً في مزدلفة (المغرب ثلاثاً والعشاء ركعتين).", "بِت بها وصلِّ الفجر في أول وقته، ثم قف عند المشعر الحرام داعياً حتى يسفر الصبح.", "الْتقط حصى الجمار (سبع حصيات ليوم النحر) إن أحببت، ولك أن تلتقطها من أي مكان."],
+        dua: "فَإِذَا أَفَضْتُم مِّنْ عَرَفَاتٍ فَاذْكُرُوا اللَّهَ عِندَ الْمَشْعَرِ الْحَرَامِ وَاذْكُرُوهُ كَمَا هَدَاكُمْ\n\nاللهم كما أوقفتنا فيه وأريتنا إياه فوفقنا لذكرك كما هديتنا" },
+      { n: "جمرة العقبة", t: "يوم النحر — رمي جمرة العقبة", icon: "bi-bullseye", pebbles: true,
+        steps: ["توجّه إلى منى وارمِ جمرة العقبة (الكبرى) بسبع حصيات، تكبّر مع كل حصاة.", "انحر هديك (ذبح الهدي) إن كنت متمتعاً أو قارناً.", "احلق رأسك أو قصّره (والحلق أفضل للرجل)، وللمرأة تقصّر قدر أنملة.", "بذلك يحصل التحلل الأول، فيحل لك كل شيء إلا النساء."],
+        dua: "الله أكبر (مع كل حصاة)\n\nاللهم اجعله حجاً مبروراً وسعياً مشكوراً وذنباً مغفوراً" },
+      { n: "الإفاضة", t: "طواف الإفاضة والسعي", icon: "bi-arrow-repeat",
+        steps: ["اذهب إلى مكة (في يوم النحر أو بعده) وطف بالكعبة سبعة أشواط وهو طواف الإفاضة، ركن من أركان الحج.", "صلِّ ركعتين خلف مقام إبراهيم إن تيسّر.", "اسعَ بين الصفا والمروة سبعة أشواط (للمتمتع سعي الحج)، تبدأ بالصفا وتنتهي بالمروة.", "بذلك يحصل التحلل الثاني ويحل لك كل شيء."],
+        dua: "ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار" },
+      { n: "التشريق", t: "أيام التشريق — رمي الجمرات (11 و12 و13)", icon: "bi-3-circle", rami: true,
+        steps: ["بعد زوال الشمس ارمِ الجمرات الثلاث مرتبة: الصغرى ثم الوسطى ثم الكبرى، سبع حصيات لكل واحدة.", "بعد الصغرى والوسطى قف مستقبل القبلة وادعُ طويلاً، وبعد الكبرى انصرف بلا دعاء.", "بِت بمنى ليالي التشريق، ومن تعجّل في يومين فلا إثم عليه ومن تأخر فلا إثم عليه، والتأخر أفضل."],
+        dua: "الله أكبر (مع كل حصاة)\n\nواذكروا الله في أيام معدودات فمن تعجّل في يومين فلا إثم عليه ومن تأخر فلا إثم عليه لمن اتقى" },
+      { n: "الوداع", t: "طواف الوداع", icon: "bi-door-open",
+        steps: ["قبل مغادرتك مكة طف بالبيت سبعة أشواط ليكون آخر عهدك بالبيت.", "يسقط طواف الوداع عن الحائض والنفساء.", "ادعُ الله أن يتقبل حجك ويجعله مبروراً."],
+        dua: "اللهم إن هذا البيت بيتك وأنا عبدك وابن عبدك وابن أمتك، حملتني على ما سخّرت لي من خلقك، وسيّرتني في بلادك حتى بلّغتني بنعمتك إلى بيتك، فإن كنت رضيت عني فازدد عني رضاً، وإلا فمن الآن قبل أن تنأى عن بيتك داري، فهذا أوان انصرافي إن أذنت لي" }
+    ];
+    let hStage = parseInt(localStorage.getItem("mutawwif_hstage")) || 1;
+    let hChk = JSON.parse(localStorage.getItem("mutawwif_hchk") || "{}");
+    let hPeb = parseInt(localStorage.getItem("mutawwif_hpeb")) || 0;
+    let hRami = JSON.parse(localStorage.getItem("mutawwif_hrami") || "{}");
+    function hSave() { localStorage.setItem("mutawwif_hstage", hStage); localStorage.setItem("mutawwif_hchk", JSON.stringify(hChk)); localStorage.setItem("mutawwif_hpeb", hPeb); localStorage.setItem("mutawwif_hrami", JSON.stringify(hRami)); }
+    function hGo(d) { hStage = Math.min(HAJJ.length + 1, Math.max(1, hStage + d)); hSave(); renderMutawwifStage(); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    function hSet(n) { hStage = n; hSave(); renderMutawwifStage(); }
+    function hToggle(i) { const k = hStage + "_" + i; hChk[k] = !hChk[k]; hSave(); renderMutawwifStage(); }
+    function hPebble(d) { hPeb = Math.max(0, Math.min(7, hPeb + d)); hSave(); renderMutawwifStage(); }
+    function hRamiTap(day, j) { const k = day + "_" + j; hRami[k] = ((hRami[k] || 0) + 1) % 8; hSave(); renderMutawwifStage(); }
+    function hReset() { ixAsk("البدء من جديد؟ سيُمسح تقدمك في مناسك الحج.", { danger: 1, ok: "ابدأ من جديد" }).then(function (ok) { if (!ok) return; hStage = 1; hChk = {}; hPeb = 0; hRami = {}; hSave(); renderMutawwifStage(); }); }
+    function renderHajj(container, stepsContainer, prevBtn, counterText) {
+      if (prevBtn) prevBtn.classList.add("d-none");
+      if (counterText) counterText.textContent = hStage <= HAJJ.length ? "المرحلة " + hStage + " من " + HAJJ.length : "";
+      stepsContainer.style.overflowX = "auto";
+      stepsContainer.innerHTML = HAJJ.map((st, i) => {
+        const id = i + 1, cls = id === hStage ? "active" : id < hStage ? "completed" : "";
+        return `<div class="step-indicator text-center ${cls}" style="min-width:58px;cursor:pointer" onclick="hSet(${id})"><span class="badge-num">${id}</span><small class="d-block mt-1" style="font-size:.7rem;white-space:nowrap">${st.n}</small></div>` + (i < HAJJ.length - 1 ? '<div class="step-line" style="min-width:10px"></div>' : "");
+      }).join("");
+      { const act = stepsContainer.querySelector(".active"); if (act) stepsContainer.scrollLeft = act.offsetLeft - stepsContainer.clientWidth / 2 + act.clientWidth / 2 - (stepsContainer.dir === "rtl" || getComputedStyle(stepsContainer).direction === "rtl" ? 0 : 0); }
+      if (hStage > HAJJ.length) {
+        container.innerHTML = `<div class="text-center py-3"><h4 class="gold fw-bold mb-3"><i class="bi bi-stars me-1"></i> تم الحج بحمد الله</h4>
+          <div class="p-3 rounded mb-3 bg-success bg-opacity-10 border border-success"><p class="text-success fw-bold mb-0">تقبّل الله حجك وجعله حجاً مبروراً، وسعياً مشكوراً، وذنباً مغفوراً</p></div>
+          <a href="https://api.whatsapp.com/send?text=${encodeURIComponent("الحمد لله الذي بنعمته تتم الصالحات، أتممت مناسك الحج بفضل الله. أسألكم الدعاء بالقبول.")}" target="_blank" class="btn btn-success rounded-pill mb-2 w-100"><i class="bi bi-whatsapp me-1"></i> مشاركة عبر واتساب</a>
+          <button onclick="hReset()" class="btn btn-outline-light rounded-pill px-4 btn-sm">البدء من جديد</button></div>`;
+        return;
+      }
+      const st = HAJJ[hStage - 1], fs = currentFontSize;
+      let html = `<div class="text-start"><h4 class="gold fw-bold mb-3 text-center"><i class="bi ${st.icon} me-1"></i> ${st.t}</h4>`;
+      html += st.steps.map((x, i) => { const on = hChk[hStage + "_" + i]; return `<div onclick="hToggle(${i})" class="d-flex gap-2 align-items-start p-2 mb-2 rounded-3" style="cursor:pointer;border:1px solid ${on ? "#edcea0" : "rgba(237,206,160,.2)"};background:${on ? "rgba(237,206,160,.1)" : "transparent"}"><i class="bi ${on ? "bi-check-circle-fill gold" : "bi-circle text-secondary"} mt-1"></i><span class="text-light" style="font-size:${fs - 2}px;line-height:1.9;${on ? "opacity:.75" : ""}">${x}</span></div>`; }).join("");
+      if (st.pebbles) {
+        html += `<div class="supplication-box p-3 rounded-3 my-3 text-center"><div class="text-light small mb-1">الحصيات المرميّة</div><div class="display-5 fw-bold gold font-monospace">${hPeb} / 7</div>
+          <div class="d-flex gap-2 justify-content-center mt-2"><button class="btn btn-outline-light rounded-pill px-3" onclick="hPebble(-1)">−</button><button class="btn btn-gold-solid rounded-pill px-4 fw-bold" onclick="hPebble(1)">رميتُ حصاة</button></div></div>`;
+      }
+      if (st.rami) {
+        const days = [["11", "اليوم الحادي عشر"], ["12", "اليوم الثاني عشر"], ["13", "اليوم الثالث عشر (لمن تأخر)"]], jn = ["الصغرى", "الوسطى", "الكبرى"];
+        html += `<div class="supplication-box p-3 rounded-3 my-3">` + days.map(d => `<div class="gold small fw-bold mt-2 mb-1">${d[1]}</div><div class="d-flex gap-2">` + jn.map((j, k) => `<button class="btn btn-sm flex-fill ${(hRami[d[0] + "_" + k] || 0) >= 7 ? "btn-gold-solid" : "btn-outline-warning"}" onclick="hRamiTap('${d[0]}',${k})">${j}<br><span class="font-monospace">${hRami[d[0] + "_" + k] || 0}/7</span></button>`).join("") + `</div>`).join("") + `<div class="text-secondary small mt-2">اضغط على الجمرة بعد كل حصاة.</div></div>`;
+      }
+      html += `<div class="supplication-box p-3 rounded-3 my-3 text-center"><p class="text-gold lh-lg mb-0" style="font-size:${fs}px;white-space:pre-line">${st.dua}</p></div>
+        <div class="d-flex gap-2"><button onclick="hGo(-1)" class="btn btn-outline-light rounded-pill flex-fill ${hStage === 1 ? "d-none" : ""}">السابق</button><button onclick="hGo(1)" class="btn btn-gold-solid rounded-pill flex-fill fw-bold">${hStage === HAJJ.length ? "إتمام الحج" : "أتممت هذه المرحلة"} <i class="bi bi-chevron-left ms-1"></i></button></div></div>`;
+      container.innerHTML = html;
+    }
+
+    (function syncMode() {
+      const u = document.getElementById("btn-mode-umrah"), h = document.getElementById("btn-mode-hajj");
+      if (u && h) { u.classList.toggle("active", ritualMode === "umrah"); h.classList.toggle("active", ritualMode === "hajj"); }
+    })();

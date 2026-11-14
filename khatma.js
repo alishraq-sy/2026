@@ -45,6 +45,6 @@
   };
   $("#kh-done").onclick = function () { var i = dayInfo(); st.page = Math.max(st.page, i.to); save(); render(); fxToast("تقبّل الله"); };
   $("#kh-setb").onclick = function () { var v = parseInt($("#kh-set").value, 10); if (!(v >= 0 && v <= TOTAL)) return; st.page = v; st.counted = 0; save(); render(); $("#kh-set").value = ""; };
-  $("#kh-reset").onclick = function () { if (confirm("إلغاء الخطة الحالية؟")) { st = null; try { localStorage.removeItem(K); } catch (e) {} render(); } };
+  $("#kh-reset").onclick = function () { ixAsk("إلغاء الخطة الحالية؟", { danger: 1, ok: "إلغاء الخطة" }).then(function (ok) { if (ok) { st = null; try { localStorage.removeItem(K); } catch (e) {} render(); } }); };
   render();
 })();

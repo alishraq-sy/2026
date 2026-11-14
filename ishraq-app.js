@@ -28,6 +28,7 @@
         '<a class="m-row" style="--ac:#d6ac52" href="./zakat.html"><i class="bi bi-calculator-fill"></i>حاسبة الزكاة<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#e07a9a" href="./challenge.html"><i class="bi bi-patch-question-fill"></i>التحدي اليومي<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#9aa0aa" href="./themes.html"><i class="bi bi-palette-fill"></i>المظهر والألوان<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#6aa8f0" href="./offline.html"><i class="bi bi-cloud-arrow-down-fill"></i>بدون إنترنت<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#e0a23a" href="./awrad.html"><i class="bi bi-book-half"></i>الأوراد<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#e07a9a" href="./adiya.html"><i class="bi bi-chat-heart"></i>الأدعية<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#d6ac52" href="./favorites.html"><i class="bi bi-star-fill"></i>المفضلة<span class="ch bi bi-chevron-left"></span></a>' +

@@ -256,12 +256,12 @@ function renderBeads() {
 
 // تصفير العداد يدوياً بالكامل (الدورة الحالية)
 function resetCounter() {
-  if (confirm('هل تريد تصفير العداد الحالي؟')) {
+  ixAsk('هل تريد تصفير العداد الحالي؟', { danger: 1, ok: 'تصفير' }).then(function (ok) { if (!ok) return;
     currentCount = 0;
     roundsCount = 0;
     updateDisplay();
     renderBeads();
-  }
+  });
 }
 
 // تغيير نص الذكر المعروض

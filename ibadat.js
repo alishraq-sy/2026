@@ -38,7 +38,7 @@
   document.addEventListener("click", function (e) {
     var c = e.target.closest("[data-k]"); if (c) { selDay = c.dataset.k; grid(); list(); return; }
     var dl = e.target.closest("[data-del]");
-    if (dl) { if (confirm("حذف هذه العبادة من قائمتك؟ (تبقى سجلاتها القديمة محفوظة)")) { custom = custom.filter(function (c) { return c.id !== dl.dataset.del; }); fxSet("ix_ibadat_items", custom); build(); grid(); list(); } return; }
+    if (dl) { var did = dl.dataset.del; ixAsk("حذف هذه العبادة من قائمتك؟ (تبقى سجلاتها القديمة محفوظة)", { danger: 1, ok: "حذف" }).then(function (ok) { if (!ok) return; custom = custom.filter(function (c) { return c.id !== did; }); fxSet("ix_ibadat_items", custom); build(); grid(); list(); }); return; }
     var b = e.target.closest("[data-i]"); if (b) { var d = data[selDay] = data[selDay] || {}; d[b.dataset.i] = d[b.dataset.i] ? 0 : 1; if (!cnt(selDay)) delete data[selDay]; fxSet(K, data); grid(); list(); }
   });
   $("#ib-prev").onclick = function () { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); grid(); };
