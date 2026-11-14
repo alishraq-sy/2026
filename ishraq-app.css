@@ -521,3 +521,9 @@ body.focus-reading-mode.ix.app:has(>.app-bar){padding-top:0}
 /* ألوان التمييز: دوائر المعاينة تحتفظ بلونها الحقيقي */
 html[data-accent] .fx-s i{filter:hue-rotate(calc(var(--ix-hue,0deg) * -1))}
 html[data-accent] .ix-tile,html[data-accent] .m-row{filter:hue-rotate(calc(var(--ix-hue,0deg) * -1))}
+
+/* v24: منع التمرير الأفقي بدون تحويل body إلى حاوية تمرير (كان يكسر sticky ويضيف فراغاً) */
+html,html body.ix{overflow-x:clip!important}
+body.focus-reading-mode.ix.app.reader .reader-bar{top:0}
+button.ix-tile{font:inherit;width:100%;cursor:pointer}
+@media(max-width:767.98px){body.focus-reading-mode.ix.app .ix-player,body.focus-reading-mode.ix.app #hz-bar{bottom:calc(10px + env(safe-area-inset-bottom,0px))!important}}

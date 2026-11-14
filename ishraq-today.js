@@ -94,3 +94,12 @@
   var c = g("ix_chal", { days: {} }), e2 = document.getElementById("hx-ch-t");
   if (e2) e2.textContent = c.days && c.days[t] ? "نتيجتك اليوم " + c.days[t].s + " / 5 — تدرّب أكثر" : "أسئلة اليوم بانتظارك";
 })();
+
+/* دعاء اليوم: مشاركة واتساب */
+(function () {
+  var b = document.getElementById("daily-dua-wa-btn"); if (!b) return;
+  b.addEventListener("click", function () {
+    var t = (document.getElementById("daily-dua-text") || {}).innerText || "";
+    window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent("✨ *إشراق - دعاء اليوم*\n\n" + t + "\n\n🔗 " + location.href), "_blank");
+  });
+})();

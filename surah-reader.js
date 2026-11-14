@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentFontSize = parseFloat(localStorage.getItem("eshraq_font_size")) || 1.6;
 
-  let isUthmaniFont = localStorage.getItem("eshraq_font_family") === "uthmani";
+  let isUthmaniFont = true; // الرسم العثماني فقط
 
   let isFocusMode = localStorage.getItem("eshraq_focus_mode") === "true";
 

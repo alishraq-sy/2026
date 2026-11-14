@@ -1,11 +1,11 @@
 {
-  "name": "إشراق - تطبيق إسلامي",
+  "name": "إشراق",
   "short_name": "إشراق",
   "description": "نُشرِقُ برُوحِك.. ونَسْمُو بِقَلْبِك",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#21211D",
-  "theme_color": "#21211D",
+  "background_color": "#0b0b0c",
+  "theme_color": "#0b0b0c",
   "orientation": "portrait",
   "icons": [
     {
