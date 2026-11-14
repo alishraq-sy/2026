@@ -30,7 +30,13 @@ const save = () => localStorage.setItem(KEY, JSON.stringify({ code, role, pilgri
 const DEFAULT_MIN = 60; // مدة النشاط (بالدقائق) إن لم يوجد عمود End_Time أو كان فارغًا
 const ICONS = [['تهجد','bi-moon-stars'],['عمرة','bi-stars'],['مزار','bi-geo-alt'],['جدة','bi-water'],['تحرك','bi-bus-front'],['وجبة','bi-cup-hot']];
 const icon = c => (ICONS.find(([k]) => (c || '').includes(k)) || [0, 'bi-calendar-event'])[1];
-const when = s => new Date(String(s).trim().replace(' ', 'T') + ':00+03:00'); // توقيت السعودية
+// توقيت السعودية. يقبل «2026-11-10 14:30» و«2026-11-10T14:30» وبالثواني، وكذلك نصوص التاريخ الكاملة (ISO بـ Z أو إزاحة) التي قد يعيدها جدول Google
+const when = s => {
+  s = String(s ?? '').trim();
+  const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?)?$/);
+  if (m) return new Date(`${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}T${(m[4] || '0').padStart(2, '0')}:${m[5] || '00'}:00+03:00`);
+  return new Date(s);
+};
 const fmt = d => d.toLocaleString('ar-SA', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Riyadh' });
 // يوم وتاريخ ميلادي لدخول/مغادرة الفندق من نص مثل 2026-10-07 أو 2026-10-07 14:00
 function fmtDay(s) {
@@ -47,9 +53,10 @@ function fmtDay(s) {
 function endOf(e, t) {
   const x = String(e.End_Time || '').trim(), dflt = new Date(t.getTime() + DEFAULT_MIN * 60000);
   if (!x) return dflt;
-  const timeOnly = /^\d{1,2}:\d{2}$/.test(x);
-  let end = when(timeOnly ? String(e.Date_Time).trim().split(/[ T]/)[0] + ' ' + x.padStart(5, '0') : x);
-  if (isNaN(end)) return dflt;
+  const timeOnly = /^\d{1,2}:\d{2}(:\d{2})?$/.test(x);
+  let end = when(timeOnly ? String(e.Date_Time).trim().split(/[ T]/)[0] + ' ' + x.slice(0, 5).padStart(5, '0') : x);
+  if (isNaN(end) || end.getFullYear() < 2000) return dflt;
+  if (!timeOnly && end <= t) return dflt; // نهاية قبل البداية: قيمة غير صالحة
   if (timeOnly && end <= t) end = new Date(end.getTime() + 864e5); // ينتهي بعد منتصف الليل
   return end;
 }
@@ -146,7 +153,7 @@ async function makeImage({ title, sub, rows = [], qr, qrNote }) {
   ops.push({ line: y + 20 }); y += 50;
   for (const [k, v] of rows) { text(k, 28, 400, GOLD, 'right', 40); text(v, 38, 700, '#f8f9fa', 'right', 54, 22); }
   if (qr) {
-    const s = qr.width * Math.max(1, Math.round(380 / qr.width)); // تكبير بمضاعف صحيح ليبقى الرمز حادًّا
+    const s = qr.width * Math.max(1, Math.round(700 / qr.width)); // تكبير بمضاعف صحيح ليبقى الرمز حادًّا
     y += 30; ops.push({ qr, x: (W - s) / 2, y, s }); y += s + 30;
     if (qrNote) text(qrNote, 28, 400, '#d3d3c7', 'center', 40);
   }
@@ -190,7 +197,17 @@ const askConfirm = (title, body, yes) => new Promise(res => {
 });
 
 /* ---------- بطاقة المعتمر / المشرف ---------- */
-const qrURL = () => { try { const q = qrcode(0, 'M'); q.addData('UMRAH:' + me.PilgrimNo); q.make(); return q.createDataURL(10, 0); } catch { return null; } };
+const qrPayload = () => {
+  // السطر الأول هو رمز المسح (يقرؤه scan.html)، وبقية الأسطر معلومات المعتمر لمن يمسح الرمز بأي كاميرا
+  const L = ['UMRAH:' + me.PilgrimNo, 'المعتمر: ' + (me.Name || '')];
+  [['مكة', 'Makkah'], ['المدينة', 'Madinah']].forEach(([n, k]) => {
+    if (me[k + '_Hotel']) L.push(`فندق ${n}: ${me[k + '_Hotel']}${me[k + '_Room'] ? ' (غرفة ' + me[k + '_Room'] + ')' : ''}`);
+    if (isUrl(me[k + '_Location'])) L.push(me[k + '_Location']);
+  });
+  if (me.Supervisor_Name || me.Supervisor_Phone) L.push('المشرف: ' + [me.Supervisor_Name, me.Supervisor_Phone].filter(Boolean).join(' - '));
+  return L.join('\n');
+};
+const qrURL = (cell = 6) => { try { if (qrcode.stringToBytesFuncs && qrcode.stringToBytesFuncs['UTF-8']) qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8']; const q = qrcode(0, 'L'); q.addData(qrPayload()); q.make(); return q.createDataURL(cell, 2); } catch { return null; } };
 
 function renderMe() {
   fillWho();
@@ -223,15 +240,11 @@ function renderMe() {
     <div class="body">${city(['فندق مكة المكرمة', me.Makkah_Hotel], me.Makkah_Room, me.Makkah_Location)}${city(['فندق المدينة المنورة', me.Madinah_Hotel], me.Madinah_Room, me.Madinah_Location)}
       <div id="qrWrap" class="text-center my-3"><div id="qrBox" class="d-inline-block bg-white p-2 rounded"></div><small class="d-block mt-1" style="opacity:.75">رمز الحضور — اعرضه للمشرف عند صعود الباص</small></div>
       <div class="d-grid gap-2">
-        <button type="button" class="btn btn-danger fw-bold" id="lostBtn"><i class="bi bi-exclamation-triangle-fill ms-1"></i>أنا تائه</button>
-        <button type="button" class="btn btn-warning fw-bold" id="lateBtn"><i class="bi bi-person-walking ms-1"></i>أنا في الطريق إلى الباص</button>
         <button type="button" class="btn btn-dark" id="saveCard"><i class="bi bi-download ms-1"></i>حفظ البطاقة كصورة</button>
         <button type="button" class="btn btn-outline-dark" id="logout">تسجيل خروج</button>
       </div></div></div>`;
   const q = qrURL();
   if (q) $('qrBox').innerHTML = `<img src="${q}" width="180" height="180" alt="رمز الحضور" style="display:block">`; else $('qrWrap').remove();
-  $('lostBtn').onclick = lostPress;
-  $('lateBtn').onclick = latePress;
   $('saveCard').onclick = e => saveCardImage(e.currentTarget);
   $('logout').onclick = logout;
 }
@@ -247,7 +260,7 @@ async function saveCardImage(btn) {
     const bus = [me.Bus_Title, me.Bus_No && 'رقم ' + me.Bus_No].filter(Boolean).join(' — ');
     if (bus) rows.push(['باص الرحلة', bus]);
     if (me.Supervisor_Name || me.Supervisor_Phone) rows.push(['المشرف', [me.Supervisor_Name, me.Supervisor_Phone].filter(Boolean).join(' — ')]);
-    const qr = await loadImg(qrURL());
+    const qr = await loadImg(qrURL(9));
     const c = await makeImage({ title: me.Name, sub: 'رقم المعتمر: ' + me.PilgrimNo, rows, qr, qrNote: 'رمز الحضور — اعرضه للمشرف عند صعود الباص' });
     await saveCanvas(c, `ishraq-card-${me.PilgrimNo}.png`);
   } catch { toast('تعذّر حفظ البطاقة'); } finally { btn.disabled = false; }
@@ -392,7 +405,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) sync
 
 /* ---------- علامات التبويب ---------- */
 let curTab = 'all';
-const TABS = [['all', 'الكل'], ['bus', 'باص الرحلة'], ['sup', 'المشرفون'], ['hotel', 'معلومات الفنادق'], ['prog', 'برنامج الرحلة'], ['ask', 'ملاحظات واستفسارات'], ['fatwa', 'الأسئلة الشرعية'], ['rate', 'تقييم الرحلة']];
+const TABS = [['all', 'الكل'], ['bus', 'باص الرحلة'], ['sup', 'المشرفون'], ['hotel', 'معلومات الفنادق'], ['prog', 'برنامج الرحلة'], ['rites', 'مناسكي وتجهيزاتي'], ['ask', 'ملاحظات واستفسارات'], ['fatwa', 'الأسئلة الشرعية'], ['rate', 'تقييم الرحلة']];
 function renderTabs() {
   const on = me && role === 'pilgrim';
   $('tabsBar').classList.toggle('d-none', !on);

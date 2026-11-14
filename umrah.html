@@ -10,20 +10,23 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./ishraq-ui.css">
+<link rel="stylesheet" href="./ishraq-app.css">
 <meta name="theme-color" content="#0b0b0c">
 <style>
 /* قواعد وظيفية يعتمد عليها umrah.js (لا تحذفها) */
 .tab-off{display:none!important}
-#app.role-sheikh>:not(#sheikhBox){display:none!important}
+#app.role-sheikh>:not(#sheikhBox):not(#nextBox):not(#quickActs):not(#notifyBar):not([data-sec="prog"]){display:none!important}
 </style>
-</head>
-<body class="ix no-nav">
+    <link rel="stylesheet" href="./ishraq-light.css" />
+    <script src="./ishraq-theme.js"></script>
+  </head>
+<body class="ix no-nav app">
 <div id="banner" class="u-banner d-none"></div>
-<header class="ix-top ">
-  <div class="ix-wrap fixed-top in">
+<header class="app-bar">
+  <div class="in">
+    <a class="ab" href="./index.html" aria-label="الرئيسية"><i class="bi bi-house-door"></i></a>
     <a class="logo" href="./index.html" aria-label="إشراق"><img src="./5b862b4281f64fd884b11984846f0e97.png" alt="إشراق"></a>
-    <span class="sp"></span>
-    <a href="./index.html" class="btn btn-gold-outline btn-sm px-3"><i class="bi bi-house-door ms-1"></i>الرئيسية</a>
+    <button class="ab d-none" id="umrah-tabs-btn" type="button" aria-label="المزيد"><i class="bi bi-grid-fill"></i></button>
   </div>
 </header>
 
@@ -50,10 +53,12 @@
   
   <!-- لا يظهر إلا بعد إدخال رقم معتمر صحيح -->
   <div id="app" class="d-none">
-    <section id="sheikhBox" class="u-box mb-3 d-none"><h2><i class="bi bi-book ms-2"></i>لوحة الشيخ</h2><div id="sh"></div></section>
-    <section id="adminBox" class="u-box mb-3 d-none"><h2><i class="bi bi-speedometer2 ms-2"></i>لوحة المشرف</h2><div id="adm"></div></section>
+    <section id="sheikhBox" class="u-box mb-3 d-none" data-sec="sheikh"><h2><i class="bi bi-book ms-2"></i>لوحة الشيخ</h2><div id="sh"></div></section>
+    <section id="adminBox" class="u-box mb-3 d-none" data-sec="admin"><h2><i class="bi bi-speedometer2 ms-2"></i>لوحة المشرف</h2><div id="adm"></div></section>
     <section id="lostBox" class="u-box mb-3 d-none" style="border-color:#dc3545"></section>
     <div id="notifyBar" class="text-center mb-3 d-none"><button type="button" id="notifyBtn" class="btn btn-sm btn-gold-outline rounded-pill"><i class="bi bi-bell ms-1"></i>تفعيل تنبيهات التعديلات</button></div>
+
+    <div id="quickActs" class="d-none"></div>
 
     <section class="u-box u-next mb-3" id="nextBox">
       <h2><i class="bi bi-alarm ms-2"></i>النشاط القادم</h2>
@@ -75,6 +80,8 @@
 
     <section class="mb-3" data-sec="prog"><h2 class="gold h5 fw-bold mb-3"><i class="bi bi-calendar-event ms-2"></i>برنامج الرحلة</h2><div id="events"></div></section>
     <section id="doneBox" class="mb-3 d-none" data-sec="prog"></section>
+
+    <section class="u-box mb-3 d-none" id="ritesBox" data-sec="rites"></section>
 
     <section class="u-box mb-3" id="askBox" data-sec="ask">
       <h2><i class="bi bi-chat-dots ms-2"></i>ملاحظات واستفسارات</h2>
@@ -122,7 +129,9 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script src="./umrah.js"></script>
+<script src="./umrah-ui.js"></script>
 <script src="./admin.js"></script>
 <script src="./sheikh.js"></script>
+<script src="./ishraq-app.js"></script>
 </body>
 </html>

@@ -1,17 +1,56 @@
-// --- إعدادات مواقيت الصلاة لـ إشراق --- //
+// --- مواقيت الصلاة لـ إشراق (سوريا · مكة · المدينة) --- //
+// الإعدادات كلها من صفحة الإعدادات: المدينة، طريقة الحساب، العصر، وتعديل الدقائق لكل صلاة.
 
-// دمشق كخيار افتراضي في حال عدم استجابة الـ GPS
-const DEFAULT_LAT = 33.5138;
+const DEFAULT_LAT = 33.5138; // دمشق إن تعذّر تحديد الموقع
 const DEFAULT_LNG = 36.2765;
-const IQAMA_OFFSET_MINUTES = 15; // وقت الإقامة بالدقائق بعد الأذان
+const IQAMA_OFFSET_MINUTES = 15;
+
+// المدن المتاحة في الإعدادات (المفتاح محفوظ بـ eshraq_prayer_city)
+const PRAYER_CITIES = {
+  damascus: { n: 'دمشق، سوريا', lat: 33.5138, lng: 36.2765 },
+  aleppo: { n: 'حلب، سوريا', lat: 36.2021, lng: 37.1343 },
+  homs: { n: 'حمص، سوريا', lat: 34.7324, lng: 36.7137 },
+  hama: { n: 'حماة، سوريا', lat: 35.1318, lng: 36.7578 },
+  latakia: { n: 'اللاذقية، سوريا', lat: 35.5317, lng: 35.7915 },
+  tartus: { n: 'طرطوس، سوريا', lat: 34.8890, lng: 35.8866 },
+  idlib: { n: 'إدلب، سوريا', lat: 35.9306, lng: 36.6339 },
+  raqqa: { n: 'الرقة، سوريا', lat: 35.9528, lng: 39.0079 },
+  deir: { n: 'دير الزور، سوريا', lat: 35.3359, lng: 40.1408 },
+  hasakah: { n: 'الحسكة، سوريا', lat: 36.5024, lng: 40.7477 },
+  daraa: { n: 'درعا، سوريا', lat: 32.6189, lng: 36.1021 },
+  suwayda: { n: 'السويداء، سوريا', lat: 32.7090, lng: 36.5663 },
+  makkah: { n: 'مكة المكرمة، السعودية', lat: 21.4225, lng: 39.8262 },
+  madinah: { n: 'المدينة المنورة، السعودية', lat: 24.4672, lng: 39.6111 }
+};
+const PRAYER_KEYS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
 let prayerTimings = null;
+let prayerTZ = null;      // المنطقة الزمنية لموقع المواقيت (قد تختلف عن توقيت الجهاز)
+let prayerDay = '';       // اليوم الذي جُلبت له المواقيت
 let countdownInterval = null;
+let lastCoords = null;
+
+// الوقت «الجداري» في منطقة المواقيت: يحمي من اختلاف توقيت الجهاز عن موقع الصلاة
+function wallNow() {
+  if (!prayerTZ) return new Date();
+  try { return new Date(new Date().toLocaleString('en-US', { timeZone: prayerTZ })); } catch (e) { return new Date(); }
+}
+
+function prayerCfg() {
+  const ls = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
+  let tune = {};
+  try { tune = JSON.parse(ls('eshraq_prayer_tune', '{}')) || {}; } catch (e) {}
+  return { city: ls('eshraq_prayer_city', 'auto'), method: ls('eshraq_prayer_method', 'auto'), school: ls('eshraq_prayer_school', '0'), tune };
+}
+
+// أم القرى للسعودية، ورابطة العالم الإسلامي لسوريا (يمكن تغييرها من الإعدادات)
+function resolveMethod(cfg, lat, lng) {
+  if (cfg.method !== 'auto') return cfg.method;
+  return (lat < 32.2 && lng > 34 && lng < 56) ? '4' : '3';
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   initPrayerSystem();
-
-  // زر إعادة تحديث الموقع
   const refreshBtn = document.getElementById('btn-refresh-location');
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
@@ -21,85 +60,91 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function initPrayerSystem() {
-  getUserLocation();
-}
+function initPrayerSystem() { getUserLocation(); }
 
-// 1. جلب موقع المستخدم من الـ GPS
+function setLocName(t) { const el = document.getElementById('user-location'); if (el) el.innerText = t; }
+
+// 1. الموقع: المدينة المختارة بالإعدادات، أو GPS عند الاختيار «تلقائي»
 function getUserLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        fetchLocationName(lat, lng);
-        fetchPrayerTimes(lat, lng);
-      },
-      (error) => {
-        console.warn("تعذر الحصول على الـ GPS، استخدام دمشق كخيار افتراضي.");
-        document.getElementById('user-location').innerText = "دمشق، سوريا (افتراضي)";
-        fetchPrayerTimes(DEFAULT_LAT, DEFAULT_LNG);
-      },
-      { timeout: 10000 }
-    );
-  } else {
-    document.getElementById('user-location').innerText = "دمشق، سوريا (افتراضي)";
-    fetchPrayerTimes(DEFAULT_LAT, DEFAULT_LNG);
-  }
+  const cfg = prayerCfg();
+  const c = PRAYER_CITIES[cfg.city];
+  if (c) { setLocName(c.n); fetchPrayerTimes(c.lat, c.lng); return; }
+  if (!navigator.geolocation) { setLocName("دمشق، سوريا (افتراضي)"); fetchPrayerTimes(DEFAULT_LAT, DEFAULT_LNG); return; }
+  navigator.geolocation.getCurrentPosition(
+    (pos) => { fetchLocationName(pos.coords.latitude, pos.coords.longitude); fetchPrayerTimes(pos.coords.latitude, pos.coords.longitude); },
+    () => { setLocName("دمشق، سوريا (افتراضي)"); fetchPrayerTimes(DEFAULT_LAT, DEFAULT_LNG); },
+    { timeout: 10000, maximumAge: 600000 }
+  );
 }
 
-// 2. اسم المدينة التقريبي
+// 2. اسم المدينة التقريبي (للـ GPS فقط)
 function fetchLocationName(lat, lng) {
   fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=ar`)
     .then(res => res.json())
     .then(data => {
       const city = data.city || data.locality || data.principalSubdivision || "موقعك الحالي";
-      const country = data.countryName || "";
-      document.getElementById('user-location').innerText = `${city}${country ? '، ' + country : ''}`;
+      setLocName(`${city}${data.countryName ? '، ' + data.countryName : ''}`);
     })
-    .catch(() => {
-      document.getElementById('user-location').innerText = "موقعك الحالي";
-    });
+    .catch(() => setLocName("موقعك الحالي"));
 }
 
-// 3. طلب المواقيت والتاريخ الهجري من Aladhan API
+// تنظيف نص الوقت («05:12 (EET)» → «05:12») وتطبيق تعديل الدقائق
+function cleanTime(t) { const m = String(t || '').match(/(\d{1,2}):(\d{2})/); return m ? m[1].padStart(2, '0') + ':' + m[2] : ''; }
+function shiftTime(t, min) {
+  if (!t || !min) return t;
+  const [h, m] = t.split(':').map(Number);
+  const x = ((h * 60 + m + min) % 1440 + 1440) % 1440;
+  return String(Math.floor(x / 60)).padStart(2, '0') + ':' + String(x % 60).padStart(2, '0');
+}
+function buildTimings(raw, tune) {
+  const out = {};
+  PRAYER_KEYS.forEach(k => { out[k] = shiftTime(cleanTime(raw[k]), parseInt(tune[k]) || 0); });
+  return out;
+}
+
+function showHijri(h) {
+  try {
+    document.getElementById('hijri-date').innerText = `${h.day} ${h.month.ar} ${h.year} هـ`;
+    document.getElementById('gregorian-date').innerText = `${wallNow().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })} م`;
+  } catch (e) {}
+}
+
+function applyTimings(raw, tz, hijri, stale) {
+  const cfg = prayerCfg();
+  prayerTZ = tz || null;
+  prayerTimings = buildTimings(raw, cfg.tune);
+  prayerDay = wallNow().toDateString();
+  // نخزّن المواقيت (بعد التعديل) ليستخدمها فحص الإشعارات في باقي الصفحات
+  try { localStorage.setItem('eshraq_prayer_timings_cache', JSON.stringify({ date: new Date().toDateString(), timings: prayerTimings })); } catch (e) {}
+  if (hijri) showHijri(hijri);
+  updatePrayerGridUI(prayerTimings);
+  startCountdownLogic();
+}
+
+// 3. المواقيت من Aladhan مع تخزين محلي للعمل بدون إنترنت
 function fetchPrayerTimes(lat, lng) {
-  // طريقة الحساب تُقرأ من إعدادات المستخدم (افتراضياً 5: الهيئة المصرية العامة للمساحة)
-  const prayerMethod = localStorage.getItem('eshraq_prayer_method') || '5';
-  const url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lng}&method=${prayerMethod}`;
+  lastCoords = { lat, lng };
+  const cfg = prayerCfg();
+  const method = resolveMethod(cfg, lat, lng);
+  const d = new Date(), dd = String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear();
+  const key = `${lat.toFixed(2)},${lng.toFixed(2)},${method},${cfg.school}`;
+  const url = `https://api.aladhan.com/v1/timings/${dd}?latitude=${lat}&longitude=${lng}&method=${method}&school=${cfg.school}`;
 
   fetch(url)
     .then(res => res.json())
     .then(response => {
-      if (response && response.data) {
-        prayerTimings = response.data.timings;
-
-        // تخزين المواقيت باليوم الحالي محلياً عشان باقي صفحات التطبيق تقدر تستخدمها لفحص الإشعارات
-        localStorage.setItem('eshraq_prayer_timings_cache', JSON.stringify({
-          date: new Date().toDateString(),
-          timings: prayerTimings
-        }));
-        
-       // عرض التاريخ الهجري
-const hijri = response.data.date.hijri;
-document.getElementById('hijri-date').innerText = `${hijri.day} ${hijri.month.ar} ${hijri.year} هـ`;
-
-const now = new Date();
-const gregorianArabic = now.toLocaleDateString('ar-EG', {
-  day: 'numeric',
-  month: 'long',
-  year: 'numeric'
-});
-document.getElementById('gregorian-date').innerText = `${gregorianArabic} م`;
-        // عرض الأوقات بالشاشات الصغرى
-        updatePrayerGridUI(prayerTimings);
-
-        // تشغيل العداد التنازلي للصلاة القادمة
-        startCountdownLogic();
-      }
+      if (!response || !response.data) throw new Error('bad response');
+      const raw = {}; PRAYER_KEYS.forEach(k => { raw[k] = cleanTime(response.data.timings[k]); });
+      try { localStorage.setItem('eshraq_prayer_raw', JSON.stringify({ key, day: dd, raw, tz: response.data.meta && response.data.meta.timezone, hijri: response.data.date.hijri })); } catch (e) {}
+      applyTimings(raw, response.data.meta && response.data.meta.timezone, response.data.date.hijri);
     })
     .catch(err => {
       console.error("خطأ في جلب مواقيت الصلاة:", err);
+      // دون إنترنت: آخر مواقيت محفوظة لنفس الموقع والإعدادات (فرق الدقائق بين يوم وآخر بسيط)
+      try {
+        const c = JSON.parse(localStorage.getItem('eshraq_prayer_raw') || 'null');
+        if (c && c.key === key) applyTimings(c.raw, c.tz, c.day === dd ? c.hijri : null, true);
+      } catch (e) {}
     });
 }
 
@@ -136,7 +181,8 @@ function startCountdownLogic() {
 function updateCountdown() {
   if (!prayerTimings) return;
 
-  const now = new Date();
+  const now = wallNow();
+  if (prayerDay && prayerDay !== now.toDateString() && lastCoords) { prayerDay = now.toDateString(); fetchPrayerTimes(lastCoords.lat, lastCoords.lng); }
   const list = [
     { name: 'صلاة الفجر', key: 'Fajr', id: 'p-fajr' },
     { name: 'الشروق', key: 'Sunrise', id: 'p-sunrise' },
@@ -231,13 +277,13 @@ function checkIqamaTime(now) {
 // أدوات مساعدة للأوقات
 function parsePrayerTime(timeStr) {
   const [h, m] = timeStr.split(':');
-  const d = new Date();
+  const d = wallNow();
   d.setHours(parseInt(h), parseInt(m), 0, 0);
   return d;
 }
 
 function format12Hour(timeStr) {
-  const [h, m] = timeStr.split(':');
+  const [h, m] = cleanTime(timeStr).split(':');
   let hours = parseInt(h);
   const ampm = hours >= 12 ? 'م' : 'ص';
   hours = hours % 12 || 12;
@@ -273,7 +319,7 @@ function checkPrayerTimeForNotification(prayerName, prayerTimeString) {
     const isEnabled = localStorage.getItem('prayer_notifications_enabled') === 'true';
     if (!isEnabled) return;
 
-    const now = new Date();
+    const now = wallNow();
     const currentHours = String(now.getHours()).padStart(2, '0');
     const currentMinutes = String(now.getMinutes()).padStart(2, '0');
     const currentTimeStr = `${currentHours}:${currentMinutes}`;

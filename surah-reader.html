@@ -11,17 +11,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Cairo:wght@400;700;900&family=Reem+Kufi:wght@500;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./style.css" />
     <link rel="stylesheet" href="./ishraq-ui.css" />
+    <link rel="stylesheet" href="./ishraq-app.css" />
     <link rel="manifest" href="./manifest.json" />
     <meta name="theme-color" content="#0b0b0c" />
+      <link rel="stylesheet" href="./ishraq-light.css" />
+    <script src="./ishraq-theme.js"></script>
   </head>
-  <body class="ix reader">
+  <body class="ix reader app">
     <script>try{if(localStorage.getItem('ix_reader_theme')==='paper')document.body.classList.add('paper')}catch(e){}</script>
-    <header class="ix-top">
-      <div class="ix-wrap fixed-top in">
-        <a class="ix-ib" href="./quran.html" aria-label="العودة للسور" title="العودة للسور"><i class="bi bi-chevron-right"></i></a>
+    <header class="app-bar">
+      <div class="in">
+        <a class="ab" href="./quran.html" aria-label="العودة للسور" title="العودة للسور"><i class="bi bi-chevron-right"></i></a>
         <div id="surah-top-title" class="ix-stitle">جاري تحميل السورة...</div>
-        <span class="sp"></span>
-        <a class="ix-ib" href="./favorites.html" aria-label="المفضلة" title="المفضلة"><i class="bi bi-star"></i></a>
+        <button class="ab" type="button" data-ix-more aria-label="المزيد"><i class="bi bi-grid-fill"></i></button>
       </div>
     </header>
 
@@ -32,6 +34,7 @@
           <select id="reciter-select" class="form-select form-select-sm" title="اختيار القارئ" aria-label="القارئ"></select>
           <button id="audio-play-btn" class="btn btn-gold-solid btn-sm" title="استماع لتلاوة السورة"><i class="bi bi-play-fill"></i> استماع للسورة</button>
           <button id="display-options-btn" class="ix-ib" type="button" title="خيارات العرض" aria-label="خيارات العرض" data-bs-toggle="collapse" data-bs-target="#display-options-panel" aria-expanded="false"><i class="bi bi-sliders"></i></button>
+          <button id="hifz-btn" class="ix-ib" type="button" title="وضع الحفظ" aria-label="وضع الحفظ"><i class="bi bi-mortarboard-fill"></i></button>
           <button id="focus-mode-btn" class="ix-ib" type="button" title="وضع القراءة المركزة" aria-label="وضع القراءة المركزة"><i class="bi bi-arrows-fullscreen"></i></button>
         </div>
         <div class="collapse" id="display-options-panel">
@@ -76,7 +79,8 @@
     <div id="audio-progress-wrap" class="ix-player d-none">
       <div class="pl-top">
         <small id="audio-ayah-indicator">تلاوة السورة كاملة</small>
-        <button id="audio-stop-btn" class="ix-ib" type="button" title="إيقاف التلاوة" aria-label="إيقاف التلاوة"><i class="bi bi-stop-fill"></i></button>
+        <span class="pl-btns"><button id="audio-pp-btn" class="ix-ib" type="button" title="إيقاف مؤقت" aria-label="إيقاف مؤقت"><i class="bi bi-pause-fill"></i></button>
+        <button id="audio-stop-btn" class="ix-ib" type="button" title="إيقاف التلاوة" aria-label="إيقاف التلاوة"><i class="bi bi-stop-fill"></i></button></span>
       </div>
       <div id="audio-seek-row" class="pl-seek">
         <small id="audio-current-time">00:00</small>
@@ -90,7 +94,7 @@
     </div>
     <audio id="surah-audio" preload="none"></audio>
 
-    <nav class="bottom-nav d-md-none" aria-label="التنقل السفلي">
+    <nav class="bottom-nav" aria-label="التنقل السفلي">
       <div class="container d-flex justify-content-around align-items-center">
         <a href="index.html" class="nav-item-bottom text-center text-decoration-none" data-page="home"><i class="bi bi-house-door d-block"></i><i class="bi bi-house-door-fill d-block active-icon"></i><span>الرئيسية</span></a>
         <a href="quran.html" class="nav-item-bottom text-center text-decoration-none active" data-page="quran"><i class="bi bi-book d-block"></i><i class="bi bi-book-fill d-block active-icon"></i><span>القرآن</span></a>
@@ -116,8 +120,10 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="./surah-reader.js"></script>
+    <script src="./ishraq-share.js"></script>
     <script src="./main.js"></script>
     <script src="./ishraq-ui.js"></script>
+    <script src="./ishraq-app.js"></script>
     <script>
       // السورة السابقة / التالية
       (function () {

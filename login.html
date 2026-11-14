@@ -24,7 +24,7 @@
 body{margin:0;min-height:100vh;font-family:Cairo,Tajawal,system-ui,sans-serif;color:var(--t);line-height:1.8;background:var(--k);
  background-image:radial-gradient(900px 420px at 85% -80px,#d6ac5220,transparent 70%),radial-gradient(700px 380px at 5% 60%,#d6ac520e,transparent 70%);background-attachment:fixed;-webkit-tap-highlight-color:transparent}
 h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
-.notch{clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px))}
+.notch{border-radius:22px}
 
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:34px 16px;position:relative;z-index:1}
 .login-wrapper{width:100%;max-width:420px}
@@ -36,9 +36,9 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
 .brand-name{font-family:"Reem Kufi",Cairo,sans-serif;font-size:3.1rem;line-height:1.2;margin:0;color:var(--a2);letter-spacing:.02em}
 .brand-subtitle{color:var(--m);margin:6px 0 0;font-size:.95rem}
 .gold-divider{width:110px;height:1px;margin:18px auto 0;background:linear-gradient(90deg,transparent,var(--a),transparent)}
-.login-card{position:relative;padding:30px 24px 26px;background:linear-gradient(180deg,var(--c2),var(--c1));
- clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px))}
-.login-card::before{content:"";position:absolute;inset:0;border:1px solid var(--c3);pointer-events:none;clip-path:inherit}
+.login-card{position:relative;overflow:hidden;padding:30px 24px 26px;background:linear-gradient(180deg,var(--c2),var(--c1));
+ border-radius:22px}
+.login-card::before{content:"";position:absolute;inset:0;border:1px solid var(--c3);pointer-events:none;border-radius:22px}
 .login-card::after{content:"";position:absolute;top:0;right:0;left:0;height:2px;background:linear-gradient(90deg,transparent,var(--a),transparent)}
 .card-heading{text-align:center;margin-bottom:24px}
 .card-heading h1{font-size:1.4rem;font-weight:700;margin-bottom:6px}
@@ -52,7 +52,7 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
 .password-toggle{position:absolute;left:13px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:var(--m);cursor:pointer}
 .password-toggle:hover{color:var(--a2)}
 .login-button{width:100%;min-height:54px;margin-top:24px;border:0;border-radius:0;color:#1c1405;background:linear-gradient(135deg,#edcea0,#d6ac52);font-family:inherit;font-size:1rem;font-weight:800;transition:transform .2s,filter .2s;
- clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+ border-radius:22px}
 .login-button:hover{filter:brightness(1.07)}
 .login-button:active{transform:scale(.98)}
 .login-button:disabled{opacity:.7;cursor:wait}
@@ -62,8 +62,11 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
 .login-footer strong{color:var(--a);font-weight:700}
 @media(max-width:480px){.brand-name{font-size:2.8rem}.login-card{padding:26px 18px 22px}}
 @media(prefers-reduced-motion:reduce){.brand-symbol::before{animation:none}}
-  </style>
-</head>
+  input,select,button,.btn{border-radius:14px!important}
+</style>
+    <link rel="stylesheet" href="./ishraq-light.css" />
+    <script src="./ishraq-theme.js"></script>
+  </head>
 
 <body>
   <main class="login-page">

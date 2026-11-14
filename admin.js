@@ -291,7 +291,11 @@ function paintSched() {
 }
 const toLocal = (s, base) => {
   s = String(s || '').trim();
-  if (/^\d{1,2}:\d{2}$/.test(s) && base) return base.slice(0, 10) + 'T' + s.padStart(5, '0');
+  if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s) && base) return base.slice(0, 10) + 'T' + s.slice(0, 5).padStart(5, '0');
+  if (/(Z|[+-]\d{2}:?\d{2})$/.test(s) && !isNaN(new Date(s))) { // تاريخ كامل بمنطقة زمنية: نحوّله لتوقيت السعودية
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Riyadh', hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date(s)).map(x => [x.type, x.value]));
+    return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}`;
+  }
   const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})/);
   return m ? `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}T${m[4].padStart(2, '0')}:${m[5]}` : '';
 };

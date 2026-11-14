@@ -171,7 +171,7 @@ body.ix{
 
 /* ---------- تثبيت التطبيق ---------- */
 .ix .ix-install{display:grid;gap:10px}
-@media(min-width:640px){.ix .ix-install{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:640px){.ix .ix-install{grid-template-columns:repeat(2,1fr)}}
 .ix .ix-inst{display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--c1);border:1px solid var(--c3);width:100%;text-align:right;color:var(--t);cursor:pointer;font-family:inherit;transition:.3s var(--ease);
   clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
 .ix .ix-inst:hover{border-color:var(--a);background:var(--c2)}

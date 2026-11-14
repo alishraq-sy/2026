@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="./style.css" />
     <link rel="stylesheet" href="./ishraq-ui.css" />
+    <link rel="stylesheet" href="./ishraq-app.css" />
     <link rel="manifest" href="./manifest.json" />
     <meta name="theme-color" content="#0b0b0c" />
     <link rel="icon" href="data:," />
@@ -20,55 +21,53 @@
     href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
   />
     <style>
+      /* شاشة البداية: مضمّنة هنا حتى تعمل حتى لو تأخّر تحميل ملف التنسيق */
+      #ix-splash{position:fixed;inset:0;z-index:3000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0b0b0c;transition:opacity .7s .1s,visibility .8s}
+      #ix-splash.off{opacity:0;visibility:hidden;pointer-events:none}
+      #ix-splash svg.sp-m{width:260px;height:260px;color:#f3ead2;opacity:.25}
+      #ix-splash svg.sp-bg{display:none}
+      #ix-splash .sp-l{position:absolute;width:118px;top:50%;left:50%;transform:translate(-50%,-50%)}
+      #ix-splash h1{font-family:"Reem Kufi",Cairo,sans-serif;font-size:2.6rem;color:#edcea0;margin:34px 0 0}
+      #ix-splash p{color:#8f9197;font-size:.9rem;margin:4px 0 0}
+    </style>
+    <style>
       body.auth-pending {
         visibility: hidden;
       }
     </style>
+      <link rel="stylesheet" href="./ishraq-light.css" />
+    <script src="./ishraq-theme.js"></script>
   </head>
-  <body class="ix auth-pendin">
-    <header class="ix-top">
-      <div class="ix-wrap fixed-top in">
+  <body class="ix app auth-pendin">
+    <!-- شاشة البداية (تظهر مرة واحدة بكل جلسة) -->
+    <div id="ix-splash" aria-hidden="true">
+      <svg width="0" height="0" style="position:absolute"><defs><symbol id="ixm" viewBox="-100 -100 200 200"><g fill="none" stroke="currentColor" stroke-width="1.1"><g id="ixr"><path d="M0-96C14-70 14-52 0-34-14-52-14-70 0-96Z"/><path d="M0-80C8-66 8-58 0-48-8-58-8-66 0-80Z" opacity=".7"/></g><use href="#ixr" transform="rotate(22.5)"/><use href="#ixr" transform="rotate(45)"/><use href="#ixr" transform="rotate(67.5)"/><use href="#ixr" transform="rotate(90)"/><use href="#ixr" transform="rotate(112.5)"/><use href="#ixr" transform="rotate(135)"/><use href="#ixr" transform="rotate(157.5)"/><use href="#ixr" transform="rotate(180)"/><use href="#ixr" transform="rotate(202.5)"/><use href="#ixr" transform="rotate(225)"/><use href="#ixr" transform="rotate(247.5)"/><use href="#ixr" transform="rotate(270)"/><use href="#ixr" transform="rotate(292.5)"/><use href="#ixr" transform="rotate(315)"/><use href="#ixr" transform="rotate(337.5)"/><circle r="30"/><circle r="22" opacity=".6"/><circle r="98" opacity=".5"/><path d="M0-30L8-8 30 0 8 8 0 30-8 8-30 0-8-8Z"/></g></symbol></defs></svg>
+      <svg class="sp-bg"><use href="#ixm"/></svg>
+      <svg class="sp-m"><use href="#ixm"/></svg>
+      <img class="sp-l" src="./5b862b4281f64fd884b11984846f0e97.png" alt="" />
+          </div>
+    <script>
+      (function () {
+        var el = document.getElementById("ix-splash"), seen = false;
+        try { seen = sessionStorage.getItem("ix_splash") === "1"; sessionStorage.setItem("ix_splash", "1"); } catch (e) {}
+        if (seen) { el.style.display = "none"; return; }
+        setTimeout(function () { el.className = "off"; }, 1700);
+        setTimeout(function () { el.style.display = "none"; }, 2800);
+      })();
+    </script>
+    <header class="app-bar">
+      <div class="in">
+        <a class="ab" href="./settings.html" aria-label="الإعدادات"><i class="bi bi-gear"></i></a>
         <a class="logo" href="./index.html" aria-label="إشراق"><img src="./5b862b4281f64fd884b11984846f0e97.png" alt="إشراق" /></a>
-        <nav class="ix-links" aria-label="التنقل الرئيسي">
-          <a class="on" href="./index.html">الرئيسية</a>
-          <a href="./quran.html">القرآن</a>
-          <a href="./hadith.html">الحديث</a>
-          <a href="./azkar.html">الأذكار</a>
-          <a href="./awrad.html">الأوراد</a>
-          <a href="./adiya.html">الأدعية</a>
-          <a href="./tasbeeh.html">السبحة</a>
-          <a href="./matwaf.html">المطوف</a>
-        </nav>
-        <span class="sp"></span>
-        <a class="ix-ib" href="./settings.html" aria-label="الإعدادات" title="الإعدادات"><i class="bi bi-gear"></i></a>
-        <button id="logoutButton" type="button" class="ix-ib" aria-label="تسجيل الخروج" title="تسجيل الخروج"><i class="bi bi-box-arrow-right"></i></button>
+        <button class="ab" type="button" data-ix-more aria-label="المزيد"><i class="bi bi-grid-fill"></i></button>
       </div>
     </header>
 
     <main class="ix-wrap">
       <!-- البطل -->
-      <section class="ix-hero">
+      <section class="ix-hero app-hero">
         <!-- <div class="ix-hello rv">السلام عليكم ورحمة الله</div> -->
-        <h1 class="ix-tag rv">نُشرِقُ <span class="ol">برُوحِك</span><br /><span style="font-size: 2.5rem">ونَسْمُو بِقَلْبِك</span></h1>
-      </section>
-
-      <!-- بطاقة معتمري الحملة -->
-      <section class="ix-sec rv" style="margin-top:22px">
-        <a href="./umrah.html" class="ix-umrah">
-          <div class="ix-card hl">
-            <img class="logo-bg" src="./5b862b4281f64fd884b11984846f0e97.png" alt="" />
-            <img class="logo-bgf" src="./ibrahim-photo.png" alt="" />
-            <span class="badge badge-gold">حملة الإشراق للعمرة</span>
-            <h3>أهلًا بمعتمري حملة الإشراق</h3>
-            <p>بطاقتك الخاصة، برنامج الرحلة،<br> تقييمك واستفساراتك، <br> كلها بمكان واحد.</p>
-            <div class="d-grid justify-content-between">
-              <span class="ix-go">ادخل إلى رحلتك <i class="bi bi-arrow-left"></i></span>
-              <a href="./Ibrahim-alamary-main/index.html" class="si mt-3 ms-5 link-offset-3 animate__animated animate__pulse animate__infinite "> احجز مقعدك الآن</a>
-              
-            <!-- <a class="btn ix-go " href="https://alishraq-campaign.github.io/Ibrahim-alamary/">سجل الآن<a> -->
-            </div>
-          </div>
-        </a>
+        <h1 class="ix-tag rv">نُشرِقُ <span class="ol">برُوحِك</span><br /><span style="font-size:.72em">ونَسْمُو بِقَلْبِك</span></h1>
       </section>
 
       <!-- مواقيت الصلاة -->
@@ -119,20 +118,23 @@
         </div>
       </section>
 
+      <!-- إنجازات اليوم + آية وحديث اليوم (ishraq-extras.js) -->
+      <section class="ix-sec" id="ix-extras"></section>
+
       <!-- وصول سريع -->
       <section class="ix-sec">
         <div class="ix-lab rv">وصول سريع</div>
         <h2 class="ix-h rv">كل ما <span class="ol">تحتاجه</span></h2>
         <div class="ix-grid">
-          <a href="./quran.html" class="ix-tile rv"><i class="bi bi-book-fill"></i><span>القرآن</span></a>
-          <a href="./hadith.html" class="ix-tile rv"><i class="bi bi-journal-text"></i><span>الحديث</span></a>
-          <a href="./azkar.html" class="ix-tile rv"><i class="bi bi-moon-stars-fill"></i><span>الأذكار</span></a>
-          <a href="./awrad.html" class="ix-tile rv"><i class="bi bi-book-half"></i><span>الأوراد</span></a>
-          <a href="./adiya.html" class="ix-tile rv"><i class="bi bi-chat-heart"></i><span>الأدعية</span></a>
-          <a href="./tasbeeh.html" class="ix-tile rv"><i class="bi bi-record-circle"></i><span>السبحة</span></a>
-          <a href="./matwaf.html" class="ix-tile rv"><i class="bi bi-person-walking"></i><span>المطوف</span></a>
-          <a href="./qibla.html" class="ix-tile rv"><i class="bi bi-compass"></i><span>القبلة</span></a>
-          <a href="./favorites.html" class="ix-tile rv"><i class="bi bi-star-fill"></i><span>المفضلة</span></a>
+          <a href="./quran.html" class="ix-tile rv" style="--ac:#2eb5a4"><i class="bi bi-book-fill"></i><span>القرآن</span></a>
+          <a href="./hadith.html" class="ix-tile rv" style="--ac:#c98a5a"><i class="bi bi-journal-text"></i><span>الحديث</span></a>
+          <a href="./azkar.html" class="ix-tile rv" style="--ac:#7b86e0"><i class="bi bi-moon-stars-fill"></i><span>الأذكار</span></a>
+          <a href="./awrad.html" class="ix-tile rv" style="--ac:#e0a23a"><i class="bi bi-book-half"></i><span>الأوراد</span></a>
+          <a href="./adiya.html" class="ix-tile rv" style="--ac:#e07a9a"><i class="bi bi-chat-heart"></i><span>الأدعية</span></a>
+          <a href="./tasbeeh.html" class="ix-tile rv" style="--ac:#5aa9e6"><i class="bi bi-record-circle"></i><span>السبحة</span></a>
+          <a href="./matwaf.html" class="ix-tile rv" style="--ac:#d6ac52"><i class="bi bi-person-walking"></i><span>المطوف</span></a>
+          <a href="./qibla.html" class="ix-tile rv" style="--ac:#6dc277"><i class="bi bi-compass"></i><span>القبلة</span></a>
+          <a href="./favorites.html" class="ix-tile rv" style="--ac:#e5c15a"><i class="bi bi-star-fill"></i><span>المفضلة</span></a>
         </div>
       </section>
 
@@ -154,6 +156,7 @@
             <div class="ix-acts">
               <button onclick="copyContent('quran')" class="btn btn-gold-outline btn-sm px-3" title="نسخ النص"><i class="bi bi-copy me-1"></i> نسخ</button>
               <button onclick="shareWhatsapp('quran')" class="btn btn-gold-solid btn-sm px-3" title="مشاركة عبر واتساب"><i class="bi bi-whatsapp me-1"></i> مشاركة</button>
+              <button onclick="ixCardFrom('quran')" class="btn btn-gold-outline btn-sm px-3" title="بطاقة صورة"><i class="bi bi-image me-1"></i> بطاقة</button>
             </div>
           </div>
 
@@ -165,6 +168,7 @@
             <div class="ix-acts">
               <button onclick="copyContent('hadith')" class="btn btn-gold-outline btn-sm px-3" title="نسخ النص"><i class="bi bi-copy me-1"></i> نسخ</button>
               <button onclick="shareWhatsapp('hadith')" class="btn btn-gold-solid btn-sm px-3" title="مشاركة عبر واتساب"><i class="bi bi-whatsapp me-1"></i> مشاركة</button>
+              <button onclick="ixCardFrom('hadith')" class="btn btn-gold-outline btn-sm px-3" title="بطاقة صورة"><i class="bi bi-image me-1"></i> بطاقة</button>
             </div>
           </div>
 
@@ -183,64 +187,10 @@
         <div class="ix-dots"><i class="on"></i><i></i><i></i></div>
       </section>
 
-      <!-- السبحة -->
-      <section class="ix-sec rv">
-        <div class="tasbeeh-card p-4 text-center position-relative overflow-hidden">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <a class="badge badge-gold text-decoration-none" href="./tasbeeh.html"><i class="bi bi-record-circle me-1"></i> السبحة الإلكترونية</a>
-            <button onclick="resetTasbeeh()" class="btn btn-sm border-0 text-light opacity-75" title="إعادة الضبط"><i class="bi bi-arrow-counterclockwise fs-5"></i></button>
-          </div>
-          <h3 id="tasbeeh-phrase" class="gold fw-bold my-3">سُبْحَانَ اللَّهِ وَبِحَمْدِهِ</h3>
-          <div class="my-4">
-            <button id="tasbeeh-btn" onclick="countTasbeeh()" class="tasbeeh-circle-btn my-2 mx-auto d-flex flex-column justify-content-center align-items-center" aria-label="عدّ">
-              <span id="tasbeeh-count" class="display-3 fw-bold gold">0</span>
-              <small class="opacity-50">اضغط هنا</small>
-            </button>
-          </div>
-          <div class="d-flex justify-content-center gap-2 flex-wrap mt-3">
-            <button onclick="setTasbeehPhrase('سُبْحَانَ اللَّهِ ')" class="btn btn-sm btn-gold-outline">سبحان الله</button>
-            <button onclick="setTasbeehPhrase('الْحَمْدُ لِلَّهِ')" class="btn btn-sm btn-gold-outline">الحمد لله</button>
-            <button onclick="setTasbeehPhrase('لا إِلَهَ إِلا اللَّهُ')" class="btn btn-sm btn-gold-outline">لا إله إلا الله</button>
-            <button onclick="setTasbeehPhrase('اللَّهُ أَكْبَرُ')" class="btn btn-sm btn-gold-outline">الله أكبر</button>
-            <button onclick="setTasbeehPhrase('أَسْتَغْفِرُ اللَّهَ')" class="btn btn-sm btn-gold-outline">أستغفر الله</button>
-            <button onclick="setTasbeehPhrase('اللهم صلّ على سيدنا محمد ')" class="btn btn-sm btn-gold-outline">اللهم صلّ على سيدنا محمد</button>
-          </div>
-        </div>
-      </section>
 
-      <!-- بوصلة القبلة -->
-      <section class="ix-sec rv">
-        <div class="qibla-card p-4 text-center position-relative overflow-hidden">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <span class="badge badge-gold"><i class="bi bi-compass me-1"></i> بوصلة القِبلة الذكية</span>
-            <button onclick="initQiblaCompass()" class="btn btn-sm border-0 text-light opacity-75" title="إعادة ضبط البوصلة"><i class="bi bi-arrow-clockwise fs-5"></i></button>
-          </div>
-          <h5 class="gold fw-bold mb-1">اتجاه الكعبة المشرفة</h5>
-          <div class="d-flex justify-content-center gap-3 my-2 small">
-            <span class="opacity-75">اتجاهك: <strong id="device-angle-val" class="gold">--°</strong></span>
-            <span class="opacity-75">|</span>
-            <span class="opacity-75">القبلة: <strong id="qibla-target-val" class="gold">--°</strong></span>
-          </div>
-          <div class="compass-container my-4 mx-auto position-relative d-flex justify-content-center align-items-center">
-            <div class="qibla-radar-ring"></div>
-            <div id="compass-dial" class="compass-dial position-relative">
-              <div class="compass-rose">
-                <span class="rose-dir north">N</span><span class="rose-dir east">E</span><span class="rose-dir south">S</span><span class="rose-dir west">W</span>
-              </div>
-              <div id="qibla-pointer" class="qibla-pointer">
-                <div class="kaaba-marker shadow"><i class="bi bi-box-fill gold"></i></div>
-                <div class="arrow-wrapper"><i class="bi bi-caret-up-fill gold display-5"></i></div>
-              </div>
-            </div>
-          </div>
-          <div id="qibla-status-box" class="qibla-status-box normal mb-3">
-            <p id="qibla-status" class="small mb-0 fw-medium">جاري تفعيل الحساسات وحساب الاتجاه...</p>
-          </div>
-          <button id="btn-enable-compass" onclick="requestCompassPermission()" class="btn btn-gold-solid px-4 py-2 d-none">
-            <i class="bi bi-shield-lock me-1"></i> تفعيل مستشعر الاتجاه
-          </button>
-        </div>
-      </section>
+
+      <section class="ix-sec" id="ix-asma"></section>
+      <section class="ix-sec" id="ix-ramadan" style="display:none"></section>
 
       <!-- تثبيت التطبيق -->
       <section class="ix-sec rv">
@@ -250,7 +200,6 @@
         <div class="ix-install">
           <button id="btn-install-android" class="ix-inst" type="button"><i class="bi bi-android2 os"></i><span><b>أندرويد</b><small>تثبيت مباشر على هاتفك</small></span></button>
           <button onclick="showIosInstructions()" class="ix-inst" type="button"><i class="bi bi-apple os"></i><span><b>آيفون</b><small>إضافة إلى الشاشة الرئيسية</small></span></button>
-          <button id="btn-install-windows" class="ix-inst" type="button"><i class="bi bi-laptop os"></i><span><b>الكمبيوتر</b><small>تثبيت كتطبيق سطح مكتب</small></span></button>
         </div>
       </section>
 
@@ -258,7 +207,7 @@
     </main>
 
     <!-- الشريط السفلي -->
-    <nav class="bottom-nav d-md-none" aria-label="التنقل السفلي">
+    <nav class="bottom-nav" aria-label="التنقل السفلي">
       <div class="container d-flex justify-content-around align-items-center ">
         <a href="index.html" class="nav-item-bottom text-center text-decoration-none active" data-page="home">
           <i class="bi bi-house-door d-block"></i><i class="bi bi-house-door-fill d-block active-icon"></i><span>الرئيسية</span>
@@ -286,6 +235,11 @@
     <script src="./qibla.js"></script>
     <script src="./adiya.js"></script>
     <script src="./ishraq-ui.js"></script>
+    <script src="./ishraq-app.js"></script>
+    <script src="./ishraq-extras.js"></script>
+    <script src="./ishraq-share.js"></script>
+    <script src="./asma.js"></script>
+    <script src="./ishraq-today.js"></script>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";

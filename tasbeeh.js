@@ -1,5 +1,5 @@
 // المتغيرات البرمجية للسبحة
-let currentCount = parseInt(localStorage.getItem('tasbeeh_current')) || 0;
+currentCount = parseInt(localStorage.getItem('tasbeeh_current')) || 0;
 let totalCount = parseInt(localStorage.getItem('tasbeeh_total')) || 0;
 let roundsCount = parseInt(localStorage.getItem('tasbeeh_rounds')) || 0;
 const targetPerRound = 33;

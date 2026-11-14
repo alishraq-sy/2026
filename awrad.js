@@ -343,6 +343,90 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ===== وضع البطاقات: ذكر واحد بكل شاشة، عدّ بالنقر وانتقال بالسحب =====
+  const deckBtn = document.getElementById("zk-cards-btn");
+  let deck = null, dIdx = 0, dCat = null, dStart = null, dMoved = false;
+  const buzzD = ms => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} };
+
+  function deckBuild() {
+    if (deck) return;
+    deck = document.createElement("div"); deck.id = "zk-deck"; deck.setAttribute("aria-hidden", "true");
+    deck.innerHTML = '<div class="zd-top"><button type="button" class="zd-x" aria-label="إغلاق"><i class="bi bi-x-lg"></i></button><div class="zd-ttl"><b id="zd-title"></b><small id="zd-prog"></small></div><button type="button" class="zd-x" id="zd-img" aria-label="بطاقة صورة"><i class="bi bi-image"></i></button></div>' +
+      '<div class="zd-bar"><i id="zd-barfill"></i></div>' +
+      '<div class="zd-stage" id="zd-stage"><div class="zd-card" id="zd-card"><div class="zd-txt" id="zd-txt"></div><div class="zd-src" id="zd-src"></div></div></div>' +
+      '<div class="zd-hint" id="zd-hint">اضغط للعدّ · اسحب للتنقّل</div>' +
+      '<div class="zd-bot"><button type="button" class="zd-nav" id="zd-prev" aria-label="السابق"><i class="bi bi-chevron-right"></i></button>' +
+      '<button type="button" class="zd-count" id="zd-count" aria-label="عدّ"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="bg"/><circle cx="50" cy="50" r="44" class="fg" id="zd-ring"/></svg><b id="zd-num">0</b></button>' +
+      '<button type="button" class="zd-nav" id="zd-next" aria-label="التالي"><i class="bi bi-chevron-left"></i></button></div>' +
+      '<div class="zd-fin" id="zd-fin"><div class="zd-star">۞</div><h2>تقبّل الله منك</h2><p>أتممتَ <span id="zd-finname"></span> بحمد الله</p><button type="button" class="zd-go" id="zd-close2">إغلاق</button></div>';
+    document.body.appendChild(deck);
+    const stage = deck.querySelector("#zd-stage");
+    deck.querySelector(".zd-x").onclick = deckClose;
+    deck.querySelector("#zd-close2").onclick = deckClose;
+    deck.querySelector("#zd-prev").onclick = () => deckGo(dIdx - 1);
+    deck.querySelector("#zd-next").onclick = () => deckGo(dIdx + 1);
+    deck.querySelector("#zd-count").onclick = deckTap;
+    deck.querySelector("#zd-img").onclick = () => { const it = dCat.items[dIdx]; if (window.ixCard && it) window.ixCard.open({ text: it.text, ref: it.source || dCat.title, kind: "ورد" }); };
+    stage.addEventListener("pointerdown", e => { dStart = { x: e.clientX, y: e.clientY }; dMoved = false; });
+    stage.addEventListener("pointermove", e => { if (dStart && Math.abs(e.clientX - dStart.x) > 12) dMoved = true; });
+    stage.addEventListener("pointerup", e => {
+      if (!dStart) return; const dx = e.clientX - dStart.x, dy = e.clientY - dStart.y; dStart = null;
+      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.3) { deckGo(dx < 0 ? dIdx + 1 : dIdx - 1); return; }
+      if (!dMoved && Math.abs(dy) < 10) deckTap();
+    });
+    stage.addEventListener("pointercancel", () => { dStart = null; });
+    document.addEventListener("keydown", e => { if (!deck.classList.contains("on")) return; if (e.key === "Escape") deckClose(); if (e.key === "ArrowLeft") deckGo(dIdx + 1); if (e.key === "ArrowRight") deckGo(dIdx - 1); if (e.key === " " || e.key === "Enter") { e.preventDefault(); deckTap(); } });
+  }
+  function deckOpen() {
+    deckBuild();
+    dCat = categories.find(c => c.id === activeCategoryId); if (!dCat) return;
+    const cn = getCounters(dCat.id);
+    dIdx = Math.max(0, dCat.items.findIndex((it, i) => (cn[i] ?? it.count) > 0));
+    deck.querySelector("#zd-title").textContent = dCat.title;
+    deck.classList.remove("fin"); deck.classList.add("on"); deck.setAttribute("aria-hidden", "false");
+    document.documentElement.style.overflow = "hidden";
+    deckShow(0);
+  }
+  function deckClose() { deck.classList.remove("on"); deck.setAttribute("aria-hidden", "true"); document.documentElement.style.overflow = ""; renderCategory(); }
+  function deckShow(dir) {
+    const it = dCat.items[dIdx], cn = getCounters(dCat.id), rem = cn[dIdx] ?? it.count, total = it.count;
+    const card = deck.querySelector("#zd-card");
+    deck.querySelector("#zd-txt").textContent = it.text;
+    deck.querySelector("#zd-txt").style.fontFamily = getFontFamilyCss();
+    deck.querySelector("#zd-src").textContent = it.source || "";
+    deck.querySelector("#zd-prog").textContent = `${dIdx + 1} / ${dCat.items.length}`;
+    deck.querySelector("#zd-barfill").style.width = ((dIdx + 1) / dCat.items.length * 100) + "%";
+    card.classList.toggle("done", rem <= 0);
+    deck.querySelector("#zd-txt").scrollTop = 0;
+    deckRing(rem, total);
+    if (dir) { card.classList.remove("in-l", "in-r"); void card.offsetWidth; card.classList.add(dir > 0 ? "in-l" : "in-r"); }
+  }
+  function deckRing(rem, total) {
+    const c = 2 * Math.PI * 44, p = total > 0 ? Math.max(0, Math.min(1, 1 - rem / total)) : 1;
+    const r = deck.querySelector("#zd-ring"); r.style.strokeDasharray = c; r.style.strokeDashoffset = c * (1 - p);
+    deck.querySelector("#zd-num").innerHTML = rem <= 0 ? '<i class="bi bi-check-lg"></i>' : rem;
+  }
+  function deckGo(n) {
+    if (n < 0) { buzzD(8); return; }
+    if (n >= dCat.items.length) { deckFinish(); return; }
+    const dir = n > dIdx ? 1 : -1; dIdx = n; deckShow(dir);
+  }
+  function deckTap() {
+    const it = dCat.items[dIdx], cn = getCounters(dCat.id), rem = cn[dIdx] ?? it.count;
+    if (rem <= 0) { deckGo(dIdx + 1); return; }
+    cn[dIdx] = rem - 1; saveCounters(dCat.id, cn);
+    deckRing(cn[dIdx], it.count); buzzD(cn[dIdx] <= 0 ? [25, 40, 25] : 8);
+    const b = deck.querySelector("#zd-count"); b.classList.remove("pop"); void b.offsetWidth; b.classList.add("pop");
+    if (cn[dIdx] <= 0) { deck.querySelector("#zd-card").classList.add("done"); setTimeout(() => { if (deck.classList.contains("on") && !deck.classList.contains("fin")) deckGo(dIdx + 1); }, 520); }
+  }
+  function deckFinish() {
+    const cn = getCounters(dCat.id), left = dCat.items.filter((it, i) => (cn[i] ?? it.count) > 0).length;
+    if (left > 0) { const j = dCat.items.findIndex((it, i) => (cn[i] ?? it.count) > 0); dIdx = j; deckShow(-1); buzzD(30); return; }
+    deck.querySelector("#zd-finname").textContent = dCat.title;
+    deck.classList.add("fin"); buzzD([30, 50, 30, 50, 60]);
+  }
+  if (deckBtn) deckBtn.addEventListener("click", deckOpen);
+
   renderTabs();
   renderCategory();
 });

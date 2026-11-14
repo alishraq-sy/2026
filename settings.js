@@ -50,6 +50,28 @@ function toggleFridayReminder(checkbox) {
 function setPrayerMethod(value) {
     localStorage.setItem('eshraq_prayer_method', value);
 }
+function setPrayerCity(value) {
+    localStorage.setItem('eshraq_prayer_city', value);
+}
+function setPrayerSchool(value) {
+    localStorage.setItem('eshraq_prayer_school', value);
+}
+const PRAYER_TUNE_KEYS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+function setPrayerTune() {
+    const t = {};
+    PRAYER_TUNE_KEYS.forEach(k => {
+        const el = document.getElementById('tune' + k);
+        let v = parseInt(el && el.value) || 0;
+        v = Math.max(-30, Math.min(30, v));
+        if (el) el.value = v;
+        if (v) t[k] = v;
+    });
+    localStorage.setItem('eshraq_prayer_tune', JSON.stringify(t));
+}
+function resetPrayerTune() {
+    localStorage.removeItem('eshraq_prayer_tune');
+    PRAYER_TUNE_KEYS.forEach(k => { const el = document.getElementById('tune' + k); if (el) el.value = 0; });
+}
 
 // 5. وضع القراءة الليلية
 // ملاحظة: دالة toggleNightReadingMode معرّفة بملف main.js فقط (مشتركة بكل الصفحات)
@@ -240,7 +262,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // طريقة حساب المواقيت
     const prayerMethodSelect = document.getElementById('prayerMethodSelect');
     if (prayerMethodSelect) {
-        prayerMethodSelect.value = localStorage.getItem('eshraq_prayer_method') || '5';
+        prayerMethodSelect.value = localStorage.getItem('eshraq_prayer_method') || 'auto';
+        if (!prayerMethodSelect.value) prayerMethodSelect.value = 'auto';
+        const cs = document.getElementById('prayerCitySelect'); if (cs) cs.value = localStorage.getItem('eshraq_prayer_city') || 'auto';
+        const ss = document.getElementById('prayerSchoolSelect'); if (ss) ss.value = localStorage.getItem('eshraq_prayer_school') || '0';
+        try {
+            const t = JSON.parse(localStorage.getItem('eshraq_prayer_tune') || '{}') || {};
+            PRAYER_TUNE_KEYS.forEach(k => { const el = document.getElementById('tune' + k); if (el) el.value = t[k] || 0; });
+        } catch (e) {}
     }
 
     // الوضع الليلي
@@ -284,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // 17. تثبيت التطبيق (PWA Install Prompt)
-let deferredPrompt;
+// deferredPrompt معرّف في main.js (تعريفه مرتين كان يمنع تشغيل main.js بصفحة الإعدادات)
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;

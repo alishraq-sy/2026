@@ -321,6 +321,12 @@ function getCleanAyahText(ayah, index) {
 
             </button>
 
+            <button type="button" class="btn btn-sm btn-outline-light border-0 opacity-75 card-btn" data-index="${index}" title="بطاقة صورة">
+
+              <i class="bi bi-image"></i> بطاقة
+
+            </button>
+
             <button type="button" class="btn btn-sm btn-outline-light border-0 opacity-75 link-btn" data-index="${index}" title="نسخ رابط هذه الآية">
 
               <i class="bi bi-link-45deg"></i> رابط
@@ -342,6 +348,7 @@ function getCleanAyahText(ayah, index) {
     setupScrollTracking();
 
     tryAutoScrollToSavedPosition();
+    if (typeof hzApply === "function" && hz && hz.on) { hzApply(); }
 
   }
 
@@ -556,6 +563,13 @@ function bindEvents() {
       });
     });
 
+    document.querySelectorAll(".card-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const index = parseInt(e.currentTarget.getAttribute("data-index"));
+        const ayah = ayahsList[index];
+        if (window.ixCard && ayah) window.ixCard.open({ text: getCleanAyahText(ayah, index), ref: `سورة ${currentSurahName} - الآية ${ayah.numberInSurah}`, kind: "آية" });
+      });
+    });
     document.querySelectorAll(".link-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         const index = e.currentTarget.getAttribute("data-index");
@@ -565,6 +579,177 @@ function bindEvents() {
       });
     });
   }
+
+  // ===== وضع الحفظ: إخفاء كلمات + تكرار آية/مقطع بصوت كل آية على حدة =====
+  // [id, الاسم, مجلدات everyayah (بالترتيب), معرّف islamic.network]
+  const HZ_RECITERS = [
+    ["alafasy", "العفاسي", ["Alafasy_128kbps"], "ar.alafasy"],
+    ["husary", "الحصري", ["Husary_128kbps", "Husary_64kbps"], "ar.husary"],
+    ["husary_m", "الحصري (معلّم)", ["Husary_Muallim_128kbps"], ""],
+    ["minshawi", "المنشاوي", ["Minshawy_Murattal_128kbps"], "ar.minshawi"],
+    ["minshawi_m", "المنشاوي (معلّم)", ["Minshawy_Teacher_128kbps"], ""],
+    ["abdulbasit", "عبد الباسط", ["Abdul_Basit_Murattal_64kbps", "Abdul_Basit_Murattal_192kbps", "Abdul_Basit_Mujawwad_128kbps"], "ar.abdulbasit"],
+    ["sudais", "السديس", ["Abdurrahmaan_As-Sudais_192kbps", "Abdurrahmaan_As-Sudais_64kbps"], "ar.abdurrahmaansudais"],
+    ["shuraym", "الشريم", ["Saood_ash-Shuraym_128kbps", "Saood_ash-Shuraym_64kbps"], "ar.saoodshuraym"]
+  ];
+  const hz = { on: false, from: 1, to: 0, rep: 3, loops: 3, rec: "ar.alafasy", hide: "all", cur: 0, r: 0, l: 0, paused: false, reveal: false };
+  try { Object.assign(hz, JSON.parse(localStorage.getItem("ix_hifz") || "{}"), { on: false, paused: false, reveal: false }); } catch (e) {}
+  if (hz.hide === "half") hz.hide = "all";
+  if (!HZ_RECITERS.some(r => r[0] === hz.rec)) hz.rec = "alafasy";
+  const hzBR = {}; let hzTry = 0;
+  let hzAudio = null, hzSheet = null, hzBar = null;
+
+  function hzSave() { try { localStorage.setItem("ix_hifz", JSON.stringify({ rep: hz.rep, loops: hz.loops, rec: hz.rec, hide: hz.hide })); } catch (e) {} }
+
+  function hzApply() {
+    if (!hz.on || !ayahsContainer) return;
+    ayahsContainer.classList.toggle("hz-reveal", hz.reveal);
+    ayahsContainer.querySelectorAll(".ayah-item").forEach(item => {
+      const n = parseInt(item.dataset.ayahnum), idx = n - 1;
+      const inRange = n >= hz.from && n <= hz.to;
+      item.classList.toggle("hz-dim", !inRange);
+      item.classList.toggle("hz-cur", n === hz.cur);
+      if (!inRange || hz.hide === "none") return;
+      const p = item.querySelector(".ayah-text"); if (!p || p.dataset.hz) return;
+      const badge = p.querySelector(".badge"), ayah = ayahsList[idx]; if (!ayah) return;
+      const words = getCleanAyahText(ayah, idx).split(/\s+/).filter(Boolean);
+      p.innerHTML = words.map((w, i) => {
+        const hide = hz.hide === "all";
+        return `<span class="hz-w${hide ? " h" : ""}">${w}</span>`;
+      }).join(" ") + " " + (badge ? badge.outerHTML : "");
+      p.dataset.hz = "1";
+    });
+  }
+
+  function hzUI() {
+    if (hzSheet) return;
+    hzSheet = document.createElement("div"); hzSheet.id = "hz-sheet";
+    hzSheet.innerHTML = '<div class="hz-sh"><div class="hz-gr"></div><div class="hz-hd"><b><i class="bi bi-mortarboard-fill"></i> وضع الحفظ</b><button type="button" class="hz-x" aria-label="إغلاق"><i class="bi bi-x-lg"></i></button></div>' +
+      '<div class="hz-row"><label>من آية</label><select id="hz-from"></select><label>إلى آية</label><select id="hz-to"></select></div>' +
+      '<div class="hz-row"><label>تكرار كل آية</label><span class="hz-chs" data-k="rep">' + [1, 3, 5, 10].map(n => `<button type="button" class="hz-ch" data-v="${n}">${n}</button>`).join("") + '</span></div>' +
+      '<div class="hz-row"><label>تكرار المقطع</label><span class="hz-chs" data-k="loops">' + [1, 3, 5, 0].map(n => `<button type="button" class="hz-ch" data-v="${n}">${n === 0 ? "∞" : n}</button>`).join("") + '</span></div>' +
+      '<div class="hz-row"><label>إخفاء الكلمات</label><span class="hz-chs" data-k="hide"><button type="button" class="hz-ch" data-v="none">بدون</button><button type="button" class="hz-ch" data-v="all">كلها</button></span></div>' +
+      '<div class="hz-row"><label>القارئ</label><span class="hz-chs" data-k="rec">' + HZ_RECITERS.map(r => `<button type="button" class="hz-ch" data-v="${r[0]}">${r[1]}</button>`).join("") + '</span></div>' +
+      '<p class="hz-note">استمع للآية، ثم رددها من الذاكرة. اضغط على أي كلمة مخفية لإظهارها.</p>' +
+      '<button type="button" class="hz-go" id="hz-go"><i class="bi bi-play-fill"></i> ابدأ الحفظ</button></div>';
+    document.body.appendChild(hzSheet);
+    hzBar = document.createElement("div"); hzBar.id = "hz-bar"; hzBar.className = "d-none";
+    hzBar.innerHTML = '<div class="hz-st"><b id="hz-t1">—</b><small id="hz-t2"></small></div><div class="hz-bt">' +
+      '<button type="button" data-a="prev" aria-label="السابقة"><i class="bi bi-skip-forward-fill"></i></button>' +
+      '<button type="button" data-a="pp" aria-label="إيقاف مؤقت"><i class="bi bi-pause-fill"></i></button>' +
+      '<button type="button" data-a="next" aria-label="التالية"><i class="bi bi-skip-backward-fill"></i></button>' +
+      '<button type="button" data-a="eye" aria-label="إظهار الكلمات"><i class="bi bi-eye-fill"></i></button>' +
+      '<button type="button" data-a="stop" aria-label="إنهاء"><i class="bi bi-stop-fill"></i></button></div>';
+    document.body.appendChild(hzBar);
+    hzSheet.addEventListener("click", e => {
+      if (e.target === hzSheet || e.target.closest(".hz-x")) return hzClose();
+      const c = e.target.closest(".hz-ch"); if (c) { const k = c.parentNode.dataset.k; hz[k] = (k === "rep" || k === "loops") ? parseInt(c.dataset.v) : c.dataset.v; hzMark(); return; }
+      if (e.target.closest("#hz-go")) hzStart();
+    });
+    hzBar.addEventListener("click", e => {
+      const b = e.target.closest("[data-a]"); if (!b) return; const a = b.dataset.a;
+      if (a === "stop") hzStop(); else if (a === "pp") hzTogglePause(); else if (a === "eye") { hz.reveal = !hz.reveal; ayahsContainer.classList.toggle("hz-reveal", hz.reveal); b.innerHTML = `<i class="bi bi-eye${hz.reveal ? "-slash" : ""}-fill"></i>`; }
+      else if (a === "next") hzGo(hz.cur + 1); else if (a === "prev") hzGo(hz.cur - 1);
+    });
+    ayahsContainer.addEventListener("click", e => { const w = e.target.closest(".hz-w.h"); if (w && hz.on) { w.classList.toggle("shown"); } });
+  }
+  function hzMark() {
+    hzSheet.querySelectorAll(".hz-chs").forEach(g => g.querySelectorAll(".hz-ch").forEach(c => {
+      const k = g.dataset.k, v = (k === "rep" || k === "loops") ? parseInt(c.dataset.v) : c.dataset.v;
+      c.classList.toggle("on", hz[k] === v);
+    }));
+  }
+  function hzOpen() {
+    if (!ayahsList.length) return;
+    hzUI();
+    const n = ayahsList.length, opts = ayahsList.map(a => `<option value="${a.numberInSurah}">${a.numberInSurah}</option>`).join("");
+    const f = hzSheet.querySelector("#hz-from"), t = hzSheet.querySelector("#hz-to");
+    f.innerHTML = t.innerHTML = opts;
+    if (!(hz.from >= 1 && hz.from <= n)) hz.from = 1;
+    if (!(hz.to >= hz.from && hz.to <= n)) hz.to = Math.min(n, hz.from + 6);
+    f.value = hz.from; t.value = hz.to;
+    f.onchange = () => { hz.from = parseInt(f.value); if (hz.to < hz.from) { hz.to = hz.from; t.value = hz.to; } };
+    t.onchange = () => { hz.to = parseInt(t.value); if (hz.to < hz.from) { hz.from = hz.to; f.value = hz.from; } };
+    hzMark(); hzSheet.classList.add("on");
+  }
+  function hzClose() { if (hzSheet) hzSheet.classList.remove("on"); }
+
+  function hzStart() {
+    hzSave(); hzClose();
+    if (typeof stopAudioPlayback === "function") stopAudioPlayback();
+    if (isMushafMode) { isMushafMode = false; localStorage.setItem("eshraq_mushaf_mode", "false"); if (typeof updateToggleButtonText === "function") updateToggleButtonText(); }
+    hz.on = true; hz.paused = false; hz.reveal = false; hz.l = 1;
+    hzAudio = hzAudio || new Audio();
+    hzAudio.onended = hzEnded;
+    hzAudio.onplaying = () => { hzBR[hz.rec] = hzTry; };
+    hzAudio.onerror = () => {
+      if (!hz.on || !hzAudio.getAttribute("src")) return;
+      if (hzTry < hzCands(hz.cur).length - 1) { hzTry++; hzAudio.src = hzUrl(hz.cur); hzAudio.play().catch(() => {}); return; }
+      hz.paused = true; hzStatus("تعذّر تحميل الصوت — جرّب قارئاً آخر أو تحقق من الاتصال"); hzPP();
+    };
+    document.body.classList.add("hz-on");
+    renderAyahs();
+    hzBar.classList.remove("d-none");
+    hzBar.querySelector('[data-a="eye"]').innerHTML = '<i class="bi bi-eye-fill"></i>';
+    hzGo(hz.from, true);
+  }
+  function hzCands(n) {
+    const a = ayahsList[n - 1]; if (!a) return [];
+    const r = HZ_RECITERS.find(x => x[0] === hz.rec) || HZ_RECITERS[0];
+    const p3 = v => String(v).padStart(3, "0");
+    const out = r[2].map(f => `https://everyayah.com/data/${f}/${p3(surahNumber)}${p3(n)}.mp3`);
+    if (r[3]) [128, 192, 64].forEach(b => out.push(`https://cdn.islamic.network/quran/audio/${b}/${r[3]}/${a.number}.mp3`));
+    return out;
+  }
+  function hzUrl(n) { return hzCands(n)[hzTry] || ""; }
+  function hzGo(n, fresh) {
+    if (!hz.on) return;
+    n = Math.max(hz.from, Math.min(hz.to, n));
+    hz.cur = n; hz.r = 1;
+    hzPlay();
+  }
+  function hzPlay() {
+    hzTry = hzBR[hz.rec] || 0; const u = hzUrl(hz.cur); if (!u) return;
+    hzAudio.src = u; hz.paused = false; hzPP();
+    hzAudio.play().catch(() => {});
+    hzApplyCur(); hzStatus();
+  }
+  function hzApplyCur() {
+    hzApply();
+    const el = ayahsContainer.querySelector(`.ayah-item[data-ayahnum="${hz.cur}"]`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+    ayahsContainer.querySelectorAll(".ayah-item").forEach(i => i.classList.toggle("hz-cur", parseInt(i.dataset.ayahnum) === hz.cur));
+  }
+  function hzEnded() {
+    if (!hz.on) return;
+    if (hz.r < hz.rep) { hz.r++; hzAudio.currentTime = 0; hzAudio.play().catch(() => {}); hzStatus(); return; }
+    if (hz.cur < hz.to) { hz.cur++; hz.r = 1; hzPlay(); return; }
+    if (hz.loops === 0 || hz.l < hz.loops) { hz.l++; hz.cur = hz.from; hz.r = 1; hzPlay(); return; }
+    hzStatus("ما شاء الله، أتممت المقطع 🌿"); hz.paused = true; hzPP();
+  }
+  function hzStatus(msg) {
+    if (!hzBar) return;
+    hzBar.querySelector("#hz-t1").textContent = msg || `الآية ${hz.cur}`;
+    hzBar.querySelector("#hz-t2").textContent = msg ? "" : `تكرار ${hz.r}/${hz.rep} · المقطع ${hz.l}/${hz.loops === 0 ? "∞" : hz.loops}`;
+  }
+  function hzPP() { const b = hzBar && hzBar.querySelector('[data-a="pp"]'); if (b) b.innerHTML = `<i class="bi bi-${hz.paused ? "play" : "pause"}-fill"></i>`; }
+  function hzTogglePause() {
+    if (!hzAudio) return;
+    if (hz.paused) { hz.paused = false; if (hzAudio.ended || !hzAudio.src) hzEnded(); else hzAudio.play().catch(() => {}); }
+    else { hz.paused = true; hzAudio.pause(); }
+    hzPP();
+  }
+  function hzStop() {
+    hz.on = false; hz.paused = true;
+    if (hzAudio) { hzAudio.pause(); hzAudio.removeAttribute("src"); }
+    if (hzBar) hzBar.classList.add("d-none");
+    document.body.classList.remove("hz-on");
+    ayahsContainer.classList.remove("hz-reveal");
+    renderAyahs();
+  }
+  const hzBtn = document.getElementById("hifz-btn");
+  if (hzBtn) hzBtn.addEventListener("click", hzOpen);
+  window.hzApply = hzApply;
 
   // ===== علامة مرجعية =====
   function addBookmark(surahNum, surahName, ayahNum, text) {
@@ -739,11 +924,26 @@ function bindEvents() {
   // القراء (ملفات ناقصة لبعضهم رغم ظهوره بالفهرس). استبدلناه بمكتبة mp3quran.net
   // وهي المصدر الأساسي الرسمي والأكثر اعتمادية، وتم التحقق يدوياً من كل رابط قارئ.
   const RECITERS = [
-    { id: "afs", name: "مشاري العفاسي", server: "https://server8.mp3quran.net/afs/" },
-    { id: "maher", name: "ماهر المعيقلي", server: "https://server12.mp3quran.net/maher/" },
-    { id: "sds", name: "عبدالرحمن السديس", server: "https://server11.mp3quran.net/sds/" },
-    { id: "yasser", name: "ياسر الدوسري", server: "https://server11.mp3quran.net/yasser/" }
+    { id: "afs", name: "مشاري العفاسي", g: "تلاوات مرتّلة", server: "https://server8.mp3quran.net/afs/" },
+    { id: "maher", name: "ماهر المعيقلي", g: "تلاوات مرتّلة", server: "https://server12.mp3quran.net/maher/" },
+    { id: "sds", name: "عبدالرحمن السديس", g: "تلاوات مرتّلة", server: "https://server11.mp3quran.net/sds/" },
+    { id: "yasser", name: "ياسر الدوسري", g: "تلاوات مرتّلة", server: "https://server11.mp3quran.net/yasser/" },
+    { id: "basit", name: "عبد الباسط عبد الصمد", g: "تلاوات مرتّلة", server: "https://server7.mp3quran.net/basit/" },
+    { id: "husr", name: "محمود خليل الحصري", g: "تلاوات مرتّلة", server: "https://server13.mp3quran.net/husr/" },
+    { id: "minsh", name: "محمد صديق المنشاوي", g: "تلاوات مرتّلة", server: "https://server10.mp3quran.net/minsh/" },
+    { id: "husr_m", name: "الحصري — المصحف المعلّم", g: "للتحفيظ والتعليم", server: "https://server13.mp3quran.net/husr/Almusshaf-Al-Mo3lim/" },
+    { id: "minsh_m", name: "المنشاوي — المصحف المعلّم", g: "للتحفيظ والتعليم", server: "https://server10.mp3quran.net/minsh/Almusshaf-Al-Mo3lim/" }
   ];
+  // إضافة قراء التحفيظ المتاحين فعلياً من مكتبة mp3quran (تُجلب عند التشغيل وتُخزَّن)
+  function mergeTeachers(list) {
+    (list || []).forEach(rc => (rc.moshaf || []).forEach(m => {
+      if (!/المعلم|معلم|تحفيظ|تعليم/.test(m.name || "")) return;
+      if (!m.server || RECITERS.some(r => r.server === m.server)) return;
+      RECITERS.push({ id: "mq" + m.id, name: rc.name + " — " + (m.name || "").replace(/^.*?(المصحف المعلم)/, "$1"), g: "للتحفيظ والتعليم", server: m.server.replace(/\/?$/, "/") });
+    }));
+  }
+  try { mergeTeachers(JSON.parse(localStorage.getItem("ix_mq_teach") || "[]")); } catch (e) {}
+
 
   const audioEl = document.getElementById("surah-audio");
   const audioPlayBtn = document.getElementById("audio-play-btn");
@@ -768,16 +968,47 @@ function bindEvents() {
     return RECITERS.find(r => r.id === selectedReciterId) || RECITERS[0];
   }
 
-  if (reciterSelect) {
+  function reciterFromId(id) { return RECITERS.find(r => r.id === id); }
+  function setReciter(id) {
+    stopAudioPlayback();
+    selectedReciterId = id;
+    localStorage.setItem("eshraq_reciter", id);
+    if (audioReciterLabel) audioReciterLabel.textContent = getSelectedReciter().name;
+    buildReciterUI();
+  }
+  let rcBtn = null, rcSheet = null;
+  function buildReciterUI() {
+    if (!reciterSelect) return;
     reciterSelect.innerHTML = RECITERS.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
     reciterSelect.value = selectedReciterId;
+    reciterSelect.style.display = "none";
+    if (!rcBtn) {
+      rcBtn = document.createElement("button");
+      rcBtn.type = "button"; rcBtn.className = "rc-btn"; rcBtn.setAttribute("aria-label", "اختيار القارئ");
+      reciterSelect.parentNode.insertBefore(rcBtn, reciterSelect);
+      rcSheet = document.createElement("div"); rcSheet.id = "rc-sheet";
+      document.body.appendChild(rcSheet);
+      rcBtn.addEventListener("click", () => rcSheet.classList.add("on"));
+      rcSheet.addEventListener("click", e => {
+        if (e.target === rcSheet || e.target.closest("[data-x]")) { rcSheet.classList.remove("on"); return; }
+        const it = e.target.closest("[data-id]"); if (!it) return;
+        rcSheet.classList.remove("on");
+        if (it.dataset.id !== selectedReciterId) setReciter(it.dataset.id);
+      });
+    }
+    rcBtn.innerHTML = '<i class="bi bi-mic-fill"></i><span>' + getSelectedReciter().name + '</span><i class="bi bi-chevron-down"></i>';
+    const groups = {}; RECITERS.forEach(r => (groups[r.g || "القرّاء"] = groups[r.g || "القرّاء"] || []).push(r));
+    rcSheet.innerHTML = '<div class="rc-box"><div class="rc-hd"><b>اختر القارئ</b><button type="button" data-x aria-label="إغلاق"><i class="bi bi-x-lg"></i></button></div><div class="rc-body">' +
+      Object.keys(groups).map(g => `<div class="rc-g">${g}</div>` + groups[g].map(r => `<button type="button" class="rc-it${r.id === selectedReciterId ? " on" : ""}" data-id="${r.id}"><span>${r.name}</span>${r.id === selectedReciterId ? '<i class="bi bi-check-lg"></i>' : ""}</button>`).join("")).join("") + '</div></div>';
     if (audioReciterLabel) audioReciterLabel.textContent = getSelectedReciter().name;
-    reciterSelect.addEventListener("change", () => {
-      stopAudioPlayback();
-      selectedReciterId = reciterSelect.value;
-      localStorage.setItem("eshraq_reciter", selectedReciterId);
-      if (audioReciterLabel) audioReciterLabel.textContent = getSelectedReciter().name;
-    });
+  }
+  buildReciterUI();
+  if (!localStorage.getItem("ix_mq_teach_t") || Date.now() - +localStorage.getItem("ix_mq_teach_t") > 7 * 864e5) {
+    fetch("https://mp3quran.net/api/v3/reciters?language=ar").then(r => r.json()).then(j => {
+      const keep = (j.reciters || []).map(rc => ({ name: rc.name, moshaf: (rc.moshaf || []).filter(m => /المعلم|معلم|تحفيظ|تعليم/.test(m.name || "")).map(m => ({ id: m.id, name: m.name, server: m.server })) })).filter(rc => rc.moshaf.length);
+      localStorage.setItem("ix_mq_teach", JSON.stringify(keep)); localStorage.setItem("ix_mq_teach_t", String(Date.now()));
+      mergeTeachers(keep); buildReciterUI();
+    }).catch(() => {});
   }
 
   function loadAndPlayFullSurah() {
@@ -865,6 +1096,18 @@ function bindEvents() {
         audioPlayBtn.innerHTML = `<i class="bi bi-play-fill"></i> متابعة الاستماع`;
       }
     });
+
+    const ppBtn = document.getElementById("audio-pp-btn");
+    const syncPP = () => {
+      if (!ppBtn) return;
+      const playing = !audioEl.paused && !audioEl.ended;
+      ppBtn.innerHTML = `<i class="bi ${playing ? "bi-pause-fill" : "bi-play-fill"}"></i>`;
+      ppBtn.title = ppBtn.ariaLabel = playing ? "إيقاف مؤقت" : "متابعة";
+    };
+    audioEl.addEventListener("play", syncPP);
+    audioEl.addEventListener("pause", syncPP);
+    audioEl.addEventListener("playing", syncPP);
+    if (ppBtn) ppBtn.addEventListener("click", () => { if (audioEl.paused) audioEl.play(); else audioEl.pause(); });
 
     audioEl.addEventListener("ended", () => {
       if (autoAdvanceEnabled && surahNumber < 114) {

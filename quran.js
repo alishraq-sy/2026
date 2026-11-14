@@ -355,7 +355,7 @@ function displaySurahs(surahs) {
 
       estimateDate.setDate(estimateDate.getDate() + daysNeeded);
 
-      estimateText = ` — بمعدلك الحالي، موعد ختمتك التقريبي: ${estimateDate.toLocaleDateString('ar-EG')}`;
+      estimateText = "";
 
     }
 

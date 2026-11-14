@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>تتبع المجموعة - إشراق</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Amiri+Quran&family=Cairo:wght@400;700;900&family=Reem+Kufi:wght@500;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./ishraq-ui.css" />
+    <link rel="stylesheet" href="./ishraq-app.css" />
+    <link rel="stylesheet" href="./ishraq-feat.css" />
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#0b0b0c" />
+      <link rel="stylesheet" href="./ishraq-light.css" />
+    <script src="./ishraq-theme.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  </head>
+
+  <body class="ix app">
+    <header class="app-bar">
+      <div class="in">
+        <a class="ab" href="./index.html" data-ix-back aria-label="رجوع"><i class="bi bi-chevron-right"></i></a>
+        <a class="logo" href="./index.html" aria-label="إشراق"><img src="./5b862b4281f64fd884b11984846f0e97.png" alt="إشراق" /></a>
+        <button class="ab" type="button" data-ix-more aria-label="المزيد"><i class="bi bi-grid-fill"></i></button>
+      </div>
+    </header>
+    <div class="ix-wrap"><section class="ix-qhead"><div class="ix-hello">LIVE GROUP</div><h1 class="ix-tag">تتبع <span class="ol">المجموعة</span></h1></section></div>
+
+    <main class="pb-5"><div class="ix-wrap fx">
+
+<div class="fx-tabs" id="lv-t"><button class="fx-tab on" data-m="p">أنا معتمر</button><button class="fx-tab" data-m="s">أنا مشرف</button></div>
+<div id="lv-p">
+ <div class="fx-card"><h3>شارك موقعك مع مشرف مجموعتك</h3>
+  <p class="fx-m">تساعد هذه الخاصية المشرف على الاطمئنان عليك وعدم ضياعك في الزحام. لا يُشارَك موقعك إلا بعد موافقتك الصريحة هنا، ويصل لمشرف مجموعتك فقط، وتوقفه متى شئت.</p>
+  <label class="fx-lb">اسمك</label><input id="lv-name" class="fx-in" placeholder="الاسم كما يعرفك المشرف" />
+  <label class="fx-lb">رمز المجموعة (من المشرف)</label><input id="lv-code" class="fx-in" placeholder="مثال: ISH-12" autocapitalize="characters" />
+  <button type="button" id="lv-consent" class="fx-chk" style="margin-top:12px"><span class="bx"><i class="bi bi-check-lg"></i></span><span>أوافق على مشاركة موقعي الحيّ مع مشرف المجموعة ما دامت هذه الصفحة مفتوحة<small>يمكنك الإيقاف في أي وقت</small></span></button>
+  <button id="lv-start" class="fx-btn w"><i class="bi bi-geo-alt-fill"></i> ابدأ المشاركة</button>
+  <button id="lv-stop" class="fx-btn o w" style="display:none"><i class="bi bi-stop-fill"></i> إيقاف المشاركة</button>
+  <p class="fx-m" id="lv-st" style="margin:12px 0 0"></p></div>
+ <p class="fx-m">لإبقاء التحديث مستمراً أبقِ الشاشة مضيئة وهذه الصفحة مفتوحة.</p>
+</div>
+<div id="lv-s" style="display:none">
+ <div class="fx-card"><h3>لوحة المشرف</h3>
+  <label class="fx-lb">رمز المجموعة</label><input id="lv-scode" class="fx-in" autocapitalize="characters" />
+  <label class="fx-lb">مفتاح المشرف</label><input id="lv-skey" class="fx-in" type="password" />
+  <button id="lv-watch" class="fx-btn w" style="margin-top:12px"><i class="bi bi-eye-fill"></i> عرض المعتمرين</button><p class="fx-m" id="lv-sst" style="margin:10px 0 0"></p></div>
+ <div id="fx-map" style="display:none"></div><div id="lv-list"></div>
+</div>
+    </div></main>
+
+    <!-- شريط التنقل السفلي الثابت -->
+    <nav class="bottom-nav" aria-label="التنقل السفلي">
+      <div class="container d-flex justify-content-around align-items-center">
+        <a href="index.html" class="nav-item-bottom text-center text-decoration-none" data-page="home"><i class="bi bi-house-door d-block"></i><i class="bi bi-house-door-fill d-block active-icon"></i><span>الرئيسية</span></a>
+        <a href="quran.html" class="nav-item-bottom text-center text-decoration-none" data-page="quran"><i class="bi bi-book d-block"></i><i class="bi bi-book-fill d-block active-icon"></i><span>القرآن</span></a>
+        <a href="tasbeeh.html" class="nav-item-bottom text-center text-decoration-none" data-page="tasbeeh"><i class="bi bi-circle d-block"></i><i class="bi bi-record-circle-fill d-block active-icon"></i><span>السبحة</span></a>
+        <a href="qibla.html" class="nav-item-bottom text-center text-decoration-none" data-page="qibla"><i class="bi bi-compass d-block"></i><i class="bi bi-compass-fill d-block active-icon"></i><span>القبلة</span></a>
+        <a href="matwaf.html" class="nav-item-bottom text-center text-decoration-none" data-page="matwaf"><i class="bi bi-person-walking d-block"></i><i class="bi bi-person-walking d-block active-icon"></i><span>المطوف</span></a>
+      </div>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./main.js"></script>
+    <script src="./ishraq-ui.js"></script>
+    <script src="./ishraq-app.js"></script>
+    <script src="./ishraq-share.js"></script>
+    <script src="./ishraq-feat.js"></script>
+    <script src="./live.js"></script>
+  </body>
+</html>

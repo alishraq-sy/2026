@@ -48,17 +48,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // طباعة الكارد بشكل ديناميكي كامل
   continueContainer.innerHTML = `
-    <div class="card bg-dark border-gold text-light p-3 shadow-sm rounded-3" style="background-color: #21211D !important; border-color: #edcea0 !important;">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <h5 class="text-gold mb-1" style="  font-family: 'Tajawal', sans-serif; color: #edcea0;">متابعة القراءة </h5>
-          <p class="mb-0 text-muted small">سورة ${progress.surahName} - الآية (${progress.ayahNumber})</p>
-        </div>
-        <a href="surah-reader.html?surah=${progress.surahNumber}" class="btn btn-sm btn-gold-outline px-4 py-2 rounded-pill" style="border-color: #edcea0; color: #edcea0; text-decoration: none;">
-          إكمال القراءة <i class="bi bi-arrow-left ms-1"></i>
-        </a>
-      </div>
-    </div>
+    <a class="ix-resume" href="surah-reader.html?surah=${progress.surahNumber}">
+      <span class="rs-orn"><i class="bi bi-book-half"></i></span>
+      <span class="rs-txt"><small>متابعة القراءة</small><b>سورة ${progress.surahName}</b><em>الآية ${progress.ayahNumber}</em></span>
+      <span class="rs-go"><i class="bi bi-arrow-left"></i></span>
+    </a>
   `;
 });
 
