@@ -201,7 +201,7 @@ body.ix{
 .ix .form-control::placeholder{color:#6c6e75}
 
 /* =====================================================
-   بوابة العمرة (umrah.html)
+   بوابة العمرة (umrah-login.html)
    ===================================================== */
 .ix .u-banner{background:linear-gradient(90deg,#b88f3a,#d6ac52,#b88f3a);color:#0b0b0c;font-weight:700;padding:.6rem 1rem;text-align:center;position:sticky;top:0;z-index:1100}
 .ix .u-box{position:relative;background:linear-gradient(160deg,var(--c1),#0e0e10);border:1px solid var(--c3);border-radius:0;padding:20px;

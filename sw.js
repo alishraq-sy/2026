@@ -1,7 +1,8 @@
-const CACHE_NAME = 'ishraq-cache-v36';
+const CACHE_NAME = 'ishraq-cache-v37';
 const assetsToCache = [
   './',
   './index.html',
+  './umrah-login.html',
   './umrah.html',
   './quran.html',
   './surah-reader.html',

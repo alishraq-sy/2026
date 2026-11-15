@@ -8,13 +8,13 @@
     '<div class="sheet" role="dialog" aria-label="المزيد">' +
       '<div class="grab"></div>' +
       '<div class="m-h"><b>المزيد</b><button class="m-x" id="ix-more-x" type="button" aria-label="إغلاق"><i class="bi bi-x-lg"></i></button></div>' +
-      '<a class="m-umrah" href="./umrah.html">' +
+      '<a class="m-umrah" href="./umrah-login.html">' +
         '<img class="bg" src="./ibrahim-photo.png" alt="" />' +
         '<span class="bd">حملة الإشراق للعمرة</span>' +
         '<h3>أهلًا بمعتمري حملة الإشراق</h3>' +
         '<p>بطاقتك الخاصة، برنامج الرحلة، تقييمك واستفساراتك، كلها بمكان واحد.</p>' +
         '<span class="go">ادخل إلى رحلتك <i class="bi bi-arrow-left"></i></span>' +
-        '<span class="si" data-href="./umrah-journey.html">احجز مقعدك الآن</span>' +
+        '<span class="si" data-href="./umrah.html">احجز مقعدك الآن</span>' +
       '</a>' +
       '<div class="m-list">' +
         '<a class="m-row" style="--ac:#6aa8f0" href="./search.html"><i class="bi bi-search"></i>البحث الشامل<span class="ch bi bi-chevron-left"></span></a>' +
