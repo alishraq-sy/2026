@@ -14,7 +14,7 @@
         '<h3>أهلًا بمعتمري حملة الإشراق</h3>' +
         '<p>بطاقتك الخاصة، برنامج الرحلة، تقييمك واستفساراتك، كلها بمكان واحد.</p>' +
         '<span class="go">ادخل إلى رحلتك <i class="bi bi-arrow-left"></i></span>' +
-        '<span class="si" data-href="./Ibrahim-alamary-main/index.html">احجز مقعدك الآن</span>' +
+        '<span class="si" data-href="./umrah-journey.html">احجز مقعدك الآن</span>' +
       '</a>' +
       '<div class="m-list">' +
         '<a class="m-row" style="--ac:#6aa8f0" href="./search.html"><i class="bi bi-search"></i>البحث الشامل<span class="ch bi bi-chevron-left"></span></a>' +
