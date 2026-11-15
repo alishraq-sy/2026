@@ -653,7 +653,7 @@ async function admClick(e) {
   if (act === 'p-gen') return pGen();
   if (act === 'doc-view') { const id = b.closest('[data-doc]').querySelector('[data-k]').value; return docView(id).catch(er => toast(er.message || 'تعذّر فتح الملف')); }
   if (act === 'doc-clear') { const bx = b.closest('[data-doc]'); bx.querySelector('[data-k]').value = ''; bx.querySelector('.doc-st').textContent = 'سيُحذف عند الحفظ'; bx.querySelectorAll('[data-act]').forEach(x => x.classList.add('d-none')); return; }
-  if (act === 'pdf') return admPdf(b.dataset.tab, b);
+  if (act === 'pdf') return admPdf(b.dataset.pdf, b);
   if (act === 'p-edit') return pForm(pplData.items[+b.dataset.i]);
   if (act === 'p-add') return pForm(null);
   if (act === 'p-import') return pImportBox();
@@ -796,7 +796,7 @@ let rateData = null, inqData = null, lostData = null;
 function admAddPdfBtn(tab) {
   if (!PDF_TABS.includes(tab) || !$('admBody') || $('admBody').querySelector('[data-act="pdf"]')) return;
   const img = IMG_TABS.includes(tab) ? `<button type="button" class="btn btn-gold-outline flex-fill" data-img-tab="${tab}"><i class="bi bi-image ms-1"></i>حفظ كصورة</button>` : '';
-  $('admBody').insertAdjacentHTML('beforeend', `<div class="d-flex gap-2 mt-3"><button type="button" class="btn btn-gold-outline flex-fill" data-act="pdf" data-tab="${tab}"><i class="bi bi-file-earmark-pdf ms-1"></i>تصدير PDF</button>${img}</div>`);
+  $('admBody').insertAdjacentHTML('beforeend', `<div class="d-flex gap-2 mt-3"><button type="button" class="btn btn-gold-outline flex-fill" data-act="pdf" data-pdf="${tab}"><i class="bi bi-file-earmark-pdf ms-1"></i>تصدير PDF</button>${img}</div>`);
 }
 /* ---------- حفظ الأقسام كصورة بهوية البطاقة ---------- */
 const IMG_TABS = ['sups', 'hotels', 'buses', 'sched'];
