@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ishraq-cache-v37';
+const CACHE_NAME = 'ishraq-cache-v38';
 const assetsToCache = [
   './',
   './index.html',
@@ -64,6 +64,7 @@ const assetsToCache = [
   './ishraq-feat.js',
   './ishraq-cert.js',
   './ishraq-ticket.js',
+  './ishraq-push.js',
   './ramadan.html',
   './asma.js',
   './ishraq-share.js',
@@ -107,6 +108,22 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+});
+
+// ===== إشعارات Firebase (رسائل data فقط: نحن نعرض الإشعار) =====
+self.addEventListener('push', (event) => {
+  let p = {}; try { p = event.data ? event.data.json() : {}; } catch (e) { try { p = { data: { title: 'إشراق', body: event.data.text() } }; } catch (_) {} }
+  const d = p.data || p.notification || p || {};
+  const title = d.title || 'إشراق', opts = { body: d.body || '', icon: './app-icon.png', badge: './app-icon.png', dir: 'rtl', lang: 'ar', tag: d.tag || undefined, data: { url: d.url || './index.html' } };
+  event.waitUntil(self.registration.showNotification(title, opts));
+});
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = new URL((event.notification.data && event.notification.data.url) || './index.html', self.registration.scope).href;
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+    for (const c of list) { if (c.url === url && 'focus' in c) return c.focus(); }
+    return self.clients.openWindow(url);
+  }));
 });
 
 // جلب الملفات: نجرب الشبكة أولاً دائماً (لضمان وصول أي تحديث فوراً)، ونرجع للكاش فقط عند انقطاع الإنترنت

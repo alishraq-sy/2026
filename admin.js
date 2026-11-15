@@ -10,7 +10,7 @@ const admRefresh = tab => `<button type="button" class="btn btn-sm btn-gold-outl
 const fmtMin = m => m == null ? '—' : m < 60 ? Math.round(m) + ' د' : Math.floor(m / 60) + ' س ' + Math.round(m % 60) + ' د';
 const busName = b => b === 'بدون باص' ? b : 'باص ' + b;
 const ADM_TABS = [['today', 'اليوم', 'bi-speedometer2'], ['att', 'الحضور', 'bi-bus-front'], ['ppl', 'المعتمرون', 'bi-people'], ['sups', 'المشرفون', 'bi-person-badge'], ['hotels', 'الفنادق', 'bi-buildings'],
-  ['buses', 'الباصات', 'bi-bus-front-fill'], ['sched', 'البرنامج والنشاطات', 'bi-calendar-event'], ['news', 'الأخبار', 'bi-megaphone'], ['rate', 'التقييمات', 'bi-star'],
+  ['buses', 'الباصات', 'bi-bus-front-fill'], ['sched', 'البرنامج والنشاطات', 'bi-calendar-event'], ['news', 'الأخبار', 'bi-megaphone'], ['push', 'الإشعارات', 'bi-bell'], ['rate', 'التقييمات', 'bi-star'],
   ['inq', 'الاستفسارات', 'bi-chat-dots'], ['lost', 'التائهون والمتأخرون', 'bi-exclamation-triangle'], ['audit', 'السجل', 'bi-journal-text']];
 
 function adminRender() {
@@ -30,7 +30,7 @@ async function admGo(tab) {
   admTab = tab;
   document.querySelectorAll('#admTabs [data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   $('admBody').innerHTML = '<div class="text-center desc-text py-4">جارٍ التحميل...</div>';
-  try { await ({ today: admToday, att: admAtt, ppl: admPpl, sups: admSups, hotels: admHotels, buses: admBuses, news: admNews, sched: admSched, rate: admRate, inq: admInq, lost: admLost, audit: admAudit })[tab](); admAddPdfBtn(tab); }
+  try { await ({ today: admToday, att: admAtt, ppl: admPpl, sups: admSups, hotels: admHotels, buses: admBuses, news: admNews, push: admPush, sched: admSched, rate: admRate, inq: admInq, lost: admLost, audit: admAudit })[tab](); admAddPdfBtn(tab); }
   catch (e) { $('admBody').innerHTML = `<div class="text-center py-3"><div class="text-danger mb-2">تعذّر التحميل</div>${admRefresh(tab)}</div>`; }
 }
 
@@ -473,6 +473,22 @@ async function admNews() {
     <div class="small mt-2" style="color:#d3d3c7">يصل المعتمرين تنبيه خلال دقيقة إلى دقيقتين إن كانت صفحتهم مفتوحة.</div>`;
 }
 
+/* ---------- الإشعارات (FCM) ---------- */
+async function admPush() {
+  const r = await admPost('adm_push_stats');
+  $('admBody').innerHTML = `${admRefresh('push')}
+    <div class="d-flex gap-2 mb-3 text-center"><div class="flex-fill p-2 rounded-3" style="background:rgba(214,172,82,.1)"><div class="h4 gold mb-0">${r.all}</div><small>جهاز مفعّل</small></div>
+      <div class="flex-fill p-2 rounded-3" style="background:rgba(214,172,82,.1)"><div class="h4 gold mb-0">${r.umrah}</div><small>من المعتمرين</small></div></div>
+    <div class="gold fw-bold mb-2">إرسال إشعار جديد</div>
+    <select id="psAud" class="form-select u-in mb-2"><option value="umrah">معتمرو الحملة فقط</option><option value="all">كل مستخدمي إشراق</option></select>
+    <input id="psTitle" class="form-control u-in mb-2" maxlength="80" placeholder="عنوان الإشعار">
+    <textarea id="psBody" class="form-control u-in mb-2" rows="3" maxlength="300" placeholder="نص الإشعار…"></textarea>
+    <button type="button" class="btn btn-gold-solid w-100" data-act="push-send"><i class="bi bi-send ms-1"></i>إرسال الآن</button>
+    <div class="small mt-2" style="color:#d3d3c7">التذكير قبل كل نشاط بـ 30 دقيقة يُرسَل تلقائيًا لمعتمري الحملة (بعد تشغيل setupPush مرة واحدة).</div>
+    <div class="gold fw-bold mt-4 mb-2">آخر الإشعارات</div>
+    ${r.log.length ? r.log.map(x => `<div class="p-2 mb-2 rounded-3" style="border:1px solid rgba(214,172,82,.25)"><div class="fw-bold">${esc(x.title)}</div><small>${esc(x.time)} · ${x.aud === 'umrah' ? 'المعتمرون' : 'الجميع'} · وصل ${esc(x.sent)}${+x.failed ? ' · فشل ' + esc(x.failed) : ''} · ${esc(x.by)}</small></div>`).join('') : '<div class="text-center desc-text">لم يُرسل شيء بعد</div>'}`;
+}
+
 /* ---------- التقييمات ---------- */
 async function admRate() {
   const r = rateData = await admPost('adm_rate'), full = Math.round(r.avg), max = Math.max(1, ...r.dist);
@@ -744,6 +760,13 @@ async function admClick(e) {
     else if (act === 'b-del') {
       if (!await askConfirm('حذف الباص؟', 'باص ' + b.dataset.no, 'نعم، احذف')) return;
       await admPost('adm_opt_del', { kind: 'bus', no: b.dataset.no }); toast('تم الحذف'); await admBuses();
+    }
+    else if (act === 'push-send') {
+      const title = $('psTitle').value.trim(), body = $('psBody').value.trim(), audience = $('psAud').value;
+      if (!title || !body) { toast('اكتب العنوان والنص'); return; }
+      if (!await askConfirm('إرسال الإشعار؟', (audience === 'umrah' ? 'لكل معتمري الحملة' : 'لكل مستخدمي إشراق') + ' — لا يمكن التراجع.', 'نعم، أرسل')) return;
+      const r = await admPost('adm_push_send', { title, body, audience });
+      toast(r.ok ? `وصل لـ ${r.sent} من ${r.total}` : 'تعذّر الإرسال'); await admPush();
     }
     else if (act === 'news-save') {
       const text = $('newsTxt').value.trim();

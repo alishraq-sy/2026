@@ -59,6 +59,16 @@
 
           <div class="settings-row d-flex justify-content-between align-items-center">
             <div>
+              <div class="settings-row-title">إشعارات إشراق</div>
+              <div class="settings-row-desc" id="serverPushDesc">تنبيهات من إدارة إشراق تصلك حتى لو التطبيق مغلق.</div>
+            </div>
+            <div class="form-check form-switch fs-4">
+              <input class="form-check-input shadow-none" type="checkbox" role="switch" id="serverPushToggle" onchange="toggleServerPush(this)">
+            </div>
+          </div>
+
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
               <div class="settings-row-title">تذكير السبحة المسائي</div>
               <div class="settings-row-desc">تنبيه لطيف الساعة 8 مساءً لو ما سبّحت شيء طول اليوم.</div>
             </div>
@@ -490,6 +500,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
     <script src="./firebase-config.js"></script>
+    <script src="./ishraq-push.js"></script>
     <script src="./settings.js"></script>
     <script src="./main.js"></script>
     <script src="./ishraq-ui.js"></script>

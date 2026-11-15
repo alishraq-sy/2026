@@ -254,6 +254,10 @@ function renderMe() {
         <button type="button" class="btn btn-dark" id="saveCard"><i class="bi bi-download ms-1"></i>حفظ البطاقة كصورة</button>
         <button type="button" class="btn btn-outline-dark" id="logout">تسجيل خروج</button>
       </div></div></div>`;
+  if (window.ixPush && ixPush.supported() && ixPush.permission() !== 'denied') {
+    if (ixPush.on()) ixPush.tagUmrah(code, DEV);
+    else t.insertAdjacentHTML('afterbegin', `<div class="p-3 mb-3 rounded-4 d-flex align-items-center gap-3" style="border:1px solid rgba(214,172,82,.45);background:rgba(214,172,82,.08)"><i class="bi bi-bell-fill fs-3 gold"></i><div class="flex-grow-1"><b>فعّل إشعارات الرحلة</b><div class="small" style="opacity:.8">تذكير قبل كل نشاط وتنبيهات المشرفين.</div></div><button type="button" class="btn btn-sm btn-gold-solid" id="pushOn">تفعيل</button></div>`);
+  }
   const q = qrURL();
   if (q) $('qrBox').innerHTML = `<img src="${q}" width="180" height="180" alt="رمز الحضور" style="display:block">`; else $('qrWrap').remove();
   $('saveCard').onclick = e => saveCardImage(e.currentTarget);
@@ -288,6 +292,12 @@ const panelRows = {
   }),
 };
 const panelTitle = { bus: 'باص الرحلة', sup: 'المشرفون', hotel: 'معلومات الفنادق' };
+document.addEventListener('click', async e => {
+  const pb = e.target.closest('#pushOn'); if (!pb) return;
+  pb.disabled = true;
+  try { await ixPush.enable({ umrah: { code, dev: DEV } }); toast('تم تفعيل إشعارات الرحلة ✅'); pb.closest('.rounded-4').remove(); }
+  catch (er) { toast(er && er.message === 'denied' ? 'لم يُسمح بالإشعارات من المتصفح' : 'تعذّر التفعيل الآن'); pb.disabled = false; }
+});
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-img]'); if (!b || !me) return;
   const k = b.dataset.img; savePanel(panelTitle[k], panelRows[k](), `ishraq-${k}.png`, b);

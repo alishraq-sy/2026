@@ -341,3 +341,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+/* إشعارات إشراق (FCM الحقيقية) */
+(function () {
+  function sync() {
+    var t = document.getElementById("serverPushToggle"), d = document.getElementById("serverPushDesc"); if (!t || !window.ixPush) return;
+    if (!ixPush.supported()) { t.disabled = true; if (d) d.textContent = "متصفحك لا يدعم الإشعارات. على الآيفون أضف التطبيق إلى الشاشة الرئيسية أولًا."; return; }
+    if (ixPush.permission() === "denied") { t.disabled = true; if (d) d.textContent = "الإشعارات محظورة من إعدادات المتصفح لهذا الموقع. فعّلها من هناك ثم أعد المحاولة."; }
+    t.checked = ixPush.on();
+  }
+  window.toggleServerPush = async function (cb) {
+    cb.disabled = true;
+    try {
+      if (cb.checked) { await ixPush.enable(); alert("تم تفعيل إشعارات إشراق ✅"); }
+      else await ixPush.disable();
+    } catch (e) { cb.checked = false; alert(e && e.message === "denied" ? "لم يُسمح بالإشعارات. فعّلها من إعدادات المتصفح." : "تعذّر التفعيل الآن، حاول لاحقًا."); }
+    cb.disabled = false; sync();
+  };
+  document.addEventListener("DOMContentLoaded", sync);
+})();
