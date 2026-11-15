@@ -119,13 +119,10 @@ $('events').onclick = e => {
   else saveEventImage(ev, b);
 };
 async function saveEventImage(ev, b) {
-  b.disabled = true;
-  try {
-    const rows = [['الموعد', fmt(ev.t)]];
-    if (plain(ev.Location)) rows.push(['الموقع', ev.Location]);
-    if (ev.Notes) rows.push(['ملاحظات', ev.Notes]);
-    await saveCanvas(await makeImage({ title: ev.Title, sub: ev.Category, rows }), 'ishraq-activity.png');
-  } catch { toast('تعذّر حفظ الصورة'); } finally { b.disabled = false; }
+  const rows = [['الموعد', fmt(ev.t)]];
+  if (plain(ev.Location)) rows.push(['الموقع', ev.Location]);
+  if (ev.Notes) rows.push(['ملاحظات', ev.Notes]);
+  await savePanel(ev.Title + (ev.Category ? ' — ' + ev.Category : ''), rows, 'ishraq-activity.png', b);
 }
 
 /* ---------- توليد الصور (Canvas) ---------- */
@@ -207,6 +204,20 @@ const qrPayload = () => {
   if (me.Supervisor_Name || me.Supervisor_Phone) L.push('المشرف: ' + [me.Supervisor_Name, me.Supervisor_Phone].filter(Boolean).join(' - '));
   return L.join('\n');
 };
+const roomAr = r => { r = String(r || '').trim(); return r ? 'غرفة ' + r.replace(/ي$/, 'ية') : ''; }; // رباعي → غرفة رباعية
+const ticketRows = () => {
+  const r = [];
+  [['فندق مكة المكرمة', 'Makkah'], ['فندق المدينة المنورة', 'Madinah']].forEach(([n, k]) => {
+    if (me[k + '_Hotel'] || me[k + '_Room']) r.push([n, `${me[k + '_Hotel'] || '—'}${me[k + '_Room'] ? ' — غرفة ' + me[k + '_Room'] : ''}`]);
+  });
+  if (me.Room_Type) r.push(['نوع الغرفة', roomAr(me.Room_Type)]);
+  if (me.Rawda_Status) r.push(['حجز الروضة الشريفة', me.Rawda_Status]);
+  const bus = [me.Bus_Title, me.Bus_No && 'رقم ' + me.Bus_No].filter(Boolean).join(' — ');
+  if (bus) r.push(['باص الرحلة', bus]);
+  if (me.Supervisor_Name) r.push(['المشرف', me.Supervisor_Name]);
+  if (me.Supervisor_Phone) r.push(['رقم المشرف', me.Supervisor_Phone]);
+  return r;
+};
 const qrURL = (cell = 6) => { try { if (qrcode.stringToBytesFuncs && qrcode.stringToBytesFuncs['UTF-8']) qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8']; const q = qrcode(0, 'L'); q.addData(qrPayload()); q.make(); return q.createDataURL(cell, 2); } catch { return null; } };
 
 function renderMe() {
@@ -232,12 +243,12 @@ function renderMe() {
     $('logout').onclick = logout;
     return;
   }
-  const city = (h, r, l) => `<p><b>${h[0]}</b>${esc(h[1])} — غرفة ${esc(r)}</p>${l ? `<p class="small">${isUrl(l) ? `<a href="${esc(l)}" target="_blank" rel="noopener" class="text-dark fw-bold"><i class="bi bi-map ms-1"></i>افتح الموقع على الخريطة</a>` : esc(l)}</p>` : ''}`;
-  t.innerHTML = `<div class="ticket mt-2">
+  const links = ['Makkah', 'Madinah'].map(k => isUrl(me[k + '_Location']) ? `<a href="${esc(me[k + '_Location'])}" target="_blank" rel="noopener" class="text-dark fw-bold small d-inline-block ms-3"><i class="bi bi-map ms-1"></i>${k === 'Makkah' ? 'موقع فندق مكة' : 'موقع فندق المدينة'}</a>` : '').join('');
+  t.innerHTML = `<div class="ticket mt-2" id="tkCard">
     <div class="head d-flex justify-content-between align-items-center"><div><small>أهلًا بك</small><div class="h5 fw-bold mb-0">${esc(me.Name)}</div></div>
       <div class="text-center"><small>رقم المعتمر</small><div class="no">${esc(me.PilgrimNo)}</div></div></div>
     <div class="perf"></div>
-    <div class="body">${city(['فندق مكة المكرمة', me.Makkah_Hotel], me.Makkah_Room, me.Makkah_Location)}${city(['فندق المدينة المنورة', me.Madinah_Hotel], me.Madinah_Room, me.Madinah_Location)}
+    <div class="body"><img class="wm" src="./5b862b4281f64fd884b11984846f0e97.png" alt="" aria-hidden="true">${ticketRows().map(([k, v]) => `<p><b>${esc(k)}</b><bdi dir="${/^[+\d\s-]+$/.test(v) ? 'ltr' : 'rtl'}">${esc(v)}</bdi></p>`).join('')}${links ? `<p>${links}</p>` : ''}
       <div id="qrWrap" class="text-center my-3"><div id="qrBox" class="d-inline-block bg-white p-2 rounded"></div><small class="d-block mt-1" style="opacity:.75">رمز الحضور — اعرضه للمشرف عند صعود الباص</small></div>
       <div class="d-grid gap-2">
         <button type="button" class="btn btn-dark" id="saveCard"><i class="bi bi-download ms-1"></i>حفظ البطاقة كصورة</button>
@@ -252,19 +263,35 @@ function renderMe() {
 async function saveCardImage(btn) {
   btn.disabled = true;
   try {
-    const hotel = (n, r, l, d) => [`${n || '—'} — غرفة ${r || '—'}`, d, plain(l)].filter(Boolean).join('\n'); // بدون كلمة الواي فاي ولا تواريخ الدخول والمغادرة
-    const rows = [
-      ['فندق مكة المكرمة', hotel(me.Makkah_Hotel, me.Makkah_Room, me.Makkah_Location, me.Makkah_Details)],
-      ['فندق المدينة المنورة', hotel(me.Madinah_Hotel, me.Madinah_Room, me.Madinah_Location, me.Madinah_Details)]
-    ];
-    const bus = [me.Bus_Title, me.Bus_No && 'رقم ' + me.Bus_No].filter(Boolean).join(' — ');
-    if (bus) rows.push(['باص الرحلة', bus]);
-    if (me.Supervisor_Name || me.Supervisor_Phone) rows.push(['المشرف', [me.Supervisor_Name, me.Supervisor_Phone].filter(Boolean).join(' — ')]);
-    const qr = await loadImg(qrURL(9));
-    const c = await makeImage({ title: me.Name, sub: 'رقم المعتمر: ' + me.PilgrimNo, rows, qr, qrNote: 'رمز الحضور — اعرضه للمشرف عند صعود الباص' });
-    await saveCanvas(c, `ishraq-card-${me.PilgrimNo}.png`);
-  } catch { toast('تعذّر حفظ البطاقة'); } finally { btn.disabled = false; }
+    const qr = await ixTicket.loadImg(qrURL(9));
+    const c = await ixTicket.draw({ headR: ['أهلًا بك', me.Name || ''], headL: ['رقم المعتمر', me.PilgrimNo || ''], rows: ticketRows(), qr, qrNote: 'رمز الحضور — اعرضه للمشرف عند صعود الباص' });
+    await ixTicket.save(c, `ishraq-card-${me.PilgrimNo}.png`);
+  } catch (e) { console.error(e); toast('تعذّر حفظ البطاقة'); } finally { btn.disabled = false; }
 }
+// صورة لوحة (باص/مشرفون/فنادق/نشاط) بنفس هوية البطاقة
+async function savePanel(title, rows, name, btn) {
+  if (btn) btn.disabled = true;
+  try { await ixTicket.save(await ixTicket.draw({ headR: ['حملة الإشراق', title], rows }), name); }
+  catch (e) { console.error(e); toast('تعذّر حفظ الصورة'); } finally { if (btn) btn.disabled = false; }
+}
+const imgBtn = k => `<button type="button" class="btn btn-sm btn-gold-outline rounded-pill mt-2" data-img="${k}"><i class="bi bi-image ms-1"></i>حفظ كصورة</button>`;
+const panelRows = {
+  bus: () => [['عنوان الباص', me.Bus_Title], ['رقم الباص', me.Bus_No]].filter(x => x[1]),
+  sup: () => [['المشرف', me.Supervisor_Name || 'المشرف'], ['رقم المشرف', me.Supervisor_Phone]].filter(x => x[1]),
+  hotel: () => ['Makkah', 'Madinah'].flatMap(k => {
+    const n = k === 'Makkah' ? 'فندق مكة المكرمة' : 'فندق المدينة المنورة', o = [[n, `${me[k + '_Hotel'] || '—'}${me[k + '_Room'] ? ' — غرفة ' + me[k + '_Room'] : ''}`]];
+    if (me[k + '_WiFi']) o.push(['كلمة مرور الواي فاي', me[k + '_WiFi']]);
+    if (me[k + '_CheckIn']) o.push(['الدخول', fmtDay(me[k + '_CheckIn'])]);
+    if (me[k + '_CheckOut']) o.push(['المغادرة', fmtDay(me[k + '_CheckOut'])]);
+    if (me[k + '_Details']) o.push(['تفاصيل', me[k + '_Details']]);
+    return me[k + '_Hotel'] ? o : [];
+  }),
+};
+const panelTitle = { bus: 'باص الرحلة', sup: 'المشرفون', hotel: 'معلومات الفنادق' };
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-img]'); if (!b || !me) return;
+  const k = b.dataset.img; savePanel(panelTitle[k], panelRows[k](), `ishraq-${k}.png`, b);
+});
 
 /* ---------- باص الرحلة، المشرفون، وفنادق الإقامة ---------- */
 function renderBus() {
@@ -274,7 +301,7 @@ function renderBus() {
   const row = (k, v) => v ? `<div class="mb-2"><small class="d-block" style="color:#d3d3c7">${k}</small><div class="text-light fw-bold">${v}</div></div>` : '';
   b.innerHTML = `<h2><i class="bi bi-bus-front ms-2"></i>باص الرحلة</h2>
     ${row('عنوان الباص', esc(me.Bus_Title))}${row('رقم الباص', esc(me.Bus_No))}
-    ${row('موقع الباص', isUrl(me.Bus_Location) ? `<a href="${esc(me.Bus_Location)}" target="_blank" rel="noopener" class="gold"><i class="bi bi-map ms-1"></i>افتح الموقع على الخريطة</a>` : esc(me.Bus_Location))}`;
+    ${row('موقع الباص', isUrl(me.Bus_Location) ? `<a href="${esc(me.Bus_Location)}" target="_blank" rel="noopener" class="gold"><i class="bi bi-map ms-1"></i>افتح الموقع على الخريطة</a>` : esc(me.Bus_Location))}${imgBtn('bus')}`;
 }
 function renderSup() {
   const b = $('mySupBox'), ok = me && role === 'pilgrim' && (me.Supervisor_Name || me.Supervisor_Phone);
@@ -283,7 +310,7 @@ function renderSup() {
   b.innerHTML = `<h2><i class="bi bi-person-badge ms-2"></i>المشرفون</h2>
     <div class="ev align-items-center" style="margin-bottom:0"><div class="ic"><i class="bi bi-person-fill"></i></div>
       <div class="flex-grow-1"><div class="fw-bold text-light">${esc(me.Supervisor_Name || 'المشرف')}</div><small>مشرفك في الرحلة</small></div>
-      ${me.Supervisor_Phone ? `<a class="btn btn-gold-solid rounded-pill" href="${phoneHref(me.Supervisor_Phone)}"><i class="bi bi-telephone-fill ms-1"></i>اتصال</a>` : ''}</div>`;
+      ${me.Supervisor_Phone ? `<a class="btn btn-gold-solid rounded-pill" href="${phoneHref(me.Supervisor_Phone)}"><i class="bi bi-telephone-fill ms-1"></i>اتصال</a>` : ''}</div>${imgBtn('sup')}`;
 }
 function renderHotels() {
   const b = $('hotelBox'), f = ['Makkah', 'Madinah'].map(c => ({ c, h: me?.[c + '_Hotel'], r: me?.[c + '_Room'], w: me?.[c + '_WiFi'], i: me?.[c + '_CheckIn'], o: me?.[c + '_CheckOut'], l: me?.[c + '_Location'], d: me?.[c + '_Details'] }));
@@ -297,7 +324,7 @@ function renderHotels() {
     ${x.o ? `<div><small><i class="bi bi-box-arrow-right ms-1"></i>المغادرة: ${esc(fmtDay(x.o))}</small></div>` : ''}
     ${x.d ? `<div class="mt-1"><small><i class="bi bi-geo-alt ms-1"></i>${esc(x.d)}</small></div>` : ''}
     ${isUrl(x.l) ? `<a href="${esc(x.l)}" target="_blank" rel="noopener" class="btn btn-sm btn-gold-outline rounded-pill mt-2"><i class="bi bi-map ms-1"></i>الموقع على الخريطة</a>` : ''}</div>` : '';
-  b.innerHTML = `<h2><i class="bi bi-buildings ms-2"></i>معلومات الفنادق</h2>${block('فندق مكة المكرمة', f[0])}${block('فندق المدينة المنورة', f[1])}`;
+  b.innerHTML = `<h2><i class="bi bi-buildings ms-2"></i>معلومات الفنادق</h2>${block('فندق مكة المكرمة', f[0])}${block('فندق المدينة المنورة', f[1])}${imgBtn('hotel')}`;
 }
 $('hotelBox').onclick = e => { const b = e.target.closest('[data-copy]'); if (b) copyText(b.dataset.copy); };
 
@@ -395,6 +422,7 @@ async function sync(forceInq) {
       if (lost?.status === 'responding' && was !== 'responding') msgs.push('ردّ المشرف: ' + (lost.reply || 'نحن في طريقنا إليك'));
       renderLost();
     }
+    if (r.mine && Object.keys(r.mine).some(k => me[k] !== r.mine[k])) { Object.assign(me, r.mine); renderMe(); renderBus(); renderSup(); renderHotels(); renderTabs(); save(); }
     if (r.hi && Object.keys(r.hi).some(k => me[k] !== r.hi[k])) { Object.assign(me, r.hi); renderMe(); renderHotels(); renderTabs(); } // تحديث واي فاي/موقع الفندق
     save(); notify(msgs);
   } catch {} finally { syncing = false; }

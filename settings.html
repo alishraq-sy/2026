@@ -37,7 +37,7 @@
           <div class="whats-new-glow"></div>
           <div class="d-flex align-items-center justify-content-between position-relative">
             <div>
-              <span class="whats-new-version">V1.0</span>
+              <span class="whats-new-version">V28</span>
               <div class="whats-new-title mt-2"><i class="bi bi-gift-fill me-2"></i>ما الجديد في إشراق</div>
               <div class="whats-new-sub">تصفّح كل ما يقدمه لك التطبيق من ميزات</div>
             </div>
@@ -45,8 +45,7 @@
           </div>
         </div>
 
-        <!-- ============== قسم العبادة والإشعارات ============== -->
-        <div class="settings-section-title"><i class="bi bi-bell-fill"></i> العبادة والإشعارات</div>
+        <div class="settings-section-title"><i class="bi bi-bell-fill"></i> الإشعارات والتذكيرات</div>
         <div class="settings-card">
           <div class="settings-row d-flex justify-content-between align-items-center">
             <div>
@@ -77,7 +76,10 @@
               <input class="form-check-input shadow-none" type="checkbox" role="switch" id="fridayReminderToggle" onchange="toggleFridayReminder(this)">
             </div>
           </div>
+        </div>
 
+        <div class="settings-section-title"><i class="bi bi-clock-history"></i> أوقات الصلاة والموقع</div>
+        <div class="settings-card">
           <div class="settings-row">
             <div class="settings-row-title mb-2">مدينة المواقيت</div>
             <select id="prayerCitySelect" class="form-select settings-select form-select-sm" onchange="setPrayerCity(this.value)">
@@ -132,8 +134,7 @@
           </div>
         </div>
 
-        <!-- ============== المظهر ============== -->
-        <div class="settings-section-title"><i class="bi bi-circle-half"></i> المظهر</div>
+        <div class="settings-section-title"><i class="bi bi-circle-half"></i> المظهر والألوان</div>
         <div class="settings-card">
           <div class="settings-row">
             <div class="settings-row-title mb-2">ثيم التطبيق</div>
@@ -143,9 +144,15 @@
               <button type="button" class="btn btn-gold-outline flex-fill theme-opt" data-theme-set="light"><i class="bi bi-sun-fill ms-1"></i>فاتح</button>
             </div>
           </div>
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">ألوان التطبيق</div>
+              <div class="settings-row-desc">اختر لون التمييز والثيم الرمضاني.</div>
+            </div>
+            <a href="./themes.html" class="btn btn-gold-outline btn-sm"><i class="bi bi-palette-fill"></i> المظهر والألوان</a>
+          </div>
         </div>
 
-        <!-- ============== قسم القراءة والعرض ============== -->
         <div class="settings-section-title"><i class="bi bi-book-half"></i> القراءة والعرض</div>
         <div class="settings-card">
           <div class="settings-row d-flex justify-content-between align-items-center">
@@ -176,7 +183,10 @@
               <input class="form-check-input shadow-none" type="checkbox" role="switch" id="fontFamilyToggle" onchange="toggleDefaultFontFamily(this)">
             </div>
           </div>
+        </div>
 
+        <div class="settings-section-title"><i class="bi bi-headphones"></i> التلاوة</div>
+        <div class="settings-card">
           <div class="settings-row">
             <div class="settings-row-title mb-2">القارئ الافتراضي</div>
             <select id="reciterSelect" class="form-select settings-select form-select-sm" onchange="setDefaultReciter(this.value)">
@@ -188,7 +198,6 @@
           </div>
         </div>
 
-        <!-- ============== قسم السبحة ============== -->
         <div class="settings-section-title"><i class="bi bi-circle"></i> السبحة</div>
         <div class="settings-card">
           <div class="settings-row">
@@ -199,6 +208,7 @@
               <button class="btn btn-sm btn-gold-outline" data-sound="metal" onclick="setDefaultTasbeehSound('metal')"><i class="bi bi-gem"></i> معدني</button>
             </div>
           </div>
+
           <div class="settings-row">
             <div class="settings-row-title mb-2">الهدف اليومي</div>
             <div class="input-group input-group-sm">
@@ -208,7 +218,28 @@
           </div>
         </div>
 
-        <!-- ============== قسم البيانات والنسخ الاحتياطي ============== -->
+        <div class="settings-section-title"><i class="bi bi-calendar3"></i> التقويم الهجري</div>
+        <div class="settings-card">
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">ضبط التاريخ الهجري</div>
+              <div class="settings-row-desc">إذا كان التاريخ الهجري لا يطابق بلدك، زِد يوماً أو انقص يوماً (يؤثر على التقويم).</div>
+            </div>
+            <div class="adj-ctl"><button type="button" id="set-adj-minus" aria-label="إنقاص يوم">−</button><span id="set-adj-val">0</span><button type="button" id="set-adj-plus" aria-label="زيادة يوم">+</button></div>
+          </div>
+        </div>
+
+        <div class="settings-section-title"><i class="bi bi-cloud-arrow-down-fill"></i> بدون إنترنت</div>
+        <div class="settings-card">
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">القرآن بدون إنترنت</div>
+              <div class="settings-row-desc">حمّل نصوص القرآن وتفسيره لتقرأ بلا اتصال، وأدر ما تم تحميله.</div>
+            </div>
+            <a href="./offline.html" class="btn btn-gold-outline btn-sm"><i class="bi bi-cloud-arrow-down-fill"></i> فتح</a>
+          </div>
+        </div>
+
         <div class="settings-section-title"><i class="bi bi-hdd-fill"></i> البيانات والنسخ الاحتياطي</div>
         <div class="settings-card">
           <div class="settings-row d-flex justify-content-between align-items-center">
@@ -218,6 +249,7 @@
             </div>
             <button onclick="exportBackup()" class="btn btn-gold-outline btn-sm"><i class="bi bi-download"></i></button>
           </div>
+
           <div class="settings-row d-flex justify-content-between align-items-center">
             <div>
               <div class="settings-row-title">استيراد نسخة احتياطية</div>
@@ -228,6 +260,7 @@
               <input type="file" id="importBackupInput" accept="application/json" class="d-none" onchange="importBackup(this.files[0])">
             </label>
           </div>
+
           <div class="settings-row d-flex justify-content-between align-items-center">
             <div>
               <div class="settings-row-title">تحديث ذاكرة التخزين المؤقت</div>
@@ -235,6 +268,7 @@
             </div>
             <button onclick="refreshAppCache()" class="btn btn-gold-outline btn-sm"><i class="bi bi-arrow-repeat"></i></button>
           </div>
+
           <div class="settings-row d-flex justify-content-between align-items-center">
             <div>
               <div class="settings-row-title text-danger">مسح جميع البيانات</div>
@@ -246,8 +280,7 @@
           </div>
         </div>
 
-        <!-- ============== قسم عام ============== -->
-        <div class="settings-section-title"><i class="bi bi-info-circle-fill"></i> عام</div>
+        <div class="settings-section-title"><i class="bi bi-person-circle"></i> الحساب</div>
         <div class="settings-card">
           <div class="settings-row d-flex justify-content-between align-items-center">
             <div>
@@ -256,20 +289,10 @@
             </div>
             <button id="logoutButton" class="btn btn-outline-danger btn-sm"><i class="bi bi-box-arrow-right"></i></button>
           </div>
-          <div class="settings-row d-flex justify-content-between align-items-center">
-            <div>
-              <div class="settings-row-title">صدقة جارية</div>
-              <div class="settings-row-desc">شارك تطبيق إشراق مع أصدقائك والدال على الخير كفاعله.</div>
-            </div>
-            <button onclick="shareApp()" class="btn btn-gold-solid btn-sm"><i class="bi bi-send-fill"></i></button>
-          </div>
-          <div class="settings-row d-flex justify-content-between align-items-center">
-            <div>
-              <div class="settings-row-title">ضبط التاريخ الهجري</div>
-              <div class="settings-row-desc">إذا كان التاريخ الهجري لا يطابق بلدك، زِد يوماً أو انقص يوماً (يؤثر على التقويم).</div>
-            </div>
-            <div class="adj-ctl"><button type="button" id="set-adj-minus" aria-label="إنقاص يوم">−</button><span id="set-adj-val">0</span><button type="button" id="set-adj-plus" aria-label="زيادة يوم">+</button></div>
-          </div>
+        </div>
+
+        <div class="settings-section-title"><i class="bi bi-phone-fill"></i> التطبيق والمشاركة</div>
+        <div class="settings-card">
           <div class="settings-row d-flex justify-content-between align-items-center" id="installRow" style="display: none;">
             <div>
               <div class="settings-row-title">تثبيت التطبيق</div>
@@ -277,6 +300,18 @@
             </div>
             <button id="installAppBtn" class="btn btn-gold-solid btn-sm">تثبيت</button>
           </div>
+
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">صدقة جارية</div>
+              <div class="settings-row-desc">شارك تطبيق إشراق مع أصدقائك والدال على الخير كفاعله.</div>
+            </div>
+            <button onclick="shareApp()" class="btn btn-gold-solid btn-sm"><i class="bi bi-send-fill"></i></button>
+          </div>
+        </div>
+
+        <div class="settings-section-title"><i class="bi bi-info-circle-fill"></i> حول إشراق</div>
+        <div class="settings-card">
           <div class="settings-row">
             <div class="settings-row-title mb-2">حول تطبيق إشراق</div>
             <p class="settings-row-desc mb-2">
@@ -309,7 +344,7 @@
         <div class="modal-content bg-dark border border-gold-subtle">
           <div class="modal-header border-bottom border-gold-subtle">
             <h5 class="modal-title gold fw-bold">
-              <i class="bi bi-gift-fill me-2"></i>ما الجديد — إشراق <span class="badge bg-gold text-dark ms-1">V1.0</span>
+              <i class="bi bi-gift-fill me-2"></i>ما الجديد — إشراق <span class="badge bg-gold text-dark ms-1">V28</span>
             </h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
@@ -318,66 +353,134 @@
             <div class="whats-new-section">
               <div class="whats-new-section-title"><i class="bi bi-book-fill me-2"></i>القرآن الكريم</div>
               <ul class="whats-new-list">
-                <li>قراءة جميع السور بعرض عادي أو عرض المصحف المتصل، مع تكبير/تصغير الخط والرسم العثماني</li>
-                <li>استماع لتلاوة السورة كاملة بأربعة قراء، مع شريط تقدم وتحكم بالصوت وتنزيل للاستماع أوفلاين</li>
-                <li>تشغيل تلقائي متسلسل بين السور (Playlist)</li>
-                <li>حفظ آخر موضع قراءة والعودة له تلقائياً، وأرشيف لآخر 5 سور مقروءة</li>
-                <li>فهرسة حسب الجزء، وبحث صوتي، ورابط مباشر لأي آية</li>
-                <li>تفسير مختصر فوري لكل آية، وعلامات مرجعية متعددة، ومتتبع للختمة</li>
-                <li>وضع القراءة المركزة (ملء الشاشة) بشريط أدوات ثابت أثناء التمرير</li>
+                <li>قراءة جميع السور بعرض عادي أو عرض المصحف المتصل بالرسم العثماني</li>
+                <li>استماع للتلاوة بعدة قرّاء مع شريط تقدم وتشغيل تلقائي متسلسل</li>
+                <li>البحث في القرآن داخل قسم القرآن الكريم</li>
+                <li>تفسير ميسّر لكل آية، وعلامات مرجعية، وآخر موضع قراءة</li>
+                <li>وضع القراءة المركزة بملء الشاشة وشريط تقدم سفلي</li>
+              </ul>
+            </div>
+
+            <div class="whats-new-section">
+              <div class="whats-new-section-title"><i class="bi bi-flag-fill me-2"></i>الختمة الذكية</div>
+              <ul class="whats-new-list">
+                <li>خطة ختمة بمدة تختارها وورد يومي يُحسب تلقائياً</li>
+                <li>متابعة التقدم والأيام المتبقية وبطاقة في الرئيسية</li>
+              </ul>
+            </div>
+
+            <div class="whats-new-section">
+              <div class="whats-new-section-title"><i class="bi bi-journal-text me-2"></i>الحديث النبوي</div>
+              <ul class="whats-new-list">
+                <li>الأربعون النووية وأحاديث رياض الصالحين بنصوص كاملة وشرح لكل حديث</li>
+                <li>وضع الحفظ بإخفاء الكلمات، وعلامة على ما حفظته</li>
+                <li>نسخ الحديث ومشاركته كبطاقة جميلة</li>
               </ul>
             </div>
 
             <div class="whats-new-section">
               <div class="whats-new-section-title"><i class="bi bi-moon-stars-fill me-2"></i>الأذكار والأوراد والأدعية</div>
               <ul class="whats-new-list">
-                <li>أذكار الصباح والمساء والنوم والاستيقاظ وبعد الصلاة، وأذكار متفرقة</li>
-                <li>أوراد النووي والبحر والنصر</li>
-                <li>أدعية من القرآن والسنة، ورمضان، والسفر، والجمعة، والمريض، وتفريج الهمّ، والحمل والولادة، والزواج</li>
-                <li>عدّاد تفاعلي لكل ذكر ودعاء، و"دعاء اليوم" يتغير تلقائياً</li>
-                <li>بحث نصي شامل، وفرز حسب الطول، وإضافة أدعية شخصية خاصة بك</li>
-                <li>مشاركة أي دعاء كصورة مصممة جاهزة للمشاركة</li>
+                <li>أذكار الصباح والمساء والنوم والصلاة بتصفح بالسحب</li>
+                <li>أوراد وأدعية بالرسم العثماني، وحفظها في المفضلة</li>
+                <li>قبس لقلبك: إشراقة قرآنية ونبوية ودعاء يومي قابل للمشاركة</li>
+              </ul>
+            </div>
+
+            <div class="whats-new-section">
+              <div class="whats-new-section-title"><i class="bi bi-clock-history me-2"></i>سنن وأذكار الوقت</div>
+              <ul class="whats-new-list">
+                <li>تظهر في الرئيسية سنّة الوقت وذكره المناسب (الصباح، المساء، النوم، الوتر…)</li>
+                <li>رابط مباشر للذكر المناسب بنقرة واحدة</li>
+              </ul>
+            </div>
+
+            <div class="whats-new-section">
+              <div class="whats-new-section-title"><i class="bi bi-check2-square me-2"></i>متتبع العبادات</div>
+              <ul class="whats-new-list">
+                <li>تتبّع عباداتك اليومية وإضافة عبادات خاصة بك</li>
+                <li>إحصائيات أسبوعية وشهرية وبطاقة في الرئيسية</li>
+              </ul>
+            </div>
+
+            <div class="whats-new-section">
+              <div class="whats-new-section-title"><i class="bi bi-patch-question-fill me-2"></i>التحدي اليومي</div>
+              <ul class="whats-new-list">
+                <li>أسئلة دينية كثيرة جداً بحيث لا تتكرر عليك تقريباً</li>
+                <li>نقاط وسلسلة أيام متتالية وبطاقة جذابة في الرئيسية</li>
+              </ul>
+            </div>
+
+            <div class="whats-new-section">
+              <div class="whats-new-section-title"><i class="bi bi-calculator-fill me-2"></i>حاسبة الزكاة</div>
+              <ul class="whats-new-list">
+                <li>تبويبات منفصلة: الذهب والفضة، والمال، وعروض التجارة</li>
+                <li>حساب النصاب والمقدار الواجب فوراً</li>
+              </ul>
+            </div>
+
+            <div class="whats-new-section">
+              <div class="whats-new-section-title"><i class="bi bi-stars me-2"></i>أسماء الله الحسنى</div>
+              <ul class="whats-new-list">
+                <li>الأسماء التسعة والتسعون مع شرح مبسّط ومشاركة</li>
+                <li>اسم اليوم من أسماء الله في الرئيسية</li>
+              </ul>
+            </div>
+
+            <div class="whats-new-section">
+              <div class="whats-new-section-title"><i class="bi bi-compass-fill me-2"></i>القبلة والمطوف والحج</div>
+              <ul class="whats-new-list">
+                <li>بوصلة القبلة ودليل المطوف للعمرة خطوة بخطوة</li>
+                <li>دليل الحج الكامل: الإحرام، منى، عرفة، مزدلفة، الجمرات، الإفاضة، الوداع</li>
+                <li>عدّاد الطواف والسعي وعدّاد الحصى ورمي الجمرات</li>
+                <li>شهادة تهنئة بعد إتمام العمرة قابلة للحفظ والمشاركة</li>
               </ul>
             </div>
 
             <div class="whats-new-section">
               <div class="whats-new-section-title"><i class="bi bi-circle me-2"></i>السبحة</div>
               <ul class="whats-new-list">
-                <li>عدّاد تفاعلي بأصوات نقر متعددة (خشبي/معدني/صامت) واهتزاز بأنماط مختلفة</li>
-                <li>أهداف يومية ورسم بياني أسبوعي لتسبيحك</li>
-                <li>التسبيح بالسحب، والتسبيح بأسماء الله الحسنى مع شرح كل اسم</li>
-                <li>تحدي الأصدقاء، وتذكير مسائي لطيف إذا نسيت التسبيح</li>
+                <li>عدّاد بأصوات نقر وهدف يومي قابل للتعديل</li>
+                <li>تذكير مسائي لطيف إن لم تسبّح</li>
               </ul>
             </div>
 
             <div class="whats-new-section">
-              <div class="whats-new-section-title"><i class="bi bi-compass-fill me-2"></i>القبلة والمطوف</div>
+              <div class="whats-new-section-title"><i class="bi bi-palette-fill me-2"></i>المظهر والألوان</div>
               <ul class="whats-new-list">
-                <li>بوصلة قبلة دقيقة ومعايرة بالكامل لجميع الأجهزة</li>
-                <li>دليل تفاعلي خطوة بخطوة للعمرة والحج مع عدّاد أشواط</li>
-                <li>أرشيف لإنجازاتك (عُمَراتي وحجّاتي) وأدعية إضافية ودعاء دخول مكة</li>
+                <li>ثيم داكن (أسود وذهبي) وآخر فاتح كريمي</li>
+                <li>ألوان تمييز متعددة بدل الذهبي، والثيم الرمضاني</li>
+                <li>نافذة المزيد وتبويب الإعدادات مرتّبان بسهولة</li>
               </ul>
             </div>
 
             <div class="whats-new-section">
-              <div class="whats-new-section-title"><i class="bi bi-bell-fill me-2"></i>الإشعارات والمفضلة</div>
+              <div class="whats-new-section-title"><i class="bi bi-cloud-arrow-down-fill me-2"></i>بدون إنترنت</div>
               <ul class="whats-new-list">
-                <li>تنبيه فوري بدخول وقت الصلاة من أي صفحة بالتطبيق، مع اختيار طريقة الحساب</li>
-                <li>تذكيرات أسبوعية (الجمعة) ويومية (السبحة) قابلة للتخصيص</li>
-                <li>صفحة مفضلة موحدة تجمع كل ما أضفته من القرآن والأذكار والأوراد والأدعية بمكان واحد</li>
+                <li>تحميل نصوص القرآن للقراءة بلا اتصال، وإدارة ما تم تحميله من الإعدادات</li>
+                <li>التطبيق يعمل كتطبيق مثبّت على الهاتف مع تخزين ذكي</li>
               </ul>
             </div>
 
             <div class="whats-new-section">
-              <div class="whats-new-section-title"><i class="bi bi-gear-fill me-2"></i>الإعدادات والهوية</div>
+              <div class="whats-new-section-title"><i class="bi bi-bell-fill me-2"></i>الإشعارات والمواقيت</div>
               <ul class="whats-new-list">
-                <li>تحكم كامل بالقارئ الافتراضي وحجم الخط والرسم العثماني من مكان واحد</li>
-                <li>نسخ احتياطي لبياناتك واستعادتها، وتحديث ذاكرة التخزين المؤقت</li>
-                <li>الوضع الليلي، ودعم العمل بدون إنترنت (PWA)، وتصميم متجاوب بالكامل على كل الأجهزة</li>
+                <li>تنبيه عند دخول كل صلاة، وتذكير الجمعة والسبحة</li>
+                <li>مدينة وطريقة حساب وتعديل دقائق المواقيت، والتاريخ الهجري القابل للضبط</li>
+              </ul>
+            </div>
+
+            <div class="whats-new-section">
+              <div class="whats-new-section-title"><i class="bi bi-person-circle me-2"></i>الحساب والهوية</div>
+              <ul class="whats-new-list">
+                <li>إنشاء حساب جديد بالبريد أو بحساب غوغل من صفحة الدخول</li>
+                <li>نوافذ حوار أنيقة بهوية إشراق بدل نوافذ المتصفح</li>
+                <li>نسخ احتياطي واستعادة لبياناتك</li>
               </ul>
             </div>
 
           </div>
+   </div>
         </div>
       </div>
     </div>

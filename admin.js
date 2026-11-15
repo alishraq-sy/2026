@@ -30,7 +30,7 @@ async function admGo(tab) {
   admTab = tab;
   document.querySelectorAll('#admTabs [data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   $('admBody').innerHTML = '<div class="text-center desc-text py-4">جارٍ التحميل...</div>';
-  try { await ({ today: admToday, att: admAtt, ppl: admPpl, sups: admSups, hotels: admHotels, buses: admBuses, news: admNews, sched: admSched, rate: admRate, inq: admInq, lost: admLost, audit: admAudit })[tab](); }
+  try { await ({ today: admToday, att: admAtt, ppl: admPpl, sups: admSups, hotels: admHotels, buses: admBuses, news: admNews, sched: admSched, rate: admRate, inq: admInq, lost: admLost, audit: admAudit })[tab](); admAddPdfBtn(tab); }
   catch (e) { $('admBody').innerHTML = `<div class="text-center py-3"><div class="text-danger mb-2">تعذّر التحميل</div>${admRefresh(tab)}</div>`; }
 }
 
@@ -142,7 +142,11 @@ const allSections = r => {
 
 /* ---------- إدارة المعتمرين ---------- */
 const PFIELDS = [['Code', 'الرقم السري للدخول'], ['PilgrimNo', 'رقم المعتمر'], ['Name', 'الاسم'], ['Phone', 'الهاتف'], ['Bus_No', 'رقم الباص'], ['Bus_Title', 'عنوان الباص'],
-  ['Supervisor_Name', 'اسم المشرف'], ['Supervisor_Phone', 'هاتف المشرف'], ['Makkah_Hotel', 'فندق مكة'], ['Makkah_Room', 'غرفة مكة'], ['Madinah_Hotel', 'فندق المدينة'], ['Madinah_Room', 'غرفة المدينة']];
+  ['Supervisor_Name', 'اسم المشرف'], ['Supervisor_Phone', 'هاتف المشرف'], ['Makkah_Hotel', 'فندق مكة'], ['Makkah_Room', 'غرفة مكة'], ['Madinah_Hotel', 'فندق المدينة'], ['Madinah_Room', 'غرفة المدينة'], ['Room_Type', 'نوع الغرفة'], ['Rawda_Status', 'حجز الروضة']];
+const ROOMS = ['إفرادي', 'ثنائي', 'ثلاثي', 'رباعي', 'خماسي'], RAWDA = ['لم يتم الحجز بعد', 'جاري الحجز', 'تم الحجز بنجاح'];
+const RAWDA_CLS = ['bg-secondary', 'bg-warning text-dark', 'bg-success'];
+const DOCS = [['photo', 'Photo_Id', 'الصورة الشخصية', 'bi-person-bounding-box'], ['passport', 'Passport_Id', 'صورة جواز السفر', 'bi-passport'], ['visa', 'Visa_Id', 'الفيزا', 'bi-card-heading']];
+let pUp = 0;
 async function admPpl() {
   $('admBody').innerHTML = `
     <div class="d-flex gap-2 mb-2"><input id="pQ" class="form-control u-in" placeholder="بحث بالاسم أو الرقم أو الهاتف أو الباص" autocomplete="off">
@@ -159,7 +163,8 @@ async function pplLoad(q) {
   $('pList').innerHTML = r.items.map((p, i) => `<div class="ev" style="display:block"><div class="d-flex justify-content-between align-items-center"><b class="text-light">${esc(p.Name)}</b>
     <span class="d-flex gap-1"><button type="button" class="btn btn-sm btn-gold-outline py-0" data-act="p-edit" data-i="${i}" aria-label="تعديل"><i class="bi bi-pencil"></i></button>
       ${delBtn(`data-act="p-del" data-no="${esc(p.PilgrimNo)}" data-name="${esc(p.Name)}"`)}</span></div>
-    <small>رقم ${esc(p.PilgrimNo)}${p.Bus_No ? ' · باص ' + esc(p.Bus_No) : ''}${p.Makkah_Room ? ' · مكة غرفة ' + esc(p.Makkah_Room) : ''}${p.Madinah_Room ? ' · المدينة غرفة ' + esc(p.Madinah_Room) : ''}${p.Devices ? ' · أجهزة ' + p.Devices.split(',').filter(Boolean).length + '/2' : ''}</small></div>`).join('') || '<p class="desc-text">لا نتائج.</p>';
+    <small>رقم ${esc(p.PilgrimNo)}${p.Bus_No ? ' · باص ' + esc(p.Bus_No) : ''}${p.Makkah_Room ? ' · مكة غرفة ' + esc(p.Makkah_Room) : ''}${p.Madinah_Room ? ' · المدينة غرفة ' + esc(p.Madinah_Room) : ''}${p.Room_Type ? ' · غرفة ' + esc(p.Room_Type) : ''}${p.Devices ? ' · أجهزة ' + p.Devices.split(',').filter(Boolean).length + '/2' : ''}</small>
+    ${p.Rawda_Status ? `<span class="badge ${RAWDA_CLS[Math.max(0, RAWDA.indexOf(p.Rawda_Status))]} me-1">الروضة: ${esc(p.Rawda_Status)}</span>` : ''}${DOCS.filter(d => p[d[1]]).map(d => `<span class="badge bg-dark border border-secondary me-1"><i class="bi ${d[3]} ms-1"></i>${d[2].replace('صورة ', '')}</span>`).join('')}</div>`).join('') || '<p class="desc-text">لا نتائج.</p>';
 }
 async function pForm(p) {
   try { optsData = await admPost('adm_opts'); } catch { optsData = optsData || { makkah: [], madinah: [], buses: [] }; }
@@ -180,14 +185,24 @@ async function pForm(p) {
       ctl = `<select class="form-select form-select-sm u-in" data-k="Supervisor_Name" id="pSupSel"><option value="" data-phone="">— اختر —</option>${ss.map(x => `<option value="${esc(x.name)}" data-phone="${esc(x.phone)}"${x.name === v ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select>`;
     } else if (k === 'Supervisor_Phone' && hasSup) {
       ctl = `<input class="form-control u-in form-control-sm" data-k="Supervisor_Phone" id="pSupPhone" value="${esc(v)}" readonly placeholder="يُدخل تلقائيًا">`;
+    } else if (k === 'Room_Type') {
+      ctl = `<select class="form-select form-select-sm u-in" data-k="Room_Type"><option value="">— اختر —</option>${ROOMS.map(n => opt(n, v)).join('')}</select>`;
+    } else if (k === 'Rawda_Status') {
+      const cur = v || RAWDA[0];
+      ctl = `<select class="form-select form-select-sm u-in" data-k="Rawda_Status">${RAWDA.map(n => opt(n, cur)).join('')}</select>`;
+    } else if (k === 'PilgrimNo' && !p) {
+      ctl = `<input class="form-control u-in form-control-sm" data-k="PilgrimNo" id="pNo" dir="ltr" readonly placeholder="يُولَّد تلقائيًا">`;
     } else if (k === 'Code' && !p) {
-      ctl = `<div class="input-group input-group-sm"><input class="form-control u-in" data-k="Code" inputmode="numeric" maxlength="12"><button type="button" class="btn btn-gold-outline" data-act="p-gen" aria-label="توليد رقم عشوائي"><i class="bi bi-dice-5"></i></button></div>`;
+      ctl = `<div class="input-group input-group-sm"><input class="form-control u-in" data-k="Code" dir="ltr" maxlength="6" style="text-transform:uppercase" placeholder="A12345"><button type="button" class="btn btn-gold-outline" data-act="p-gen" aria-label="توليد رقم عشوائي"><i class="bi bi-dice-5"></i></button></div>`;
     } else ctl = `<input class="form-control u-in form-control-sm" data-k="${k}" value="${esc(v)}" ${p && k === 'PilgrimNo' ? 'readonly' : ''}>`;
-    return `<div class="col-6"><label class="small">${k === 'Bus_No' && hasBus ? 'الباص' : k === 'Supervisor_Name' && hasSup ? 'المشرف' : l}</label>${ctl}</div>`;
+    const wide = k === 'Rawda_Status';
+    return `<div class="${wide ? 'col-12' : 'col-6'}"><label class="small">${k === 'Bus_No' && hasBus ? 'الباص' : k === 'Supervisor_Name' && hasSup ? 'المشرف' : l}</label>${ctl}</div>`;
   };
   const nw = p ? 0 : 1;
   $('pBox').innerHTML = `<div class="u-box mb-3" style="border-color:#edcea0"><div class="gold fw-bold mb-2">${p ? 'تعديل معتمر' : 'إضافة معتمر'}</div><div class="row g-2">
     ${PFIELDS.filter(([k]) => hs.includes(k) && !(k === 'Bus_Title' && hasBus)).map(([k, l]) => field(k, l)).join('')}</div>
+    ${hs.includes('Photo_Id') ? `<div class="gold fw-bold mt-3 mb-2"><i class="bi bi-paperclip ms-1"></i>المرفقات</div><div class="row g-2">${DOCS.map(([kd, col, lab, ic]) => docBox(kd, col, lab, ic, p ? String(p[col] ?? '') : '')).join('')}</div>
+      <small class="d-block mt-1" style="color:#d3d3c7">صورة أو PDF. تُضغط الصور تلقائيًا، وتُحفظ بخصوصية في Google Drive ولا تظهر للمعتمر.</small>` : ''}
     ${!o.makkah.length || !o.madinah.length || !hasBus || !hasSup ? '<small class="d-block mt-2" style="color:#d3d3c7">لتفعيل القوائم المنسدلة أضف الفنادق والباصات والمشرفين من تبويبات «الفنادق» و«الباصات» و«المشرفون».</small>' : ''}
     <div class="d-flex gap-2 mt-3 flex-wrap"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="p-save" data-new="${nw}">حفظ</button>
       <button type="button" class="btn btn-success flex-grow-1" data-act="p-save" data-send="1" data-new="${nw}"><i class="bi bi-whatsapp ms-1"></i>حفظ وإرسال</button>
@@ -196,10 +211,54 @@ async function pForm(p) {
       <button type="button" class="btn btn-sm btn-outline-warning flex-grow-1" data-act="p-sec" data-op="unblock">فك حظر جهاز</button></div>` : ''}
     ${p ? `<button type="button" class="btn btn-outline-danger w-100 mt-2" data-act="p-del" data-no="${esc(p.PilgrimNo)}" data-name="${esc(p.Name)}"><i class="bi bi-trash ms-1"></i>حذف المعتمر</button>` : ''}</div>`;
   $('pBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  if (!p) await pGen();
+  if (!p) { await pGen(); try { const n = await admPost('adm_next_no'), i = $('pNo'); if (i) i.value = n.no; } catch {} }
+}
+function docBox(kd, col, lab, ic, id) {
+  return `<div class="col-12"><div class="ev" style="display:block;margin:0" data-doc="${kd}"><div class="d-flex align-items-center gap-2 flex-wrap">
+    <i class="bi ${ic} gold fs-5"></i><b class="text-light flex-grow-1">${lab}</b><span class="small doc-st" style="color:#d3d3c7">${id ? 'مرفوعة ✓' : 'غير مرفقة'}</span></div>
+    <input type="hidden" data-k="${col}" value="${esc(id)}">
+    <div class="d-flex gap-2 mt-2 flex-wrap"><label class="btn btn-sm btn-gold-outline mb-0"><i class="bi bi-upload ms-1"></i>${id ? 'استبدال' : 'رفع'}<input type="file" class="d-none" data-doc-file="${kd}" accept="image/*,application/pdf"></label>
+      <button type="button" class="btn btn-sm btn-outline-light${id ? '' : ' d-none'}" data-act="doc-view" data-col="${col}"><i class="bi bi-eye ms-1"></i>عرض</button>
+      <button type="button" class="btn btn-sm btn-outline-danger${id ? '' : ' d-none'}" data-act="doc-clear" data-col="${col}"><i class="bi bi-x-lg"></i></button></div></div></div>`;
+}
+// ضغط الصورة (حتى 1600px، JPEG) قبل الرفع؛ PDF يُرفع كما هو بحدّ 4MB
+const fileB64 = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(f); });
+async function docPrep(f) {
+  if (f.type === 'application/pdf') { if (f.size > 4e6) throw new Error('ملف PDF أكبر من 4MB'); return { mime: f.type, data: await fileB64(f) }; }
+  if (!/^image\//.test(f.type)) throw new Error('اختر صورة أو PDF');
+  const url = URL.createObjectURL(f), img = await loadImg(url); URL.revokeObjectURL(url);
+  if (!img) throw new Error('تعذّر قراءة الصورة');
+  const k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+  const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+  return { mime: 'image/jpeg', data: c.toDataURL('image/jpeg', 0.82).split(',')[1] };
+}
+async function docUpload(inp) {
+  const box = inp.closest('[data-doc]'), kd = box.dataset.doc, hid = box.querySelector('[data-k]'), st = box.querySelector('.doc-st');
+  const f = inp.files[0]; if (!f) return;
+  pUp++; st.textContent = 'جارٍ الرفع...'; $('pBox').querySelectorAll('[data-act="p-save"]').forEach(b => b.disabled = true);
+  try {
+    const { mime, data } = await docPrep(f);
+    const no = $('pBox').querySelector('[data-k="PilgrimNo"]')?.value || '';
+    const r = await admPost('adm_doc_put', { kind: kd, mime, data, no });
+    hid.value = r.id; st.textContent = 'مرفوعة ✓ (احفظ لتثبيتها)';
+    box.querySelectorAll('[data-act]').forEach(b => b.classList.remove('d-none'));
+    [...inp.parentElement.childNodes].forEach(n => { if (n.nodeType === 3) n.textContent = 'استبدال'; });
+  } catch (e) { st.textContent = 'فشل الرفع'; toast(e.message || 'فشل رفع الملف', 4000); }
+  finally { pUp--; inp.value = ''; if (!pUp) $('pBox').querySelectorAll('[data-act="p-save"]').forEach(b => b.disabled = false); }
+}
+async function docView(id) {
+  toast('جارٍ فتح الملف...', 2000);
+  const r = await admPost('adm_doc_get', { id }), bin = atob(r.data), u8 = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([u8], { type: r.mime })), ov = document.createElement('div');
+  ov.style.cssText = 'position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px';
+  ov.innerHTML = `<button type="button" class="btn btn-light mb-2">إغلاق</button>${r.mime === 'application/pdf' ? `<iframe src="${url}" style="width:100%;height:80vh;border:0;background:#fff"></iframe>` : `<img src="${url}" style="max-width:100%;max-height:80vh;object-fit:contain">`}`;
+  const close = () => { ov.remove(); URL.revokeObjectURL(url); };
+  ov.onclick = e => { if (e.target === ov || e.target.tagName === 'BUTTON') close(); };
+  document.body.appendChild(ov);
 }
 async function pGen() { // رقم من 6 خانات محجوز على الخادم فلا يُعطى لغيره
-  try { const r = await admPost('adm_gen_code'), i = $('pBox').querySelector('[data-k="Code"]'); if (i) i.value = r.code; }
+  try { const r = await admPost('adm_gen_code', { mode: 'pilgrim' }), i = $('pBox').querySelector('[data-k="Code"]'); if (i) i.value = r.code; }
   catch (e) { toast(e.message || 'تعذّر توليد الرقم'); }
 }
 // قيمة الباص تُخزَّن برقمه، ويُشتقّ عنوانه من قائمة الباصات
@@ -220,6 +279,7 @@ function waSend(d, win) {
   const link = location.href.split('#')[0].split('?')[0];
   const msg = [`السلام عليكم ${d.Name || ''}`, 'أهلًا بك في حملة الإشراق 🌙', '',
     d.Code ? `🔑 رقمك السري للدخول: ${d.Code}` : null, d.PilgrimNo ? `🔢 رقم المعتمر: ${d.PilgrimNo}` : null,
+    d.Room_Type ? `🛏️ نوع الغرفة: ${d.Room_Type}` : null, d.Rawda_Status ? `🕌 حجز الروضة الشريفة: ${d.Rawda_Status}` : null,
     d.Bus_No ? `🚌 باص رقم: ${d.Bus_No}${d.Bus_Title ? ' — ' + d.Bus_Title : ''}` : null,
     d.Makkah_Hotel ? `🕋 فندق مكة: ${d.Makkah_Hotel}${d.Makkah_Room ? ' — غرفة ' + d.Makkah_Room : ''}` : null,
     d.Madinah_Hotel ? `🕌 فندق المدينة: ${d.Madinah_Hotel}${d.Madinah_Room ? ' — غرفة ' + d.Madinah_Room : ''}` : null,
@@ -415,7 +475,7 @@ async function admNews() {
 
 /* ---------- التقييمات ---------- */
 async function admRate() {
-  const r = await admPost('adm_rate'), full = Math.round(r.avg), max = Math.max(1, ...r.dist);
+  const r = rateData = await admPost('adm_rate'), full = Math.round(r.avg), max = Math.max(1, ...r.dist);
   $('admBody').innerHTML = `${admRefresh('rate')}
     <div class="text-center mb-3"><div class="display-4 gold fw-bold">${r.avg.toFixed(1)}</div>
       <div class="text-warning fs-4">${'★'.repeat(full)}${'☆'.repeat(5 - full)}</div><small>${r.count} تقييم</small></div>
@@ -428,7 +488,7 @@ async function admRate() {
 
 /* ---------- الاستفسارات وردّ الحملة ---------- */
 async function admInq() {
-  const r = await admPost('adm_inq'), fa = await admPost('adm_fa').catch(() => null);
+  const r = inqData = await admPost('adm_inq'), fa = await admPost('adm_fa').catch(() => null);
   $('admBody').innerHTML = admRefresh('inq') + (fa ? `<div class="ev" style="display:block"><div class="gold fw-bold mb-1"><i class="bi bi-patch-question ms-1"></i>الأسئلة الشرعية (للشيخ)</div>
       <small class="d-block">${fa.fresh} بانتظار الجواب · ${fa.answered} أُجيب عنها — تظهر لك الحالة فقط، لا الجواب. الأسئلة «للشيخ فقط» تظهر بلا اسم ولا نص.</small>
       <details class="mt-1"><summary class="small" style="cursor:pointer">عرض القائمة</summary>${fa.items.map(x => `<div class="small py-1 border-bottom border-secondary d-flex justify-content-between gap-2"><span>${x.priv ? '<span class="chip">سؤال خاص للشيخ</span>' : esc(x.name) + ': ' + esc(x.q)}</span><span class="badge ${x.status === 'أُجيب' ? 'bg-success' : 'bg-secondary'}">${esc(x.status)}</span></div>`).join('') || '<small>لا أسئلة.</small>'}</details></div>` : '') + (r.items.map(x => `
@@ -445,6 +505,7 @@ async function admInq() {
 /* ---------- التائهون ---------- */
 async function admLost() {
   const r = await admPost('adm_lost'), l = await admPost('adm_late').catch(() => ({ items: [] }));
+  lostData = { items: r.items, late: l.items };
   $('admBody').innerHTML = admRefresh('lost') + (l.items.length ? `<div class="gold fw-bold mb-2"><i class="bi bi-person-walking ms-1"></i>متأخرون عن الباص وفي طريقهم (${l.items.length})</div>` + l.items.map(x => `
     <div class="ev" style="display:block;border-inline-start-color:#ffc107" data-id="${esc(x.id)}">
       <div class="d-flex justify-content-between mb-1"><b class="text-light">${esc(x.name)}</b><small>${esc(String(x.time).slice(11))}</small></div>
@@ -580,6 +641,7 @@ function admChange(e) {
   if (t.id === 'admLabel') admAtt(t.value).catch(() => toast('تعذّر التحميل'));
   else if (t.id === 'sAll') { schedAll = t.checked; paintSched(); }
   else if (t.id === 'pFile' && t.files[0]) pParse(t.files[0]);
+  else if (t.dataset.docFile) docUpload(t);
   else if (t.id === 'pSupSel') $('pSupPhone').value = t.selectedOptions[0]?.dataset.phone || '';
 }
 const collect = box => Object.fromEntries([...box.querySelectorAll('[data-k]')].map(i => [i.dataset.k, i.value.trim()]));
@@ -589,6 +651,9 @@ async function admClick(e) {
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, card = b.closest('[data-id]'), id = card?.dataset.id;
   if (act === 'p-gen') return pGen();
+  if (act === 'doc-view') { const id = b.closest('[data-doc]').querySelector('[data-k]').value; return docView(id).catch(er => toast(er.message || 'تعذّر فتح الملف')); }
+  if (act === 'doc-clear') { const bx = b.closest('[data-doc]'); bx.querySelector('[data-k]').value = ''; bx.querySelector('.doc-st').textContent = 'سيُحذف عند الحفظ'; bx.querySelectorAll('[data-act]').forEach(x => x.classList.add('d-none')); return; }
+  if (act === 'pdf') return admPdf(b.dataset.tab, b);
   if (act === 'p-edit') return pForm(pplData.items[+b.dataset.i]);
   if (act === 'p-add') return pForm(null);
   if (act === 'p-import') return pImportBox();
@@ -623,10 +688,11 @@ async function admClick(e) {
     }
     else if (act === 'report') { toast('جارٍ إعداد التقرير...', 4000); await admReportPdf(); }
     else if (act === 'p-save') {
-      const send = b.dataset.send === '1', data = pCollect();
+      const send = b.dataset.send === '1', data = pCollect(); if (data.Code) data.Code = data.Code.toUpperCase();
       const win = send ? window.open('', '_blank') : null; // يُفتح فورًا مع الضغطة كي لا يحجبه المتصفح
-      try { await admPost('adm_p_save', { isNew: b.dataset.new === '1', data }); } catch (er) { win?.close(); throw er; }
-      toast('تم الحفظ'); $('pBox').innerHTML = ''; await pplLoad($('pQ').value.trim());
+      let sv; try { sv = await admPost('adm_p_save', { isNew: b.dataset.new === '1', data }); } catch (er) { win?.close(); throw er; }
+      if (sv.no) data.PilgrimNo = sv.no;
+      toast(sv.no ? 'تم الحفظ — رقم المعتمر ' + sv.no : 'تم الحفظ', 5000); $('pBox').innerHTML = ''; await pplLoad($('pQ').value.trim());
       if (send) waSend(data, win);
     }
     else if (act === 'h-add') {
@@ -722,3 +788,67 @@ async function admClick(e) {
 
 // إن كان المستخدم مشرفًا من جلسة محفوظة، فقد رُسمت الصفحة قبل تحميل هذا الملف
 if (me && role === 'admin') adminRender();
+
+
+/* ---------- تصدير PDF لكل قسم ---------- */
+const PDF_TABS = ['ppl', 'sups', 'hotels', 'buses', 'sched', 'rate', 'inq', 'lost', 'audit'];
+let rateData = null, inqData = null, lostData = null;
+function admAddPdfBtn(tab) {
+  if (!PDF_TABS.includes(tab) || !$('admBody') || $('admBody').querySelector('[data-act="pdf"]')) return;
+  const img = IMG_TABS.includes(tab) ? `<button type="button" class="btn btn-gold-outline flex-fill" data-img-tab="${tab}"><i class="bi bi-image ms-1"></i>حفظ كصورة</button>` : '';
+  $('admBody').insertAdjacentHTML('beforeend', `<div class="d-flex gap-2 mt-3"><button type="button" class="btn btn-gold-outline flex-fill" data-act="pdf" data-tab="${tab}"><i class="bi bi-file-earmark-pdf ms-1"></i>تصدير PDF</button>${img}</div>`);
+}
+/* ---------- حفظ الأقسام كصورة بهوية البطاقة ---------- */
+const IMG_TABS = ['sups', 'hotels', 'buses', 'sched'];
+function admImgRows(tab) {
+  const dash = v => v || '—';
+  if (tab === 'sups') return ['المشرفون', [['#h', 'المشرفون'], ...supData.map(x => [x.name, dash(x.phone)]), ...(shkData.length ? [['#h', 'شيخ الحملة'], ...shkData.map(x => [x.name, dash(x.phone)])] : [])]];
+  if (tab === 'hotels') return ['معلومات الفنادق', ['makkah', 'madinah'].flatMap(k => [['#h', k === 'makkah' ? 'فنادق مكة المكرمة' : 'فنادق المدينة المنورة'], ...(optsData.hotels?.[k] || []).map(h => [h.name, [h.wifi && 'الواي فاي: ' + h.wifi, h.details].filter(Boolean).join('\n') || '—'])])];
+  if (tab === 'buses') return ['الباصات', [['#h', 'قائمة الباصات'], ...optsData.buses.map(b => ['باص ' + b.no, dash(b.title)])]];
+  const list = schedData.filter(e => schedAll || (isActive(e) && endOf(e, when(e.Date_Time)) > Date.now()));
+  return ['برنامج الرحلة', [['#h', 'النشاطات'], ...list.map(e => [e.Title + (e.Category ? ' — ' + e.Category : ''), [fmt(when(e.Date_Time)), plain(e.Location)].filter(Boolean).join('\n')])]];
+}
+document.addEventListener('click', async e => {
+  const b = e.target.closest('[data-img-tab]'); if (!b) return;
+  b.disabled = true;
+  try { const [title, rows] = admImgRows(b.dataset.imgTab); await savePanel(title, rows, `ishraq-${b.dataset.imgTab}.png`); }
+  catch (err) { console.error(err); toast('تعذّر حفظ الصورة'); } finally { b.disabled = false; }
+});
+const T3 = (a, b, c) => [a, b, c];
+async function admPdf(tab, btn) {
+  btn.disabled = true; toast('جارٍ إعداد الملف...', 3000);
+  const dash = v => (v == null || v === '') ? '—' : v;
+  try {
+    let cfg;
+    if (tab === 'ppl') {
+      const r = await admPost('adm_p_list', { full: true });
+      cfg = { title: 'قائمة المعتمرين', meta: ['العدد: ' + r.items.length],
+        sections: [{ head: 'المعتمرون', cols: [{ t: '#', w: .06, align: 'center' }, { t: 'الاسم', w: .23 }, { t: 'الرقم', w: .13, align: 'center' }, { t: 'الهاتف', w: .17, align: 'center' }, { t: 'الباص', w: .07, align: 'center' }, { t: 'الغرفة', w: .12, align: 'center' }, { t: 'الروضة', w: .22 }],
+          rows: r.items.map((p, i) => [i + 1, p.Name, p.PilgrimNo, dash(p.Phone), dash(p.Bus_No), dash(p.Room_Type), dash(p.Rawda_Status)]) },
+        { head: 'الفنادق والغرف', cols: [{ t: '#', w: .06, align: 'center' }, { t: 'الاسم', w: .25 }, { t: 'فندق مكة', w: .22 }, { t: 'غرفة', w: .1, align: 'center' }, { t: 'فندق المدينة', w: .27 }, { t: 'غرفة', w: .1, align: 'center' }],
+          rows: r.items.map((p, i) => [i + 1, p.Name, dash(p.Makkah_Hotel), dash(p.Makkah_Room), dash(p.Madinah_Hotel), dash(p.Madinah_Room)]) }] };
+    } else if (tab === 'sups') {
+      cfg = { title: 'المشرفون وشيخ الحملة', sections: [
+        { head: 'المشرفون', cols: [{ t: '#', w: .07, align: 'center' }, { t: 'الاسم', w: .35 }, { t: 'الهاتف', w: .26, align: 'center' }, { t: 'رقم معتمر', w: .15, align: 'center' }, { t: 'ملاحظات', w: .17 }], rows: supData.map((x, i) => [i + 1, x.name, dash(x.phone), dash(x.no), dash(x.notes)]) },
+        { head: 'الشيوخ', cols: [{ t: '#', w: .07, align: 'center' }, { t: 'الاسم', w: .5 }, { t: 'الهاتف', w: .43, align: 'center' }], rows: shkData.map((x, i) => [i + 1, x.name, dash(x.phone)]) }] };
+    } else if (tab === 'hotels') {
+      const hs = k => (optsData.hotels?.[k] || []).map((h, i) => [i + 1, h.name, dash(h.wifi), dash(h.details)]), cols = [{ t: '#', w: .06, align: 'center' }, { t: 'الفندق', w: .32 }, { t: 'الواي فاي', w: .22, align: 'center' }, { t: 'التفاصيل', w: .4 }];
+      cfg = { title: 'معلومات الفنادق', sections: [{ head: 'فنادق مكة المكرمة', cols, rows: hs('makkah') }, { head: 'فنادق المدينة المنورة', cols, rows: hs('madinah') }] };
+    } else if (tab === 'buses') {
+      cfg = { title: 'الباصات', sections: [{ head: 'قائمة الباصات', cols: [{ t: '#', w: .1, align: 'center' }, { t: 'رقم الباص', w: .25, align: 'center' }, { t: 'العنوان', w: .65 }], rows: optsData.buses.map((b, i) => [i + 1, b.no, dash(b.title)]) }] };
+    } else if (tab === 'sched') {
+      const list = schedData.filter(e => schedAll || (isActive(e) && endOf(e, when(e.Date_Time)) > Date.now()));
+      cfg = { title: 'برنامج الرحلة', meta: ['عدد النشاطات: ' + list.length], sections: [{ head: 'النشاطات', cols: [{ t: '#', w: .06, align: 'center' }, { t: 'النشاط', w: .3 }, { t: 'الموعد', w: .22, align: 'center' }, { t: 'المكان', w: .2 }, { t: 'الحالة', w: .22, align: 'center' }], rows: list.map((e, i) => [i + 1, e.Title, dash(e.Date_Time), dash(e.Location), dash(e.Status)]) }] };
+    } else if (tab === 'rate') {
+      cfg = { title: 'التقييمات', meta: [`المتوسط: ${rateData.avg.toFixed(1)} / 5 — ${rateData.count} تقييم`], sections: [{ head: 'آخر التقييمات', cols: [{ t: '#', w: .06, align: 'center' }, { t: 'الاسم', w: .22 }, { t: 'النجوم', w: .12, align: 'center' }, { t: 'الملاحظة', w: .6 }], rows: rateData.latest.map((x, i) => [i + 1, x.name, x.stars + '★', dash(x.message)]) }] };
+    } else if (tab === 'inq') {
+      cfg = { title: 'الاستفسارات', sections: [{ head: 'الاستفسارات والردود', cols: [{ t: '#', w: .06, align: 'center' }, { t: 'الاسم', w: .2 }, { t: 'الحالة', w: .14, align: 'center' }, { t: 'السؤال', w: .3 }, { t: 'الرد', w: .3 }], rows: inqData.items.map((x, i) => [i + 1, x.name, x.status, x.message, dash(x.reply)]) }] };
+    } else if (tab === 'lost') {
+      cfg = { title: 'التائهون والمتأخرون', sections: [{ head: 'نداءات «أنا تائه»', cols: [{ t: '#', w: .06, align: 'center' }, { t: 'الاسم', w: .26 }, { t: 'رقم', w: .14, align: 'center' }, { t: 'الهاتف', w: .2, align: 'center' }, { t: 'الحالة', w: .14, align: 'center' }, { t: 'الوقت', w: .2, align: 'center' }], rows: lostData.items.map((x, i) => [i + 1, x.name, x.no, dash(x.phone), x.status === 'open' ? 'جديد' : 'تم الرد', x.time]) },
+        { head: 'متأخرون عن الباص', cols: [{ t: '#', w: .06, align: 'center' }, { t: 'الاسم', w: .3 }, { t: 'رقم', w: .16, align: 'center' }, { t: 'الباص', w: .2, align: 'center' }, { t: 'الوقت', w: .28, align: 'center' }], rows: lostData.late.map((x, i) => [i + 1, x.name, x.no, dash(x.bus), String(x.time).slice(11)]) }] };
+    } else if (tab === 'audit') {
+      cfg = { title: 'سجلّ التدقيق', sections: [{ head: 'العمليات', cols: [{ t: '#', w: .06, align: 'center' }, { t: 'الوقت', w: .2, align: 'center' }, { t: 'المشرف', w: .16 }, { t: 'الإجراء', w: .18 }, { t: 'التفاصيل', w: .4 }], rows: auditData.slice(0, 300).map((x, i) => [i + 1, x.time, x.admin, x.action, x.details]) }] };
+    }
+    await admTablePdf(cfg, `ishraq-${tab}.pdf`);
+  } catch (e) { toast(e.message || 'تعذّر إنشاء الملف'); } finally { btn.disabled = false; }
+}

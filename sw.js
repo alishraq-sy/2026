@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ishraq-cache-v33';
+const CACHE_NAME = 'ishraq-cache-v35';
 const assetsToCache = [
   './',
   './index.html',
@@ -61,6 +61,8 @@ const assetsToCache = [
   './ishraq-time.js',
   './ishraq-feat.css',
   './ishraq-feat.js',
+  './ishraq-cert.js',
+  './ishraq-ticket.js',
   './ramadan.html',
   './asma.js',
   './ishraq-share.js',

@@ -540,3 +540,18 @@ button.ix-tile{font:inherit;width:100%;cursor:pointer}
 .ix .tm-it b{display:block;font-size:.9rem;color:var(--a2)}.ix .tm-it small{display:block;color:var(--m);font-size:.74rem;line-height:1.6}.ix .tm-ch{color:var(--m)}
 body.ix.app>main{width:100%;min-width:0}
 #steps-container{min-width:0;max-width:100%}
+
+/* v28: توهج الآية الجارية أثناء التلاوة */
+.ayah-item.ay-live{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--a,#d6ac52) 16%,transparent),transparent)!important;border-radius:18px;box-shadow:0 0 0 1px color-mix(in srgb,var(--a,#d6ac52) 35%,transparent),0 0 26px color-mix(in srgb,var(--a,#d6ac52) 22%,transparent);animation:ayGlow 2.4s ease-in-out infinite}
+.ayah-item.ay-live .ayah-text{color:var(--a2,#ecd09a)!important;text-shadow:0 0 14px color-mix(in srgb,var(--a,#d6ac52) 45%,transparent)}
+.mushaf-ayah-unit.ay-live{background:color-mix(in srgb,var(--a,#d6ac52) 20%,transparent);border-radius:8px;box-shadow:0 0 14px color-mix(in srgb,var(--a,#d6ac52) 35%,transparent);transition:background .4s}
+@keyframes ayGlow{50%{box-shadow:0 0 0 1px color-mix(in srgb,var(--a,#d6ac52) 55%,transparent),0 0 38px color-mix(in srgb,var(--a,#d6ac52) 35%,transparent)}}
+@media (prefers-reduced-motion:reduce){.ayah-item.ay-live{animation:none}}
+
+/* v28: شعار شفاف فني داخل بطاقة المعتمر */
+.ix .ticket .body{position:relative;overflow:hidden}
+.ix .ticket .body>*{position:relative}
+.ix .ticket .body>img.wm{position:absolute;inset-inline-start:auto;right:-34px;bottom:-28px;width:250px;height:auto;opacity:.14;pointer-events:none;z-index:0;filter:none}
+.ix .ticket .body>img.wm+*{margin-top:0}
+.ix .ticket .head .no{white-space:nowrap;font-size:1.55rem;direction:ltr}
+.ix .ticket .body p bdi{unicode-bidi:isolate}

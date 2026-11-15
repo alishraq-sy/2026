@@ -17,21 +17,21 @@
         '<span class="si" data-href="./Ibrahim-alamary-main/index.html">احجز مقعدك الآن</span>' +
       '</a>' +
       '<div class="m-list">' +
-        '<a class="m-row" style="--ac:#6aa8f0" href="./search.html"><i class="bi bi-search"></i>بحث شامل<span class="ch bi bi-chevron-left"></span></a>' +
-        '<a class="m-row" style="--ac:#4fb99f" href="./calendar.html"><i class="bi bi-calendar3"></i>التقويم الهجري<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#6aa8f0" href="./search.html"><i class="bi bi-search"></i>البحث الشامل<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#4fb99f" href="./calendar.html"><i class="bi bi-calendar3"></i>التقويم<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#d6ac52" href="./quran.html"><i class="bi bi-book"></i>القرآن<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#e0a23a" href="./khatma.html"><i class="bi bi-flag-fill"></i>الختمة الذكية<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#c98a5a" href="./hadith.html"><i class="bi bi-journal-text"></i>الحديث<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#7b86e0" href="./azkar.html"><i class="bi bi-moon-stars-fill"></i>الأذكار<span class="ch bi bi-chevron-left"></span></a>' +
-        '<a class="m-row" style="--ac:#e0a23a" href="./ramadan.html"><i class="bi bi-moon-stars"></i>رمضان<span class="ch bi bi-chevron-left"></span></a>' +
-        '<a class="m-row" style="--ac:#d6ac52" href="./asma.html"><i class="bi bi-stars"></i>أسماء الله الحسنى<span class="ch bi bi-chevron-left"></span></a>' +
-        '<a class="m-row" style="--ac:#e0a23a" href="./khatma.html"><i class="bi bi-flag-fill"></i>الختمة الذكية<span class="ch bi bi-chevron-left"></span></a>' +
-        '<a class="m-row" style="--ac:#4fb99f" href="./ibadat.html"><i class="bi bi-check2-square"></i>متتبع العبادات<span class="ch bi bi-chevron-left"></span></a>' +
-        '<a class="m-row" style="--ac:#d6ac52" href="./zakat.html"><i class="bi bi-calculator-fill"></i>حاسبة الزكاة<span class="ch bi bi-chevron-left"></span></a>' +
-        '<a class="m-row" style="--ac:#e07a9a" href="./challenge.html"><i class="bi bi-patch-question-fill"></i>التحدي اليومي<span class="ch bi bi-chevron-left"></span></a>' +
-        '<a class="m-row" style="--ac:#9aa0aa" href="./themes.html"><i class="bi bi-palette-fill"></i>المظهر والألوان<span class="ch bi bi-chevron-left"></span></a>' +
-        '<a class="m-row" style="--ac:#6aa8f0" href="./offline.html"><i class="bi bi-cloud-arrow-down-fill"></i>بدون إنترنت<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#e0a23a" href="./awrad.html"><i class="bi bi-book-half"></i>الأوراد<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#e07a9a" href="./adiya.html"><i class="bi bi-chat-heart"></i>الأدعية<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#4fb99f" href="./matwaf.html"><i class="bi bi-compass"></i>المطوف<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#4fb99f" href="./ibadat.html"><i class="bi bi-check2-square"></i>متتبع العبادات<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#d6ac52" href="./asma.html"><i class="bi bi-stars"></i>أسماء الله الحسنى<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#d6ac52" href="./zakat.html"><i class="bi bi-calculator-fill"></i>حاسبة الزكاة<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#e07a9a" href="./challenge.html"><i class="bi bi-patch-question-fill"></i>التحدي اليومي<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#d6ac52" href="./favorites.html"><i class="bi bi-star-fill"></i>المفضلة<span class="ch bi bi-chevron-left"></span></a>' +
+        '<a class="m-row" style="--ac:#9aa0aa" href="./themes.html"><i class="bi bi-palette-fill"></i>المظهر والألوان<span class="ch bi bi-chevron-left"></span></a>' +
         '<a class="m-row" style="--ac:#9aa0aa" href="./settings.html"><i class="bi bi-gear-fill"></i>الإعدادات<span class="ch bi bi-chevron-left"></span></a>' +
         '<button class="m-row out" id="ix-more-logout" type="button"><i class="bi bi-box-arrow-right"></i>تسجيل الخروج</button>' +
       '</div>' +

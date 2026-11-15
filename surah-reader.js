@@ -590,6 +590,8 @@ function bindEvents() {
     ["minshawi_m", "المنشاوي (معلّم)", ["Minshawy_Teacher_128kbps"], ""],
     ["abdulbasit", "عبد الباسط", ["Abdul_Basit_Murattal_64kbps", "Abdul_Basit_Murattal_192kbps", "Abdul_Basit_Mujawwad_128kbps"], "ar.abdulbasit"],
     ["sudais", "السديس", ["Abdurrahmaan_As-Sudais_192kbps", "Abdurrahmaan_As-Sudais_64kbps"], "ar.abdurrahmaansudais"],
+    ["maher", "المعيقلي", ["Maher_AlMuaiqly_64kbps"], ""],
+    ["yasser", "الدوسري", ["Yasser_Ad-Dussary_128kbps"], ""],
     ["shuraym", "الشريم", ["Saood_ash-Shuraym_128kbps", "Saood_ash-Shuraym_64kbps"], "ar.saoodshuraym"]
   ];
   const hz = { on: false, from: 1, to: 0, rep: 3, loops: 3, rec: "ar.alafasy", hide: "all", cur: 0, r: 0, l: 0, paused: false, reveal: false };
@@ -923,22 +925,49 @@ function bindEvents() {
   // ملاحظة مهمة: المصدر السابق (cdn.islamic.network) تبيّن أنه غير موثوق لأغلب
   // القراء (ملفات ناقصة لبعضهم رغم ظهوره بالفهرس). استبدلناه بمكتبة mp3quran.net
   // وهي المصدر الأساسي الرسمي والأكثر اعتمادية، وتم التحقق يدوياً من كل رابط قارئ.
+  // ea: مجلد everyayah.com (صوت كل آية على حدة) — يُستخدم للمصحف المعلّم (مزامنة حقيقية) وكاحتياط عند تعذّر الملف الكامل
+  // ay: true => تُشغَّل التلاوة آية بآية (المصحف المعلّم يكرّر المقاطع فلا يصلح معه ملف السورة الكامل للتتبّع)
+  // mq: أنماط مطابقة الاسم في فهرس mp3quran الرسمي لضمان تطابق الاسم مع الصوت
   const RECITERS = [
-    { id: "afs", name: "مشاري العفاسي", g: "تلاوات مرتّلة", server: "https://server8.mp3quran.net/afs/" },
-    { id: "maher", name: "ماهر المعيقلي", g: "تلاوات مرتّلة", server: "https://server12.mp3quran.net/maher/" },
-    { id: "sds", name: "عبدالرحمن السديس", g: "تلاوات مرتّلة", server: "https://server11.mp3quran.net/sds/" },
-    { id: "yasser", name: "ياسر الدوسري", g: "تلاوات مرتّلة", server: "https://server11.mp3quran.net/yasser/" },
-    { id: "basit", name: "عبد الباسط عبد الصمد", g: "تلاوات مرتّلة", server: "https://server7.mp3quran.net/basit/" },
-    { id: "husr", name: "محمود خليل الحصري", g: "تلاوات مرتّلة", server: "https://server13.mp3quran.net/husr/" },
-    { id: "minsh", name: "محمد صديق المنشاوي", g: "تلاوات مرتّلة", server: "https://server10.mp3quran.net/minsh/" },
-    { id: "husr_m", name: "الحصري — المصحف المعلّم", g: "للتحفيظ والتعليم", server: "https://server13.mp3quran.net/husr/Almusshaf-Al-Mo3lim/" },
-    { id: "minsh_m", name: "المنشاوي — المصحف المعلّم", g: "للتحفيظ والتعليم", server: "https://server10.mp3quran.net/minsh/Almusshaf-Al-Mo3lim/" }
+    { id: "afs", name: "مشاري العفاسي", g: "تلاوات مرتّلة", server: "https://server8.mp3quran.net/afs/", ea: ["Alafasy_128kbps"], mq: [/العفاسي/] },
+    { id: "maher", name: "ماهر المعيقلي", g: "تلاوات مرتّلة", server: "https://server12.mp3quran.net/maher/", ea: ["Maher_AlMuaiqly_64kbps"], mq: [/ماهر/, /المعيقلي/] },
+    { id: "sds", name: "عبدالرحمن السديس", g: "تلاوات مرتّلة", server: "https://server11.mp3quran.net/sds/", ea: ["Abdurrahmaan_As-Sudais_192kbps", "Abdurrahmaan_As-Sudais_64kbps"], mq: [/السديس/] },
+    { id: "yasser", name: "ياسر الدوسري", g: "تلاوات مرتّلة", server: "https://server11.mp3quran.net/yasser/", ea: ["Yasser_Ad-Dussary_128kbps"], mq: [/الدوسري/] },
+    { id: "basit", name: "عبد الباسط عبد الصمد", g: "تلاوات مرتّلة", server: "https://server7.mp3quran.net/basit/", ea: ["Abdul_Basit_Murattal_64kbps", "Abdul_Basit_Murattal_192kbps"], mq: [/عبد الباسط/] },
+    { id: "husr", name: "محمود خليل الحصري", g: "تلاوات مرتّلة", server: "https://server13.mp3quran.net/husr/", ea: ["Husary_128kbps", "Husary_64kbps"], mq: [/الحصري/] },
+    { id: "minsh", name: "محمد صديق المنشاوي", g: "تلاوات مرتّلة", server: "https://server10.mp3quran.net/minsh/", ea: ["Minshawy_Murattal_128kbps"], mq: [/المنشاوي/] },
+    { id: "husr_m", name: "الحصري — المصحف المعلّم", g: "للتحفيظ والتعليم", server: "https://server13.mp3quran.net/husr/Almusshaf-Al-Mo3lim/", ea: ["Husary_Muallim_128kbps"], ay: true, mq: [/الحصري/], teach: true },
+    { id: "minsh_m", name: "المنشاوي — المصحف المعلّم", g: "للتحفيظ والتعليم", server: "https://server10.mp3quran.net/minsh/Almusshaf-Al-Mo3lim/", ea: ["Minshawy_Teacher_128kbps"], ay: true, mq: [/المنشاوي/], teach: true }
   ];
+  const srvNorm = u => String(u || "").replace(/\/?$/, "/").replace(/^http:/, "https:");
+  const arNorm = t => String(t || "").replace(/[\u064B-\u065F\u0670\u0640]/g, "").replace(/[أإآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه");
+  // مطابقة قارئ بفهرس mp3quran الرسمي: نصحّح الخادم وقائمة السور المتاحة حتى يطابق الاسمُ الصوتَ دائماً
+  function mqReconcile(all) {
+    if (!Array.isArray(all) || !all.length) return;
+    RECITERS.forEach(r => {
+      if (!r.mq) return;
+      const cands = all.filter(rc => r.mq.every(rx => rx.test(arNorm(rc.name).replace(/\s+/g, " ")) || rx.test(rc.name || "")));
+      let best = null;
+      cands.forEach(rc => (rc.moshaf || []).forEach(m => {
+        const nm = m.name || "", isT = /المعلم|معلم/.test(nm);
+        if (!m.server || !!r.teach !== isT) return;
+        if (!r.teach && /مجود|رباعي|قالون|ورش|الدوري|شعبه|البزي|قنبل|خلف|السوسي/.test(nm)) return;
+        if (!r.teach && !/مرتل/.test(nm)) return;
+        if (!best) best = m;
+      }));
+      if (!best) return;
+      r.server = srvNorm(best.server);
+      const sl = String(best.surah_list || "").split(",").map(x => parseInt(x)).filter(Boolean);
+      if (sl.length) r.sl = new Set(sl);
+    });
+  }
+  try { const c = JSON.parse(localStorage.getItem("ix_mq_map") || "null"); if (c && c.d) mqReconcile(c.d); } catch (e) {}
+
   // إضافة قراء التحفيظ المتاحين فعلياً من مكتبة mp3quran (تُجلب عند التشغيل وتُخزَّن)
   function mergeTeachers(list) {
     (list || []).forEach(rc => (rc.moshaf || []).forEach(m => {
       if (!/المعلم|معلم|تحفيظ|تعليم/.test(m.name || "")) return;
-      if (!m.server || RECITERS.some(r => r.server === m.server)) return;
+      if (!m.server || RECITERS.some(r => srvNorm(r.server) === srvNorm(m.server))) return;
       RECITERS.push({ id: "mq" + m.id, name: rc.name + " — " + (m.name || "").replace(/^.*?(المصحف المعلم)/, "$1"), g: "للتحفيظ والتعليم", server: m.server.replace(/\/?$/, "/") });
     }));
   }
@@ -1005,21 +1034,96 @@ function bindEvents() {
   buildReciterUI();
   if (!localStorage.getItem("ix_mq_teach_t") || Date.now() - +localStorage.getItem("ix_mq_teach_t") > 7 * 864e5) {
     fetch("https://mp3quran.net/api/v3/reciters?language=ar").then(r => r.json()).then(j => {
-      const keep = (j.reciters || []).map(rc => ({ name: rc.name, moshaf: (rc.moshaf || []).filter(m => /المعلم|معلم|تحفيظ|تعليم/.test(m.name || "")).map(m => ({ id: m.id, name: m.name, server: m.server })) })).filter(rc => rc.moshaf.length);
-      localStorage.setItem("ix_mq_teach", JSON.stringify(keep)); localStorage.setItem("ix_mq_teach_t", String(Date.now()));
-      mergeTeachers(keep); buildReciterUI();
+      const all = (j.reciters || []).map(rc => ({ name: rc.name, moshaf: (rc.moshaf || []).map(m => ({ id: m.id, name: m.name, server: m.server, surah_list: m.surah_list })) }));
+      const keep = all.map(rc => ({ name: rc.name, moshaf: rc.moshaf.filter(m => /المعلم|معلم|تحفيظ|تعليم/.test(m.name || "")).map(m => ({ id: m.id, name: m.name, server: m.server })) })).filter(rc => rc.moshaf.length);
+      const mine = all.filter(rc => RECITERS.some(r => r.mq && r.mq.every(rx => rx.test(arNorm(rc.name)) || rx.test(rc.name || ""))));
+      try { localStorage.setItem("ix_mq_teach", JSON.stringify(keep)); localStorage.setItem("ix_mq_map", JSON.stringify({ d: mine })); localStorage.setItem("ix_mq_teach_t", String(Date.now())); } catch (e) {}
+      mqReconcile(mine); mergeTeachers(keep); buildReciterUI();
     }).catch(() => {});
   }
+
+  // ===== متابعة التلاوة: توهج الآية الجارية + تمرير تلقائي =====
+  const ayF = { chain: null, last: 0, userAt: 0, follow: localStorage.getItem("ix_ay_follow") !== "0", w: null, tot: 0 };
+  const reduceMo = () => window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  ["wheel", "touchmove", "keydown"].forEach(ev => window.addEventListener(ev, () => { ayF.userAt = Date.now(); }, { passive: true }));
+  function ayMark(n) {
+    if (!n || n === ayF.last) return;
+    ayF.last = n;
+    document.querySelectorAll(".ay-live").forEach(el => el.classList.remove("ay-live"));
+    const els = ayahsContainer ? ayahsContainer.querySelectorAll('[data-ayahnum="' + n + '"]') : [];
+    els.forEach(el => el.classList.add("ay-live"));
+    if (els[0] && ayF.follow && Date.now() - ayF.userAt > 3500) els[0].scrollIntoView({ behavior: reduceMo() ? "auto" : "smooth", block: "center" });
+  }
+  function ayClear() { ayF.last = 0; ayF.chain = null; document.querySelectorAll(".ay-live").forEach(el => el.classList.remove("ay-live")); }
+  function ayWeights() {
+    if (ayF.w && ayF.w.length === ayahsList.length) return;
+    ayF.w = ayahsList.map((a, i) => 3 + arNorm(getCleanAyahText(a, i)).replace(/[\u06D6-\u06ED\s]/g, "").length);
+    ayF.pre = (surahNumber === 1 || surahNumber === 9) ? 0 : 14;
+    ayF.tot = ayF.w.reduce((x, y) => x + y, 0) + ayF.pre;
+  }
+  // الملف الكامل: تقدير موضع الآية من نسبة الزمن إلى أحرف الآيات (تقريبي)
+  function ayTick() {
+    if (ayF.chain || !audioEl || !isFinite(audioEl.duration) || !audioEl.duration || !ayahsList.length) return;
+    if (getSelectedReciter().teach) return; // المصحف المعلّم يكرّر المقاطع فلا يصلح التقدير
+    ayWeights();
+    const pos = audioEl.currentTime / audioEl.duration * ayF.tot - ayF.pre;
+    let acc = 0, n = 1;
+    if (pos > 0) { for (let i = 0; i < ayF.w.length; i++) { acc += ayF.w[i]; n = ayahsList[i].numberInSurah; if (pos < acc) break; } }
+    ayMark(n);
+  }
+  function ayChainUrl(c) {
+    const r = c.r, f = r.ea[c.f];
+    return f ? `https://everyayah.com/data/${f}/${String(surahNumber).padStart(3, "0")}${String(ayahsList[c.i].numberInSurah).padStart(3, "0")}.mp3` : "";
+  }
+  function ayChainPlay() {
+    const c = ayF.chain; if (!c) return;
+    const u = ayChainUrl(c); if (!u) return ayChainFail();
+    audioEl.src = u; audioEl.play().catch(() => {});
+    ayMark(ayahsList[c.i].numberInSurah);
+  }
+  function ayChainFail() { // تعذّر صوت الآية: جرّب مجلداً آخر ثم الملف الكامل
+    const c = ayF.chain; if (!c) return false;
+    if (c.f < c.r.ea.length - 1) { c.f++; ayChainPlay(); return true; }
+    ayF.chain = null; ayF.last = 0;
+    if (c.i === 0 && c.r.server) { audioEl.src = c.r.server + String(surahNumber).padStart(3, "0") + ".mp3"; audioEl.play().catch(() => {}); return true; }
+    return false;
+  }
+  function ayChainNext() { // يُستدعى عند انتهاء الآية: true إن استمرّ التسلسل
+    const c = ayF.chain; if (!c) return false;
+    if (c.i + 1 >= ayahsList.length) { ayClear(); return false; }
+    c.i++; ayChainPlay(); return true;
+  }
+  if (audioEl) {
+    audioEl.addEventListener("timeupdate", ayTick);
+    audioEl.addEventListener("seeked", () => { ayF.last = 0; ayTick(); });
+  }
+  (function followBtn() {
+    if (!audioStopBtn || !audioStopBtn.parentNode || document.getElementById("ay-follow")) return;
+    const b = document.createElement("button"); b.type = "button"; b.id = "ay-follow"; b.className = audioStopBtn.className;
+    const paint = () => { b.innerHTML = '<i class="bi bi-crosshair"></i>'; b.title = b.ariaLabel = ayF.follow ? "التمرير التلقائي مع التلاوة: يعمل" : "التمرير التلقائي مع التلاوة: متوقف"; b.style.opacity = ayF.follow ? "1" : ".45"; };
+    paint();
+    b.addEventListener("click", () => { ayF.follow = !ayF.follow; try { localStorage.setItem("ix_ay_follow", ayF.follow ? "1" : "0"); } catch (e) {} paint(); });
+    audioStopBtn.parentNode.insertBefore(b, audioStopBtn);
+  })();
 
   function loadAndPlayFullSurah() {
     if (!audioEl) return;
     const reciter = getSelectedReciter();
     const surahPadded = String(surahNumber).padStart(3, "0");
     const audioUrl = `${reciter.server}${surahPadded}.mp3`;
-    audioEl.src = audioUrl;
     loadedReciterId = selectedReciterId;
     loadedSurahNumber = surahNumber;
-    audioEl.play();
+    ayF.last = 0; ayF.chain = null;
+    const unavailable = reciter.sl && !reciter.sl.has(parseInt(surahNumber));
+    if ((reciter.ay || unavailable) && reciter.ea && ayahsList.length) {
+      ayF.chain = { r: reciter, i: 0, f: 0 }; // تلاوة آية بآية بمزامنة حقيقية
+      ayChainPlay();
+    } else if (unavailable) {
+      stopAudioPlayback(); alert("هذه السورة غير متوفرة بصوت هذا القارئ، اختر قارئاً آخر."); return;
+    } else {
+      audioEl.src = audioUrl;
+      audioEl.play();
+    }
 
     const downloadLink = document.getElementById("download-audio-link");
     if (downloadLink) {
@@ -1057,6 +1161,7 @@ function bindEvents() {
       audioEl.removeAttribute("src");
     }
     isAudioPlaying = false;
+    ayClear();
     loadedReciterId = null;
     loadedSurahNumber = null;
     if (audioProgressWrap) audioProgressWrap.classList.add("d-none");
@@ -1110,6 +1215,7 @@ function bindEvents() {
     if (ppBtn) ppBtn.addEventListener("click", () => { if (audioEl.paused) audioEl.play(); else audioEl.pause(); });
 
     audioEl.addEventListener("ended", () => {
+      if (ayChainNext()) return;
       if (autoAdvanceEnabled && surahNumber < 114) {
         const nextSurah = parseInt(surahNumber) + 1;
         localStorage.setItem("eshraq_auto_advance_continue", "true");
@@ -1121,6 +1227,7 @@ function bindEvents() {
 
     audioEl.addEventListener("error", () => {
       if (!audioEl.src) return;
+      if (ayF.chain && ayChainFail()) return;
       stopAudioPlayback();
       alert("تعذر تحميل التلاوة الصوتية، تحقق من الاتصال بالإنترنت.");
     });

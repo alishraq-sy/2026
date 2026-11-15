@@ -182,6 +182,7 @@
               <p class="text-success fw-bold mb-0"> تقبل الله عمرتك وجعلها مبرورة مشكورة <br> وجعل ذنبك مغفورا إن شاء الله!</p>
             </div>
             <div class="d-grid gap-2 mb-3">
+              <button type="button" class="btn btn-gold-solid rounded-pill fw-bold" onclick="window.ixCert && ixCert.open({ kind: 'umrah' })"><i class="bi bi-award-fill me-1"></i> شهادة تهنئة بإتمام العمرة</button>
               <a href="https://api.whatsapp.com/send?text=الحمد%20لله%20الذي%20بنعمته%20تتم%20الصالحات،%20لقد%20أتممت%20عمرتي%20اليوم%20بفضل%20الله.%20تقبل%20الله%20منا%20ومنكم." target="_blank" class="btn btn-success rounded-pill fw-bold">
                 <i class="bi bi-whatsapp me-1"></i> مشاركة إتمام العمرة عبر واتساب
               </a>
@@ -357,6 +358,7 @@
       if (hStage > HAJJ.length) {
         container.innerHTML = `<div class="text-center py-3"><h4 class="gold fw-bold mb-3"><i class="bi bi-stars me-1"></i> تم الحج بحمد الله</h4>
           <div class="p-3 rounded mb-3 bg-success bg-opacity-10 border border-success"><p class="text-success fw-bold mb-0">تقبّل الله حجك وجعله حجاً مبروراً، وسعياً مشكوراً، وذنباً مغفوراً</p></div>
+          <button type="button" class="btn btn-gold-solid rounded-pill fw-bold mb-2 w-100" onclick="window.ixCert && ixCert.open({ kind: 'hajj' })"><i class="bi bi-award-fill me-1"></i> شهادة تهنئة بإتمام الحج</button>
           <a href="https://api.whatsapp.com/send?text=${encodeURIComponent("الحمد لله الذي بنعمته تتم الصالحات، أتممت مناسك الحج بفضل الله. أسألكم الدعاء بالقبول.")}" target="_blank" class="btn btn-success rounded-pill mb-2 w-100"><i class="bi bi-whatsapp me-1"></i> مشاركة عبر واتساب</a>
           <button onclick="hReset()" class="btn btn-outline-light rounded-pill px-4 btn-sm">البدء من جديد</button></div>`;
         return;
