@@ -106,9 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentFontSize = parseFloat(localStorage.getItem("eshraq_font_size")) || 1.6;
 
   function getFontFamilyCss() {
-    return localStorage.getItem("eshraq_font_family") === "uthmani"
-      ? "'Amiri Quran', 'Traditional Arabic', serif"
-      : "'Amiri', 'Traditional Arabic', serif";
+    return "'Amiri Quran', 'Traditional Arabic', serif"; // الرسم العثماني دائمًا
   }
 
   function todayKey() {

@@ -46,17 +46,8 @@
           </div>
         </div>
 
-        <div class="settings-section-title"><i class="bi bi-bell-fill"></i> الإشعارات والتذكيرات</div>
+        <div class="settings-section-title"><i class="bi bi-bell-fill"></i> الإشعارات</div>
         <div class="settings-card">
-          <div class="settings-row d-flex justify-content-between align-items-center">
-            <div>
-              <div class="settings-row-title">تنبيهات أوقات الصلاة</div>
-              <div class="settings-row-desc">إشعار محلي عند دخول وقت الصلاة والتطبيق مفتوح. يتوقف تلقائيًا إذا فعّلت «أذان كل صلاة» أدناه.</div>
-            </div>
-            <div class="form-check form-switch fs-4">
-              <input class="form-check-input shadow-none" type="checkbox" role="switch" id="prayerNotificationsToggle" onchange="togglePrayerNotifications(this)">
-            </div>
-          </div>
 
           <div class="settings-row d-flex justify-content-between align-items-center">
             <div>
@@ -68,25 +59,7 @@
             </div>
           </div>
 
-          <div class="settings-row d-flex justify-content-between align-items-center">
-            <div>
-              <div class="settings-row-title">تذكير السبحة المسائي</div>
-              <div class="settings-row-desc">تنبيه لطيف الساعة 8 مساءً لو ما سبّحت شيء طول اليوم.</div>
-            </div>
-            <div class="form-check form-switch fs-4">
-              <input class="form-check-input shadow-none" type="checkbox" role="switch" id="tasbeehReminderToggle" onchange="toggleTasbeehReminder(this)">
-            </div>
-          </div>
 
-          <div class="settings-row d-flex justify-content-between align-items-center">
-            <div>
-              <div class="settings-row-title">تذكير الجمعة الأسبوعي</div>
-              <div class="settings-row-desc">تنبيه كل جمعة بقراءة الكهف والإكثار من الصلاة على النبي ﷺ.</div>
-            </div>
-            <div class="form-check form-switch fs-4">
-              <input class="form-check-input shadow-none" type="checkbox" role="switch" id="fridayReminderToggle" onchange="toggleFridayReminder(this)">
-            </div>
-          </div>
         </div>
 
         <div class="settings-section-title"><i class="bi bi-bell-fill"></i> تنبيهات الصلاة والأذكار (تصلك والتطبيق مغلق)</div>
@@ -273,15 +246,6 @@
             <input type="range" id="globalFontSizeSlider" class="form-range" min="1.1" max="2.4" step="0.1" oninput="setGlobalFontSize(this.value)">
           </div>
 
-          <div class="settings-row d-flex justify-content-between align-items-center">
-            <div>
-              <div class="settings-row-title">الرسم العثماني</div>
-              <div class="settings-row-desc">استخدام خط "Amiri Quran" بدل الخط العادي بصفحة قراءة السور، والأذكار، والأوراد، والأدعية.</div>
-            </div>
-            <div class="form-check form-switch fs-4">
-              <input class="form-check-input shadow-none" type="checkbox" role="switch" id="fontFamilyToggle" onchange="toggleDefaultFontFamily(this)">
-            </div>
-          </div>
         </div>
 
         <div class="settings-section-title"><i class="bi bi-headphones"></i> التلاوة</div>
@@ -595,7 +559,7 @@
     <script src="./ishraq-ui.js"></script>
     <script src="./ishraq-app.js"></script>
     <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
   import {
     getAuth,
     signOut
@@ -611,7 +575,7 @@
     measurementId: "G-X6NV8MT549"
   };
 
-  const app = initializeApp(firebaseConfig);
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig); // الحارس قد يكون هيّأ التطبيق مسبقًا
   const auth = getAuth(app);
 
   const logoutButton = document.getElementById("logoutButton");

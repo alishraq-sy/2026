@@ -30,7 +30,7 @@ grid.addEventListener("click",function(e){var b=e.target.closest(".as-c");if(b)o
 sheet.addEventListener("click",function(e){
   if(e.target===sheet||e.target.closest(".as-x"))return closeSheet();
   var a=e.target.closest("[data-a]");if(!a)return;var n=N[cur];
-  if(a.dataset.a==="card"&&window.ixCard)window.ixCard.open({title:n[0],text:n[1],ref:"من أسماء الله الحسنى",kind:"اسم"});
+  if(a.dataset.a==="card"&&window.ixCard)window.ixCard.open({title:n[0],text:n[1],ref:"من أسماء الله الحسنى",kind:""});
   if(a.dataset.a==="copy"){var t=n[0]+": "+n[1];if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){a.innerHTML='<i class="bi bi-check2"></i> تم النسخ'});}
   if(a.dataset.a==="prev")openSheet((cur+98)%99);
   if(a.dataset.a==="next")openSheet((cur+1)%99);

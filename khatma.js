@@ -40,7 +40,8 @@
     var b = e.target.closest("[data-d]"); if (b) { sel = +b.dataset.d; $("#kh-custom").value = ""; render(); }
   });
   $("#kh-start").onclick = function () {
-    var c = parseInt($("#kh-custom").value, 10), d = c >= 3 && c <= 365 ? c : sel;
+    var raw = $("#kh-custom").value.trim(), c = parseInt(raw, 10), d = sel;
+    if (raw !== "") { if (!(c >= 3)) { c = 3; $("#kh-custom").value = 3; fxToast("أقل مدة للختمة 3 أيام"); } d = Math.min(c, 365); }
     st = { start: today(), days: d, page: 0, base: null }; save(); render();
   };
   $("#kh-done").onclick = function () { var i = dayInfo(); st.page = Math.max(st.page, i.to); save(); render(); fxToast("تقبّل الله"); };

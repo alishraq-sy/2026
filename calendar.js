@@ -23,7 +23,30 @@
     }
     return g;
   }
+  var MODE_K = "ix_cal_mode", mode = "h"; try { mode = localStorage.getItem(MODE_K) === "g" ? "g" : "h"; } catch (e) {}
+  var gv = { y: today.getFullYear(), m: today.getMonth() };           // العرض الميلادي (m: 0-11)
+  var GM = new Intl.DateTimeFormat("ar-u-ca-gregory-nu-latn", { month: "long", year: "numeric" });
+  function renderG() {   // تقويم ميلادي صِرف: بلا مناسبات ولا تواريخ هجرية
+    var first = new Date(gv.y, gv.m, 1, 12), n = new Date(gv.y, gv.m + 1, 0).getDate(), lead = (first.getDay() + 1) % 7, html = "", i;
+    document.getElementById("cal-month").textContent = GM.format(first);
+    document.getElementById("cal-greg").textContent = "التقويم الميلادي";
+    for (i = 0; i < lead; i++) html += "<span></span>";
+    for (i = 1; i <= n; i++) {
+      var c = new Date(gv.y, gv.m, i, 12), isT = c.getTime() === today.getTime();
+      html += '<div class="cd' + (isT ? " today" : "") + (c.getDay() === 5 ? " fri" : "") + '"><b>' + i + "</b></div>";
+    }
+    document.getElementById("cal-days").innerHTML = html;
+  }
+  function applyMode() {
+    var g = mode === "g", q = function (s) { return document.querySelector(s); };
+    q("#cal-mh").classList.toggle("on", !g); q("#cal-mg").classList.toggle("on", g);
+    document.getElementById("cal-ttl").textContent = g ? "الميلادي" : "الهجري";
+    [".cal-adj", "#cal-evh", "#cal-events", ".cal-note"].forEach(function (s) { var e = q(s); if (e) e.style.display = g ? "none" : ""; });
+    render();
+  }
+  function setMode(m) { mode = m; try { localStorage.setItem(MODE_K, m); } catch (e) {} applyMode(); }
   function render() {
+    if (mode === "g") return renderG();
     var f = firstOf(view.y, view.m), cells = [], d = f;
     while (H(d).m === view.m && cells.length < 31) { cells.push(d); d = addDays(d, 1); }
     document.getElementById("cal-month").textContent = MN[view.m - 1] + " " + view.y;
@@ -37,8 +60,10 @@
     document.getElementById("cal-days").innerHTML = html;
   }
   document.getElementById("cal-dow").innerHTML = DOW.map(function (n) { return "<em>" + n.slice(0, 3) + "</em>"; }).join("");
-  document.getElementById("cal-next").onclick = function () { view.m++; if (view.m > 12) { view.m = 1; view.y++; } render(); };
-  document.getElementById("cal-prev").onclick = function () { view.m--; if (view.m < 1) { view.m = 12; view.y--; } render(); };
+  document.getElementById("cal-next").onclick = function () { if (mode === "g") { gv.m++; if (gv.m > 11) { gv.m = 0; gv.y++; } return render(); } view.m++; if (view.m > 12) { view.m = 1; view.y++; } render(); };
+  document.getElementById("cal-prev").onclick = function () { if (mode === "g") { gv.m--; if (gv.m < 0) { gv.m = 11; gv.y--; } return render(); } view.m--; if (view.m < 1) { view.m = 12; view.y--; } render(); };
+  document.getElementById("cal-mh").onclick = function () { setMode("h"); };
+  document.getElementById("cal-mg").onclick = function () { setMode("g"); };
   function showAdj() {
     var v = adj(), el = document.getElementById("cal-adj-val");
     if (el) el.textContent = (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v);
@@ -51,8 +76,8 @@
   document.getElementById("cal-adj-plus").onclick = function () { setAdj(adj() + 1); };
   document.getElementById("cal-adj-minus").onclick = function () { setAdj(adj() - 1); };
   showAdj();
-  document.getElementById("cal-today").onclick = function () { view = { y: th.y, m: th.m }; render(); };
-  render();
+  document.getElementById("cal-today").onclick = function () { view = { y: th.y, m: th.m }; gv = { y: today.getFullYear(), m: today.getMonth() }; render(); };
+  applyMode();
 
   // المناسبات القادمة: نمشي يوماً بيوم حتى 400 يوم
   var found = {}, i, g, h;

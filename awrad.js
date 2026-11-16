@@ -190,9 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentFontSize = parseFloat(localStorage.getItem("eshraq_font_size")) || 1.6;
 
   function getFontFamilyCss() {
-    return localStorage.getItem("eshraq_font_family") === "uthmani"
-      ? "'Amiri Quran', 'Traditional Arabic', serif"
-      : "'Amiri', 'Traditional Arabic', serif";
+    return "'Amiri Quran', 'Traditional Arabic', serif"; // الرسم العثماني دائمًا
   }
 
   function todayKey() {
@@ -263,6 +261,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button type="button" class="btn btn-sm btn-outline-light border-0 fav-btn" data-index="${index}" title="إضافة للمفضلة">
                   <i class="bi bi-star"></i> مفضلة
                 </button>
+                <button type="button" class="btn btn-sm btn-outline-light border-0 card-btn" data-index="${index}" title="حفظ كصورة">
+                  <i class="bi bi-image"></i> بطاقة
+                </button>
               </div>
             </div>
           </div>
@@ -290,6 +291,13 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
 
+    container.querySelectorAll(".card-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const item = cat.items[btn.dataset.index];
+        if (window.ixCard && item) window.ixCard.open({ text: item.text, ref: item.source || cat.title, kind: "ورد" });
+      });
+    });
     container.querySelectorAll(".copy-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         const index = e.currentTarget.getAttribute("data-index");

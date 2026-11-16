@@ -149,9 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentFontSize = parseFloat(localStorage.getItem("eshraq_font_size")) || 1.6;
 
   function getFontFamilyCss() {
-    return localStorage.getItem("eshraq_font_family") === "uthmani"
-      ? "'Amiri Quran', 'Traditional Arabic', serif"
-      : "'Amiri', 'Traditional Arabic', serif";
+    return "'Amiri Quran', 'Traditional Arabic', serif"; // الرسم العثماني دائمًا
   }
   let activeLengthFilter = "all";
   let searchQuery = "";
@@ -202,9 +200,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const counters = getCounters(catId);
     const remaining = counters[index] ?? item.count;
     const isDone = remaining <= 0;
-    const referenceUrl = item.source
-      ? `https://dorar.net/dua/search?q=${encodeURIComponent(item.source)}`
-      : null;
 
     return `
       <div class="zikr-card ${isDone ? 'done' : ''}" data-index="${index}" data-cat="${catId}">
@@ -218,7 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
             ${item.source ? `
               <div class="zikr-source gold mb-2">
                 <i class="bi bi-info-circle me-1"></i>${item.source}
-                <a href="${referenceUrl}" target="_blank" rel="noopener" class="gold ms-1" title="مصدر إضافي" style="text-decoration: underline;">(مصدر إضافي)</a>
               </div>
             ` : ""}
             <div class="zikr-actions d-flex gap-2 flex-wrap">

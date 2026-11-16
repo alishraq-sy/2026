@@ -584,8 +584,6 @@ function bindEvents() {
   // [id, الاسم, مجلدات everyayah (بالترتيب), معرّف islamic.network]
   const HZ_RECITERS = [
     ["alafasy", "العفاسي", ["Alafasy_128kbps"], "ar.alafasy"],
-    ["husary", "الحصري", ["Husary_128kbps", "Husary_64kbps"], "ar.husary"],
-    ["husary_m", "الحصري (معلّم)", ["Husary_Muallim_128kbps"], ""],
     ["minshawi", "المنشاوي", ["Minshawy_Murattal_128kbps"], "ar.minshawi"],
     ["minshawi_m", "المنشاوي (معلّم)", ["Minshawy_Teacher_128kbps"], ""],
     ["abdulbasit", "عبد الباسط", ["Abdul_Basit_Murattal_64kbps", "Abdul_Basit_Murattal_192kbps", "Abdul_Basit_Mujawwad_128kbps"], "ar.abdulbasit"],
@@ -934,9 +932,7 @@ function bindEvents() {
     { id: "sds", name: "عبدالرحمن السديس", g: "تلاوات مرتّلة", server: "https://server11.mp3quran.net/sds/", ea: ["Abdurrahmaan_As-Sudais_192kbps", "Abdurrahmaan_As-Sudais_64kbps"], mq: [/السديس/] },
     { id: "yasser", name: "ياسر الدوسري", g: "تلاوات مرتّلة", server: "https://server11.mp3quran.net/yasser/", ea: ["Yasser_Ad-Dussary_128kbps"], mq: [/الدوسري/] },
     { id: "basit", name: "عبد الباسط عبد الصمد", g: "تلاوات مرتّلة", server: "https://server7.mp3quran.net/basit/", ea: ["Abdul_Basit_Murattal_64kbps", "Abdul_Basit_Murattal_192kbps"], mq: [/عبد الباسط/] },
-    { id: "husr", name: "محمود خليل الحصري", g: "تلاوات مرتّلة", server: "https://server13.mp3quran.net/husr/", ea: ["Husary_128kbps", "Husary_64kbps"], mq: [/الحصري/] },
     { id: "minsh", name: "محمد صديق المنشاوي", g: "تلاوات مرتّلة", server: "https://server10.mp3quran.net/minsh/", ea: ["Minshawy_Murattal_128kbps"], mq: [/المنشاوي/] },
-    { id: "husr_m", name: "الحصري — المصحف المعلّم", g: "للتحفيظ والتعليم", server: "https://server13.mp3quran.net/husr/Almusshaf-Al-Mo3lim/", ea: ["Husary_Muallim_128kbps"], ay: true, mq: [/الحصري/], teach: true },
     { id: "minsh_m", name: "المنشاوي — المصحف المعلّم", g: "للتحفيظ والتعليم", server: "https://server10.mp3quran.net/minsh/Almusshaf-Al-Mo3lim/", ea: ["Minshawy_Teacher_128kbps"], ay: true, mq: [/المنشاوي/], teach: true }
   ];
   const srvNorm = u => String(u || "").replace(/\/?$/, "/").replace(/^http:/, "https:");
@@ -968,7 +964,11 @@ function bindEvents() {
     (list || []).forEach(rc => (rc.moshaf || []).forEach(m => {
       if (!/المعلم|معلم|تحفيظ|تعليم/.test(m.name || "")) return;
       if (!m.server || RECITERS.some(r => srvNorm(r.server) === srvNorm(m.server))) return;
-      RECITERS.push({ id: "mq" + m.id, name: rc.name + " — " + (m.name || "").replace(/^.*?(المصحف المعلم)/, "$1"), g: "للتحفيظ والتعليم", server: m.server.replace(/\/?$/, "/") });
+      if (/الحصري/.test(rc.name || "")) return; // أُلغي القارئ الحصري
+      // لا نكرّر قارئًا موجودًا أصلًا في فئة التحفيظ (مثل المنشاوي) ولا نكرّر مصحفًا معلّمًا لنفس القارئ
+      const nk = arNorm(rc.name);
+      if (RECITERS.some(r => r.g === "للتحفيظ والتعليم" && ((r.mq || []).some(rx => rx.test(nk) || rx.test(rc.name || "")) || r.rn === nk))) return;
+      RECITERS.push({ id: "mq" + m.id, name: rc.name + " — " + (m.name || "").replace(/^.*?(المصحف المعلم)/, "$1"), g: "للتحفيظ والتعليم", rn: nk, server: m.server.replace(/\/?$/, "/") });
     }));
   }
   try { mergeTeachers(JSON.parse(localStorage.getItem("ix_mq_teach") || "[]")); } catch (e) {}

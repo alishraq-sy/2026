@@ -4,7 +4,7 @@
    - وإلا تُخفى الصفحة حتى يتأكد الدخول، وإلا نحوّل إلى login.html?next=هذه_الصفحة. */
 (function () {
   var KEY = "ix_authed", V = "12.5.0";
-  var CFG = { apiKey: "AIzaSyD3RQ2jrXcJOUqmhUrGuBQ6R8kZ2sSLOr0", authDomain: "alishraq-fe305.firebaseapp.com", projectId: "alishraq-fe305", storageBucket: "alishraq-fe305.firebasestorage.app", messagingSenderId: "816905605188", appId: "1:816905605188:web:639252ce9ef899bd622c11" };
+  var CFG = { apiKey: "AIzaSyD3RQ2jrXcJOUqmhUrGuBQ6R8kZ2sSLOr0", authDomain: "alishraq-fe305.firebaseapp.com", projectId: "alishraq-fe305", storageBucket: "alishraq-fe305.firebasestorage.app", messagingSenderId: "816905605188", appId: "1:816905605188:web:639252ce9ef899bd622c11", measurementId: "G-X6NV8MT549" };
   var page = (location.pathname.split("/").pop() || "index.html") + location.search + location.hash, seen = false;
   try { seen = localStorage.getItem(KEY) === "1"; } catch (e) {}
   var st = null;

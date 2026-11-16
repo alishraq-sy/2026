@@ -231,6 +231,8 @@ function clearAppStorage() {
 
 // 16. تهيئة الحالة عند فتح الصفحة (ضبط كل عناصر التحكم بقيمها المحفوظة فعلياً)
 document.addEventListener('DOMContentLoaded', () => {
+    // إلغاء إشعارات المتصفح المحلية القديمة (تحتاج بقاء الموقع مفتوحًا): الاعتماد الآن على إشعارات إشراق من الخادم
+    ['prayer_notifications_enabled', 'tasbeeh_reminder_enabled', 'friday_reminder_enabled'].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
     // تنبيهات الصلاة
     const notifToggle = document.getElementById('prayerNotificationsToggle');
     if (notifToggle) {

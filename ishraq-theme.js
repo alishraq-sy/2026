@@ -93,6 +93,11 @@
     opt = opt || {};
     return new Promise(function (res) { q.push({ msg: String(msg), title: opt.title || "تأكيد", icon: opt.danger ? "bi-exclamation-triangle" : "bi-question-circle", btns: [{ t: opt.cancel || "إلغاء", v: false }, { t: opt.ok || "تأكيد", v: true, c: opt.danger ? "d" : "p" }], done: res }); whenReady(next); });
   };
+  // وضع القراءة الليلية: يُطبَّق من أي صفحة، وطبقته تعمل فوق أي ثيم (تعتيم دافئ يقلّل الضوء الأزرق)
+  try { if (localStorage.getItem("night_reading_mode") === "true") document.documentElement.setAttribute("data-night-mode", "true"); } catch (e) {}
+  (function () { var s = document.createElement("style"); s.id = "ix-night-css";
+    s.textContent = 'html[data-night-mode="true"]::after{content:"";position:fixed;inset:0;z-index:2147483000;pointer-events:none;background:rgb(236,196,138);mix-blend-mode:multiply}';
+    (document.head || document.documentElement).appendChild(s); })();
   // نافذة بأزرار مخصّصة: ixNotice({title,msg,icon,btns:[{t,v,c}]}) → Promise بقيمة الزر المضغوط
   window.ixNotice = function (o) { return new Promise(function (res) { q.push({ msg: String(o.msg || ""), title: o.title || "إشراق", icon: o.icon || "bi-bell-fill", btns: o.btns || [{ t: "إغلاق", v: true, c: "p" }], done: res }); whenReady(next); }); };
   // إشعار نُقر عليه: يظهر نصّه في نافذة مع زر إغلاق (وزر فتح إن كان رابطه صفحة أخرى)

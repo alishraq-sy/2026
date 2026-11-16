@@ -27,8 +27,10 @@
         <button class="ab" type="button" data-ix-more aria-label="المزيد"><i class="bi bi-grid-fill"></i></button>
       </div>
     </header>
-    <div class="ix-wrap"><section class="ix-qhead"><div class="ix-hello">HIJRI CALENDAR</div><h1 class="ix-tag">التقويم <span class="ol">الهجري</span></h1></section></div>
+    <div class="ix-wrap"><section class="ix-qhead"><div class="ix-hello">HIJRI CALENDAR</div><h1 class="ix-tag">التقويم <span class="ol" id="cal-ttl">الهجري</span></h1></section></div>
     <main class="ix-wrap" style="padding-bottom:20px">
+      <div class="cal-mode" role="tablist" aria-label="نوع التقويم"><button type="button" id="cal-mh" class="on" role="tab">هجري</button><button type="button" id="cal-mg" role="tab">ميلادي</button></div>
+      <style>.cal-mode{display:flex;gap:6px;background:#17181a;border:1px solid #2b2d31;border-radius:999px;padding:4px;margin:0 0 14px}.cal-mode button{flex:1;border:0;border-radius:999px;padding:9px;background:transparent;color:#c9c6bb;font-weight:700;font-family:inherit}.cal-mode button.on{background:linear-gradient(135deg,#ecd09a,#cf9f52);color:#1c1405}html[data-theme="light"] .cal-mode{background:#f1ead8;border-color:#e3d6b4}html[data-theme="light"] .cal-mode button{color:#6f6350}html[data-theme="light"] .cal-mode button.on{color:#1c1405}</style>
       <div class="cal-head"><button type="button" id="cal-next" class="ab2" aria-label="الشهر التالي"><i class="bi bi-chevron-right"></i></button>
         <div class="cal-title"><b id="cal-month">—</b><small id="cal-greg">—</small></div>
         <button type="button" id="cal-prev" class="ab2" aria-label="الشهر السابق"><i class="bi bi-chevron-left"></i></button></div>
@@ -37,7 +39,7 @@
       <button type="button" id="cal-today" class="btn btn-gold-outline w-100 mt-3">اليوم</button>
       <div class="cal-adj"><div><b>ضبط التاريخ الهجري</b><small>إذا كان التاريخ لا يطابق بلدك، زِد يوماً أو انقص يوماً.</small></div>
         <div class="adj-ctl"><button type="button" id="cal-adj-minus" aria-label="إنقاص يوم">−</button><span id="cal-adj-val">0</span><button type="button" id="cal-adj-plus" aria-label="زيادة يوم">+</button></div></div>
-      <h2 class="ix-h mt-4" style="font-size:1.2rem">المناسبات <span class="ol">القادمة</span></h2>
+      <h2 class="ix-h mt-4" id="cal-evh" style="font-size:1.2rem">المناسبات <span class="ol">القادمة</span></h2>
       <div id="cal-events"></div>
       <p class="cal-note">التقويم محسوب بطريقة أم القرى، وقد يختلف يوماً واحداً عن رؤية الهلال في بلدك.</p>
     </main>

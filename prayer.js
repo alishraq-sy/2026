@@ -316,8 +316,7 @@ function showNotification(title, bodyText) {
 let lastNotifiedMinute = "";
 
 function checkPrayerTimeForNotification(prayerName, prayerTimeString) {
-    const isEnabled = localStorage.getItem('prayer_notifications_enabled') === 'true';
-    if (!isEnabled) return;
+    return; // الأذان صار إشعارًا من الخادم (إعدادات ← تنبيهات الصلاة والأذكار)
     try { if (localStorage.getItem('ix_push_tok') && JSON.parse(localStorage.getItem('ix_push_prefs') || '{}').ad) return; } catch (e) {} // الخادم يرسل الأذان
 
     const now = wallNow();
