@@ -25,19 +25,22 @@
     if (perm !== "granted") throw new Error("denied");
     var tok = await getTok(); if (!tok) throw new Error("no-token");
     var b = { action: "push_reg", token: tok };
-    if (opt && opt.umrah) { b.umrah = 1; b.code = opt.umrah.code; b.dev = opt.umrah.dev; }
+    var um = (opt && opt.umrah) || jget("ix_push_umr", null);
+    if (um && um.code) { b.umrah = 1; b.code = um.code; b.dev = um.dev; ls("ix_push_umr", JSON.stringify({ code: um.code, dev: um.dev })); }
     var r = await post(b); if (!r.ok) throw new Error("server");
+    if (um && r.tags && r.tags.indexOf("umrah") >= 0) ls("ix_push_tag_" + um.code, tok);
     ls(TK, tok); if (prefs().length) { try { await sync(true); } catch (e) {} } return r;
   }
   async function disable() {
     var t = ls(TK); ls(TK, null); ls(PK, null); ls(SIG, null);
     if (t) { try { await post({ action: "push_off", token: t }); } catch (e) {} }
   }
-  // يُستدعى بعد دخول المعتمر: يضيف الوسم إن كانت الإشعارات مفعّلة أصلًا
+  // يُستدعى بعد دخول المعتمر: يضيف وسم المعتمرين لهذا الجهاز (يُعاد إن تغيّر التوكن أو حُذف الصف أو رفض الخادم سابقًا)
   function tagUmrah(code, dev) {
+    ls("ix_push_umr", JSON.stringify({ code: code, dev: dev }));
     var t = ls(TK); if (!t || permission() !== "granted") return;
-    var k = "ix_push_tag_" + code; if (ls(k)) return;
-    post({ action: "push_reg", token: t, umrah: 1, code: code, dev: dev }).then(function (r) { if (r && r.ok) ls(k, "1"); }).catch(function () {});
+    var k = "ix_push_tag_" + code; if (ls(k) === t) return;
+    post({ action: "push_reg", token: t, umrah: 1, code: code, dev: dev }).then(function (r) { if (r && r.ok && r.tags && r.tags.indexOf("umrah") >= 0) ls(k, t); }).catch(function () {});
   }
   /* ===== تنبيهات الصلاة والأذكار المجدولة من الخادم =====
      المفاتيح: ad أذان · pre قبل الصلاة بـ10د · fast صيام الاثنين والخميس · am/pm/sl أذكار · sal صلاة على النبي · kahf الكهف */
@@ -60,13 +63,15 @@
     var tz = "Asia/Damascus"; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || tz; } catch (e) {}
     return { tz: tz, method: ls("eshraq_prayer_method") || "auto", school: ls("eshraq_prayer_school") || "0", tune: jget("eshraq_prayer_tune", {}), city: ls("eshraq_prayer_city") || "auto" };
   }
-  function sig(p) { var c = cfg(); return JSON.stringify([prefs(), c, p && p.lat, p && p.lng]); }
+  function sig(p) { var c = cfg(); return JSON.stringify([prefs(), c, p && p.lat, p && p.lng, (jget("ix_push_umr", null) || {}).code]); }
   // يرسل الموقع والتفضيلات للخادم (force=true للإرسال دائمًا)
   async function sync(force) {
     var t = ls(TK); if (!t || permission() !== "granted") return null;
     var p = await place(), s = sig(p);
     if (!force && ls(SIG) === s) return { ok: true, same: 1 };
-    var c = cfg(), r = await post({ action: "push_prefs", token: t, lat: p.lat, lng: p.lng, tz: c.tz, method: c.method, school: c.school, tune: c.tune, prefs: prefs() });
+    var c = cfg(), q = { action: "push_prefs", token: t, lat: p.lat, lng: p.lng, tz: c.tz, method: c.method, school: c.school, tune: c.tune, prefs: prefs() };
+    var um = jget("ix_push_umr", null); if (um && um.code) { q.umrah = 1; q.code = um.code; q.dev = um.dev; }
+    var r = await post(q);
     if (r && r.ok) ls(SIG, s);
     return { ok: !!(r && r.ok), approx: !!p.approx };
   }

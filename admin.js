@@ -5,7 +5,10 @@ const JSPDF = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
 const XLSX_URL = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
 const loadLib = (src, ok) => ok() ? Promise.resolve() : new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
 const admFonts = () => Promise.all([document.fonts.load('700 30px Tajawal'), document.fonts.load('400 22px Tajawal')]).catch(() => {});
-const admPost = (action, extra = {}) => post({ action, code, ...extra }).then(r => { if (!r.ok) throw new Error(r.error || ''); return r; });
+/* ردّ قراءة وصل بعد أن انتقل المشرف لتبويب آخر يُهمل (حتى لا يمحو ردٌّ متأخر الصفحة الحالية) */
+let admSeq = 0;
+const ADM_WRITE = /(save|del|add|set|put|send|gen|import|reply|close|update|upload|status|clear|reset|resolve|scan|reg)/;
+const admPost = (action, extra = {}) => { const s = admSeq; return post({ action, code, ...extra }).then(r => { if (!r.ok) throw new Error(r.error || ''); if (s !== admSeq && !ADM_WRITE.test(action)) throw new Error('stale'); return r; }); };
 const admRefresh = tab => `<button type="button" class="btn btn-sm btn-gold-outline mb-3" data-tab="${tab}"><i class="bi bi-arrow-clockwise ms-1"></i>تحديث</button>`;
 const fmtMin = m => m == null ? '—' : m < 60 ? Math.round(m) + ' د' : Math.floor(m / 60) + ' س ' + Math.round(m % 60) + ' د';
 const busName = b => b === 'بدون باص' ? b : 'باص ' + b;
@@ -15,6 +18,7 @@ const ADM_TABS = [['today', 'اليوم', 'bi-speedometer2'], ['att', 'الحض�
 
 function adminRender() {
   const box = $('adm');
+  if (box.dataset.ready) return; // يُرسم مرة واحدة؛ المزامنة الدورية لا تُعيد تحميل التبويب المفتوح
   if (!box.dataset.ready) {
     box.dataset.ready = 1;
     box.innerHTML = `<ul class="nav nav-pills flex-nowrap gap-1 mb-3" id="admTabs" style="overflow-x:auto;padding-bottom:.25rem">${ADM_TABS.map(([k, l, i]) =>
@@ -27,11 +31,11 @@ function adminRender() {
   admGo(admTab);
 }
 async function admGo(tab) {
-  admTab = tab;
+  admTab = tab; const my = ++admSeq;
   document.querySelectorAll('#admTabs [data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
   $('admBody').innerHTML = '<div class="text-center desc-text py-4">جارٍ التحميل...</div>';
-  try { await ({ today: admToday, att: admAtt, ppl: admPpl, sups: admSups, hotels: admHotels, buses: admBuses, news: admNews, push: admPush, sched: admSched, rate: admRate, inq: admInq, lost: admLost, audit: admAudit })[tab](); admAddPdfBtn(tab); }
-  catch (e) { $('admBody').innerHTML = `<div class="text-center py-3"><div class="text-danger mb-2">تعذّر التحميل</div>${admRefresh(tab)}</div>`; }
+  try { await ({ today: admToday, att: admAtt, ppl: admPpl, sups: admSups, hotels: admHotels, buses: admBuses, news: admNews, push: admPush, sched: admSched, rate: admRate, inq: admInq, lost: admLost, audit: admAudit })[tab](); if (my === admSeq) admAddPdfBtn(tab); }
+  catch (e) { if (my !== admSeq) return; $('admBody').innerHTML = `<div class="text-center py-3"><div class="text-danger mb-2">تعذّر التحميل</div>${admRefresh(tab)}</div>`; }
 }
 
 /* ---------- لوحة اليوم + زمن الاستجابة ---------- */
