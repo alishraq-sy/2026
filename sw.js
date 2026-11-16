@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ishraq-cache-v38';
+const CACHE_NAME = 'ishraq-cache-v40';
 const assetsToCache = [
   './',
   './index.html',
@@ -65,6 +65,7 @@ const assetsToCache = [
   './ishraq-cert.js',
   './ishraq-ticket.js',
   './ishraq-push.js',
+  './ishraq-guard.js',
   './ramadan.html',
   './asma.js',
   './ishraq-share.js',
@@ -118,11 +119,14 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, opts));
 });
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  const url = new URL((event.notification.data && event.notification.data.url) || './index.html', self.registration.scope).href;
+  const n = event.notification; n.close();
+  const u = (n.data && n.data.url) || './index.html', abs = new URL(u, self.registration.scope).href;
+  const msg = { type: 'ix-notif', title: n.title || 'إشراق', body: n.body || '', url: u };
   event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
-    for (const c of list) { if (c.url === url && 'focus' in c) return c.focus(); }
-    return self.clients.openWindow(url);
+    const c = list.find((x) => 'focus' in x);
+    if (c) { c.postMessage(msg); return c.focus(); }  // التطبيق مفتوح: نعرض النافذة فوقه
+    // مغلق: نفتح الصفحة المقصودة ونمرّر نص الإشعار لتعرضه في نافذة
+    return self.clients.openWindow(abs + (abs.indexOf('?') < 0 ? '?' : '&') + 'ixn=' + encodeURIComponent(JSON.stringify({ t: msg.title, b: msg.body, u })));
   }));
 });
 
@@ -147,7 +151,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   // الخطوط والمكتبات الخارجية: نخزنها عند أول استعمال لتعمل بدون إنترنت
-  if (['fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com'].includes(url.hostname)) {
+  if (['fonts.googleapis.com', 'fonts.gstatic.com', 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com', 'www.gstatic.com'].includes(url.hostname)) {
     event.respondWith(
       caches.open('ishraq-ext').then((ch) => ch.match(req).then((hit) => {
         const net = fetch(req).then((res) => { if (res && (res.ok || res.type === 'opaque')) ch.put(req, res.clone()); return res; }).catch(() => hit);

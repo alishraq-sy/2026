@@ -318,6 +318,7 @@ let lastNotifiedMinute = "";
 function checkPrayerTimeForNotification(prayerName, prayerTimeString) {
     const isEnabled = localStorage.getItem('prayer_notifications_enabled') === 'true';
     if (!isEnabled) return;
+    try { if (localStorage.getItem('ix_push_tok') && JSON.parse(localStorage.getItem('ix_push_prefs') || '{}').ad) return; } catch (e) {} // الخادم يرسل الأذان
 
     const now = wallNow();
     const currentHours = String(now.getHours()).padStart(2, '0');

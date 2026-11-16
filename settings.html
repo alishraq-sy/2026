@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl" data-bs-theme="dark">
   <head>
+    <script src="./ishraq-guard.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>الإعدادات - إشراق</title>
@@ -50,7 +51,7 @@
           <div class="settings-row d-flex justify-content-between align-items-center">
             <div>
               <div class="settings-row-title">تنبيهات أوقات الصلاة</div>
-              <div class="settings-row-desc">إشعار فوري عند دخول وقت أي صلاة، بأي صفحة بالتطبيق.</div>
+              <div class="settings-row-desc">إشعار محلي عند دخول وقت الصلاة والتطبيق مفتوح. يتوقف تلقائيًا إذا فعّلت «أذان كل صلاة» أدناه.</div>
             </div>
             <div class="form-check form-switch fs-4">
               <input class="form-check-input shadow-none" type="checkbox" role="switch" id="prayerNotificationsToggle" onchange="togglePrayerNotifications(this)">
@@ -86,6 +87,94 @@
               <input class="form-check-input shadow-none" type="checkbox" role="switch" id="fridayReminderToggle" onchange="toggleFridayReminder(this)">
             </div>
           </div>
+        </div>
+
+        <div class="settings-section-title"><i class="bi bi-bell-fill"></i> تنبيهات الصلاة والأذكار (تصلك والتطبيق مغلق)</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <div class="settings-row-desc" id="pxNote">تُرسَل من خادم إشراق حسب موقعك ومنطقتك الزمنية وإعدادات المواقيت أدناه. الموقع التقريبي فقط يُستخدم لحساب الأوقات.</div>
+          </div>
+
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">أذان كل صلاة</div>
+              <div class="settings-row-desc">إشعار عند دخول وقت الفجر والظهر والعصر والمغرب والعشاء.</div>
+            </div>
+            <div class="form-check form-switch fs-4">
+              <input class="form-check-input shadow-none" type="checkbox" role="switch" data-px="ad" onchange="togglePx(this)">
+            </div>
+          </div>
+
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">قبل الصلاة بعشر دقائق</div>
+              <div class="settings-row-desc">تنبيه قبل أذان الصلاة القادمة بعشر دقائق.</div>
+            </div>
+            <div class="form-check form-switch fs-4">
+              <input class="form-check-input shadow-none" type="checkbox" role="switch" data-px="pre" onchange="togglePx(this)">
+            </div>
+          </div>
+
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">صيام الاثنين والخميس</div>
+              <div class="settings-row-desc">تذكير مساء الأحد والأربعاء، وتذكير السحور صباح الاثنين والخميس.</div>
+            </div>
+            <div class="form-check form-switch fs-4">
+              <input class="form-check-input shadow-none" type="checkbox" role="switch" data-px="fast" onchange="togglePx(this)">
+            </div>
+          </div>
+
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">أذكار الصباح</div>
+              <div class="settings-row-desc">بعد الفجر بربع ساعة.</div>
+            </div>
+            <div class="form-check form-switch fs-4">
+              <input class="form-check-input shadow-none" type="checkbox" role="switch" data-px="am" onchange="togglePx(this)">
+            </div>
+          </div>
+
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">أذكار المساء</div>
+              <div class="settings-row-desc">بعد المغرب بربع ساعة.</div>
+            </div>
+            <div class="form-check form-switch fs-4">
+              <input class="form-check-input shadow-none" type="checkbox" role="switch" data-px="pm" onchange="togglePx(this)">
+            </div>
+          </div>
+
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">أذكار النوم</div>
+              <div class="settings-row-desc">الساعة 11 مساءً.</div>
+            </div>
+            <div class="form-check form-switch fs-4">
+              <input class="form-check-input shadow-none" type="checkbox" role="switch" data-px="sl" onchange="togglePx(this)">
+            </div>
+          </div>
+
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">الصلاة على النبي ﷺ</div>
+              <div class="settings-row-desc">ثلاث مرات يوميًا: 10 صباحًا، 4 عصرًا، 9 مساءً.</div>
+            </div>
+            <div class="form-check form-switch fs-4">
+              <input class="form-check-input shadow-none" type="checkbox" role="switch" data-px="sal" onchange="togglePx(this)">
+            </div>
+          </div>
+
+          <div class="settings-row d-flex justify-content-between align-items-center">
+            <div>
+              <div class="settings-row-title">سورة الكهف</div>
+              <div class="settings-row-desc">مساء الخميس (8 م) وصباح الجمعة (8 ص).</div>
+            </div>
+            <div class="form-check form-switch fs-4">
+              <input class="form-check-input shadow-none" type="checkbox" role="switch" data-px="kahf" onchange="togglePx(this)">
+            </div>
+          </div>
+
         </div>
 
         <div class="settings-section-title"><i class="bi bi-clock-history"></i> أوقات الصلاة والموقع</div>
@@ -530,6 +619,7 @@
   if (logoutButton) {
     logoutButton.addEventListener("click", async () => {
       try {
+        try { localStorage.removeItem("ix_authed"); } catch (e) {}
         await signOut(auth);
         window.location.replace("./login.html");
       } catch (error) {

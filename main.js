@@ -275,6 +275,7 @@ if ('serviceWorker' in navigator) {
 
   function checkPrayerTimeBg() {
     if (localStorage.getItem('prayer_notifications_enabled') !== 'true') return;
+    try { if (localStorage.getItem('ix_push_tok') && JSON.parse(localStorage.getItem('ix_push_prefs') || '{}').ad) return; } catch (e) {} // الخادم يرسل الأذان
 
     const timings = getCachedTodayTimings();
     if (!timings) return;
@@ -334,6 +335,7 @@ if ('serviceWorker' in navigator) {
 
     const now = new Date();
     if (now.getDay() !== 5) return; // الجمعة فقط
+    try { if (localStorage.getItem('ix_push_tok') && JSON.parse(localStorage.getItem('ix_push_prefs') || '{}').kahf) return; } catch (e) {} // الخادم يرسل التذكير
     if (now.getHours() < 9 || now.getHours() >= 18) return; // نافذة معقولة بين الصباح والمغرب
 
     const todayKey = now.toDateString();

@@ -63,6 +63,7 @@ function createLogoutButton() {
     button.textContent = "جارٍ تسجيل الخروج...";
 
     try {
+      try { localStorage.removeItem("ix_authed"); } catch (e) {}
       await signOut(auth);
       window.location.replace(LOGIN_PAGE);
     } catch (error) {

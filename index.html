@@ -255,6 +255,7 @@
     <script src="./asma.js"></script>
     <script src="./ishraq-today.js"></script>
     <script src="./ishraq-time.js"></script>
+    <script src="./ishraq-push.js"></script>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
@@ -285,6 +286,7 @@
         }
 
         // المستخدم مسجل دخول، أظهر الصفحة
+        try { localStorage.setItem("ix_authed", "1"); } catch (e) {}
         document.body.classList.remove("auth-pending");
 
         // زر تسجيل الخروج
@@ -293,6 +295,7 @@
         if (logoutButton) {
           logoutButton.addEventListener("click", async () => {
             try {
+              try { localStorage.removeItem("ix_authed"); } catch (e) {}
               await signOut(auth);
               window.location.replace("./login.html");
             } catch (error) {

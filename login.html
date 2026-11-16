@@ -252,6 +252,7 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
       "auth/unauthorized-domain": "هذا النطاق غير مصرّح له في إعدادات Firebase.",
       "auth/operation-not-allowed": "هذه الطريقة غير مفعّلة بعد في إعدادات Firebase."
     };
+    const ixNext = () => { try { localStorage.setItem("ix_authed", "1"); } catch (e) {} const n = new URLSearchParams(location.search).get("next") || ""; return /^[A-Za-z0-9_\-]+\.html([?#][^\s]*)?$/.test(n) ? "./" + n : "./index.html"; };
     const fail = (e) => { console.error("Auth error:", e); errorBox.textContent = MSG[e.code] || "تعذّرت العملية. حاول مرة أخرى."; errorBox.classList.add("show"); };
 
     const gBtn = document.getElementById("googleButton");
@@ -261,7 +262,7 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
       provider.setCustomParameters({ prompt: "select_account" });
       try {
         await signInWithPopup(auth, provider);
-        window.location.replace("./index.html");
+        window.location.replace(ixNext());
       } catch (e) {
         if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") {
           try { await signInWithRedirect(auth, provider); return; } catch (e2) { fail(e2); }
@@ -269,7 +270,7 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
         gBtn.disabled = false;
       }
     });
-    getRedirectResult(auth).then((r) => { if (r && r.user) window.location.replace("./index.html"); }).catch(fail);
+    getRedirectResult(auth).then((r) => { if (r && r.user) window.location.replace(ixNext()); }).catch(fail);
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -292,7 +293,7 @@ h1,h2,h3{font-family:"Reem Kufi",Cairo,sans-serif}
           await signInWithEmailAndPassword(auth, emailInput.value.trim(), passwordInput.value);
         }
 
-        window.location.replace("./index.html");
+        window.location.replace(ixNext());
       } catch (error) {
         console.error("Login error:", error);
 

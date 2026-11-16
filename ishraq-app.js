@@ -59,7 +59,7 @@
   addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
 
   document.getElementById("ix-more-logout").addEventListener("click", function () {
-    var go = function () { location.replace("./login.html"); };
+    var go = function () { try { localStorage.removeItem("ix_authed"); } catch (e) {} location.replace("./login.html"); };
     Promise.all([
       import("https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js"),
       import("https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js")

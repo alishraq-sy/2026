@@ -1,5 +1,5 @@
 // لوحة المشرف الإداري — تعتمد على متغيرات umrah.js ($, esc, post, code, role, me, toast, phoneHref, STATUS_CLS, when, endOf, loadImg, askConfirm)
-let admTab = 'today', admLabel = '', admData = null, optsData = null, supData = [], shkData = [], lessonsPend = [], pplData = null, schedData = [], schedAll = false, impRows = null, auditData = [];
+let admTab = 'today', admLabel = '', admData = null, optsData = null, supData = [], shkData = [], mgrData = [], lessonsPend = [], pplData = null, schedData = [], schedAll = false, impRows = null, auditData = [];
 
 const JSPDF = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
 const XLSX_URL = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
@@ -142,7 +142,7 @@ const allSections = r => {
 
 /* ---------- إدارة المعتمرين ---------- */
 const PFIELDS = [['Code', 'الرقم السري للدخول'], ['PilgrimNo', 'رقم المعتمر'], ['Name', 'الاسم'], ['Phone', 'الهاتف'], ['Bus_No', 'رقم الباص'], ['Bus_Title', 'عنوان الباص'],
-  ['Supervisor_Name', 'اسم المشرف'], ['Supervisor_Phone', 'هاتف المشرف'], ['Makkah_Hotel', 'فندق مكة'], ['Makkah_Room', 'غرفة مكة'], ['Madinah_Hotel', 'فندق المدينة'], ['Madinah_Room', 'غرفة المدينة'], ['Room_Type', 'نوع الغرفة'], ['Rawda_Status', 'حجز الروضة']];
+  ['Supervisor_Name', 'اسم المشرف'], ['Supervisor_Phone', 'هاتف المشرف'], ['Manager_Name', 'إداري الحملة'], ['Manager_Phone', 'هاتف الإداري'], ['Makkah_Hotel', 'فندق مكة'], ['Makkah_Room', 'غرفة مكة'], ['Madinah_Hotel', 'فندق المدينة'], ['Madinah_Room', 'غرفة المدينة'], ['Room_Type', 'نوع الغرفة'], ['Rawda_Status', 'حجز الروضة']];
 const ROOMS = ['إفرادي', 'ثنائي', 'ثلاثي', 'رباعي', 'خماسي'], RAWDA = ['لم يتم الحجز بعد', 'جاري الحجز', 'تم الحجز بنجاح'];
 const RAWDA_CLS = ['bg-secondary', 'bg-warning text-dark', 'bg-success'];
 const DOCS = [['photo', 'Photo_Id', 'الصورة الشخصية', 'bi-person-bounding-box'], ['passport', 'Passport_Id', 'صورة جواز السفر', 'bi-passport'], ['visa', 'Visa_Id', 'الفيزا', 'bi-card-heading']];
@@ -169,7 +169,8 @@ async function pplLoad(q) {
 async function pForm(p) {
   try { optsData = await admPost('adm_opts'); } catch { optsData = optsData || { makkah: [], madinah: [], buses: [] }; }
   try { supData = (await admPost('adm_sup_list')).items.filter(x => x.name); } catch { supData = []; }
-  const hs = pplData.headers, o = optsData, hasBus = o.buses.length > 0, hasSup = supData.length > 0;
+  try { mgrData = (await admPost('adm_mgr_list')).items.filter(x => x.name); } catch { mgrData = []; }
+  const hs = pplData.headers, o = optsData, hasBus = o.buses.length > 0, hasSup = supData.length > 0, hasMgr = mgrData.length > 0;
   const opt = (v, cur, label) => `<option value="${esc(v)}"${v === cur ? ' selected' : ''}>${esc(label ?? v)}</option>`;
   const field = (k, l) => {
     const v = p ? String(p[k] ?? '') : '';
@@ -183,6 +184,11 @@ async function pForm(p) {
     } else if (k === 'Supervisor_Name' && hasSup) {
       const ss = v && !supData.some(x => x.name === v) ? [{ name: v, phone: p?.Supervisor_Phone || '' }, ...supData] : supData;
       ctl = `<select class="form-select form-select-sm u-in" data-k="Supervisor_Name" id="pSupSel"><option value="" data-phone="">— اختر —</option>${ss.map(x => `<option value="${esc(x.name)}" data-phone="${esc(x.phone)}"${x.name === v ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select>`;
+    } else if (k === 'Manager_Name' && hasMgr) {
+      const ms = v && !mgrData.some(x => x.name === v) ? [{ name: v, phone: p?.Manager_Phone || '' }, ...mgrData] : mgrData;
+      ctl = `<select class="form-select form-select-sm u-in" data-k="Manager_Name" id="pMgrSel"><option value="" data-phone="">— اختر —</option>${ms.map(x => `<option value="${esc(x.name)}" data-phone="${esc(x.phone)}"${x.name === v ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select>`;
+    } else if (k === 'Manager_Phone' && hasMgr) {
+      ctl = `<input class="form-control u-in form-control-sm" data-k="Manager_Phone" id="pMgrPhone" value="${esc(v)}" readonly placeholder="يُدخل تلقائيًا">`;
     } else if (k === 'Supervisor_Phone' && hasSup) {
       ctl = `<input class="form-control u-in form-control-sm" data-k="Supervisor_Phone" id="pSupPhone" value="${esc(v)}" readonly placeholder="يُدخل تلقائيًا">`;
     } else if (k === 'Room_Type') {
@@ -196,14 +202,14 @@ async function pForm(p) {
       ctl = `<div class="input-group input-group-sm"><input class="form-control u-in" data-k="Code" dir="ltr" maxlength="6" style="text-transform:uppercase" placeholder="A12345"><button type="button" class="btn btn-gold-outline" data-act="p-gen" aria-label="توليد رقم عشوائي"><i class="bi bi-dice-5"></i></button></div>`;
     } else ctl = `<input class="form-control u-in form-control-sm" data-k="${k}" value="${esc(v)}" ${p && k === 'PilgrimNo' ? 'readonly' : ''}>`;
     const wide = k === 'Rawda_Status';
-    return `<div class="${wide ? 'col-12' : 'col-6'}"><label class="small">${k === 'Bus_No' && hasBus ? 'الباص' : k === 'Supervisor_Name' && hasSup ? 'المشرف' : l}</label>${ctl}</div>`;
+    return `<div class="${wide ? 'col-12' : 'col-6'}"><label class="small">${k === 'Bus_No' && hasBus ? 'الباص' : k === 'Supervisor_Name' && hasSup ? 'المشرف' : k === 'Manager_Name' && hasMgr ? 'إداري الحملة' : l}</label>${ctl}</div>`;
   };
   const nw = p ? 0 : 1;
   $('pBox').innerHTML = `<div class="u-box mb-3" style="border-color:#edcea0"><div class="gold fw-bold mb-2">${p ? 'تعديل معتمر' : 'إضافة معتمر'}</div><div class="row g-2">
     ${PFIELDS.filter(([k]) => hs.includes(k) && !(k === 'Bus_Title' && hasBus)).map(([k, l]) => field(k, l)).join('')}</div>
     ${hs.includes('Photo_Id') ? `<div class="gold fw-bold mt-3 mb-2"><i class="bi bi-paperclip ms-1"></i>المرفقات</div><div class="row g-2">${DOCS.map(([kd, col, lab, ic]) => docBox(kd, col, lab, ic, p ? String(p[col] ?? '') : '')).join('')}</div>
       <small class="d-block mt-1" style="color:#d3d3c7">صورة أو PDF. تُضغط الصور تلقائيًا، وتُحفظ بخصوصية في Google Drive ولا تظهر للمعتمر.</small>` : ''}
-    ${!o.makkah.length || !o.madinah.length || !hasBus || !hasSup ? '<small class="d-block mt-2" style="color:#d3d3c7">لتفعيل القوائم المنسدلة أضف الفنادق والباصات والمشرفين من تبويبات «الفنادق» و«الباصات» و«المشرفون».</small>' : ''}
+    ${!o.makkah.length || !o.madinah.length || !hasBus || !hasSup || !hasMgr ? '<small class="d-block mt-2" style="color:#d3d3c7">لتفعيل القوائم المنسدلة أضف الفنادق والباصات والمشرفين من تبويبات «الفنادق» و«الباصات» و«المشرفون» (المشرفون وإداريو الحملة).</small>' : ''}
     <div class="d-flex gap-2 mt-3 flex-wrap"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="p-save" data-new="${nw}">حفظ</button>
       <button type="button" class="btn btn-success flex-grow-1" data-act="p-save" data-send="1" data-new="${nw}"><i class="bi bi-whatsapp ms-1"></i>حفظ وإرسال</button>
       <button type="button" class="btn btn-outline-light" data-act="p-cancel">إلغاء</button></div>
@@ -276,14 +282,16 @@ function waNumber(p) {
 function waSend(d, win) {
   const num = waNumber(d.Phone);
   if (!num) { win?.close(); toast('تم الحفظ، لكن اكتب الهاتف بصيغة دولية (مثل +9665…) لإرسال واتساب', 7000); return; }
-  const link = location.href.split('#')[0].split('?')[0];
-  const msg = [`السلام عليكم ${d.Name || ''}`, 'أهلًا بك في حملة الإشراق 🌙', '',
-    d.Code ? `🔑 رقمك السري للدخول: ${d.Code}` : null, d.PilgrimNo ? `🔢 رقم المعتمر: ${d.PilgrimNo}` : null,
-    d.Room_Type ? `🛏️ نوع الغرفة: ${d.Room_Type}` : null, d.Rawda_Status ? `🕌 حجز الروضة الشريفة: ${d.Rawda_Status}` : null,
-    d.Bus_No ? `🚌 باص رقم: ${d.Bus_No}${d.Bus_Title ? ' — ' + d.Bus_Title : ''}` : null,
-    d.Makkah_Hotel ? `🕋 فندق مكة: ${d.Makkah_Hotel}${d.Makkah_Room ? ' — غرفة ' + d.Makkah_Room : ''}` : null,
-    d.Madinah_Hotel ? `🕌 فندق المدينة: ${d.Madinah_Hotel}${d.Madinah_Room ? ' — غرفة ' + d.Madinah_Room : ''}` : null,
-    '', `🌐 رابط الصفحة: ${link}`, 'أدخل رقمك السري في الصفحة لعرض برنامج رحلتك.'].filter(x => x !== null).join('\n');
+  const L = [`السّلام عليكم *${d.Name || ''}*`, 'أهلاً بك في *حملة الإشراق* 🕋', ''];
+  const blk = (head, v) => { if (v) L.push(head, ' ' + v, ''); };
+  blk('🔑 رقمك السري للدخول:', d.Code);
+  blk('🔢 رقم المعتمر:', d.PilgrimNo);
+  if (d.Room_Type) L.push('🛏️ نوع الغرفة: ', d.Room_Type, '');
+  blk('🕌 حجز الروضة الشريفة:', d.Rawda_Status);
+  blk('🕋 فندق مكة:', d.Makkah_Hotel && d.Makkah_Hotel + (d.Makkah_Room ? ' — غرفة ' + d.Makkah_Room : ''));
+  blk('🕌 فندق المدينة:', d.Madinah_Hotel && d.Madinah_Hotel + (d.Madinah_Room ? ' — غرفة ' + d.Madinah_Room : ''));
+  L.push('🌐 أدخل رقمك السري في الصفحة لعرض برنامج رحلتك 👇🏼', ' *https://alishraq-sy.com/umrah-login*');
+  const msg = L.join('\n');
   const url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
   if (win && !win.closed) win.location.href = url; else window.open(url, '_blank');
 }
@@ -410,6 +418,7 @@ async function admBuses() {
 async function admSups() {
   supData = (await admPost('adm_sup_list')).items;
   shkData = (await admPost('adm_sh_list').catch(() => ({ items: [] }))).items;
+  mgrData = (await admPost('adm_mgr_list').catch(() => ({ items: [] }))).items;
   $('admBody').innerHTML = `<div class="d-flex gap-2 mb-3"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="sup-add"><i class="bi bi-plus-lg ms-1"></i>إضافة مشرف</button>${admRefresh('sups').replace('mb-3', '')}</div>
     <div id="supBox"></div>
     ${supData.map((x, i) => `<div class="ev" style="display:block"><div class="d-flex justify-content-between align-items-center"><b class="text-light">${esc(x.name)}${x.me ? ' <span class="badge bg-success">أنت</span>' : ''}</b>
@@ -417,6 +426,12 @@ async function admSups() {
         ${x.me ? '' : delBtn(`data-act="sup-del" data-i="${i}"`)}</span></div>
       <small class="d-block">${x.phone ? `<a href="${phoneHref(x.phone)}" class="gold" dir="ltr">${esc(x.phone)}</a>` : 'بلا هاتف'}${x.no ? ' · رقم معتمر ' + esc(x.no) : ''}</small>
       ${x.notes ? `<small class="d-block">${esc(x.notes)}</small>` : ''}</div>`).join('') || '<p class="desc-text">لا مشرفين.</p>'}
+    <hr class="border-secondary"><div class="d-flex gap-2 mb-3"><div class="gold fw-bold flex-grow-1 align-self-center"><i class="bi bi-person-gear ms-1"></i>إداريو الحملة</div>
+      <button type="button" class="btn btn-sm btn-gold-solid" data-act="mgr-add"><i class="bi bi-plus-lg ms-1"></i>إضافة إداري</button></div>
+    <div id="mgrBox"></div>
+    ${mgrData.map((x, i) => `<div class="ev" style="display:block"><div class="d-flex justify-content-between align-items-center"><b class="text-light">${esc(x.name)}</b>
+        <span class="d-flex gap-1"><button type="button" class="btn btn-sm btn-gold-outline py-0" data-act="mgr-edit" data-i="${i}" aria-label="تعديل"><i class="bi bi-pencil"></i></button>${delBtn(`data-act="mgr-del" data-i="${i}"`)}</span></div>
+      <small class="d-block">${x.phone ? `<a href="${phoneHref(x.phone)}" class="gold" dir="ltr">${esc(x.phone)}</a>` : 'بلا هاتف'}</small></div>`).join('') || '<small class="desc-text">لا إداري مضاف بعد. يظهر اسمه ورقمه في قائمة «إداري الحملة» عند إضافة المعتمرين ويُملأ الرقم تلقائيًا.</small>'}
     <hr class="border-secondary"><div class="d-flex gap-2 mb-3"><div class="gold fw-bold flex-grow-1 align-self-center"><i class="bi bi-book ms-1"></i>شيخ الحملة</div>
       <button type="button" class="btn btn-sm btn-gold-solid" data-act="shk-add"><i class="bi bi-plus-lg ms-1"></i>إضافة شيخ</button></div>
     <div id="shkBox"></div>
@@ -436,6 +451,13 @@ function supForm(x) {
     <div class="d-flex gap-2"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="sup-save">حفظ</button><button type="button" class="btn btn-outline-light" data-act="sup-cancel">إلغاء</button></div></div>`;
   $('supBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
   if (!x) supGen();
+}
+function mgrForm(x) {
+  $('mgrBox').innerHTML = `<div class="u-box mb-3" style="border-color:#edcea0" data-id="${x ? x.id : ''}" data-old="${esc(x?.name)}"><div class="gold fw-bold mb-2">${x ? 'تعديل إداري' : 'إضافة إداري'}</div>
+    <input class="form-control u-in mb-2" data-k="name" placeholder="اسم إداري الحملة" maxlength="100" value="${esc(x?.name)}">
+    <input class="form-control u-in mb-3" data-k="phone" type="tel" dir="ltr" placeholder="رقم الهاتف (يُفضّل دوليًا +9665…)" maxlength="40" value="${esc(x?.phone)}">
+    <div class="d-flex gap-2"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="mgr-save">حفظ</button><button type="button" class="btn btn-outline-light" data-act="mgr-cancel">إلغاء</button></div></div>`;
+  $('mgrBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 function shkForm(x) {
   $('shkBox').innerHTML = `<div class="u-box mb-3" style="border-color:#edcea0" data-id="${x ? x.id : ''}" data-old="${esc(x?.name)}"><div class="gold fw-bold mb-2">${x ? 'تعديل شيخ' : 'إضافة شيخ'}</div>
@@ -659,6 +681,7 @@ function admChange(e) {
   else if (t.id === 'pFile' && t.files[0]) pParse(t.files[0]);
   else if (t.dataset.docFile) docUpload(t);
   else if (t.id === 'pSupSel') $('pSupPhone').value = t.selectedOptions[0]?.dataset.phone || '';
+  else if (t.id === 'pMgrSel') $('pMgrPhone').value = t.selectedOptions[0]?.dataset.phone || '';
 }
 const collect = box => Object.fromEntries([...box.querySelectorAll('[data-k]')].map(i => [i.dataset.k, i.value.trim()]));
 
@@ -684,6 +707,9 @@ async function admClick(e) {
   if (act === 'sup-edit') return supForm(supData[+b.dataset.i]);
   if (act === 'sup-cancel') { $('supBox').innerHTML = ''; return; }
   if (act === 'sup-gen') return supGen();
+  if (act === 'mgr-add') return mgrForm(null);
+  if (act === 'mgr-edit') return mgrForm(mgrData[+b.dataset.i]);
+  if (act === 'mgr-cancel') { $('mgrBox').innerHTML = ''; return; }
   if (act === 'shk-add') return shkForm(null);
   if (act === 'shk-edit') return shkForm(shkData[+b.dataset.i]);
   if (act === 'shk-cancel') { $('shkBox').innerHTML = ''; return; }
@@ -742,6 +768,15 @@ async function admClick(e) {
       const x = shkData[+b.dataset.i];
       if (!await askConfirm('حذف الشيخ؟', `${x.name} — لن يتمكن من الدخول بعد الآن.`, 'نعم، احذف')) return;
       await admPost('adm_sh_del', { id: x.id, oldName: x.name }); toast('تم الحذف'); await admSups();
+    }
+    else if (act === 'mgr-save') {
+      const f = collect(card);
+      await admPost('adm_mgr_save', { id: card.dataset.id, oldName: card.dataset.old, ...f }); toast(card.dataset.id ? 'تم الحفظ' : 'تمت الإضافة'); await admSups();
+    }
+    else if (act === 'mgr-del') {
+      const x = mgrData[+b.dataset.i];
+      if (!await askConfirm('حذف الإداري؟', x.name, 'نعم، احذف')) return;
+      await admPost('adm_mgr_del', { id: x.id, oldName: x.name }); toast('تم الحذف'); await admSups();
     }
     else if (act === 'sup-save') {
       const f = collect(card);
@@ -825,7 +860,7 @@ function admAddPdfBtn(tab) {
 const IMG_TABS = ['sups', 'hotels', 'buses', 'sched'];
 function admImgRows(tab) {
   const dash = v => v || '—';
-  if (tab === 'sups') return ['المشرفون', [['#h', 'المشرفون'], ...supData.map(x => [x.name, dash(x.phone)]), ...(shkData.length ? [['#h', 'شيخ الحملة'], ...shkData.map(x => [x.name, dash(x.phone)])] : [])]];
+  if (tab === 'sups') return ['المشرفون', [['#h', 'المشرفون'], ...supData.map(x => [x.name, dash(x.phone)]), ...(mgrData.length ? [['#h', 'إداريو الحملة'], ...mgrData.map(x => [x.name, dash(x.phone)])] : []), ...(shkData.length ? [['#h', 'شيخ الحملة'], ...shkData.map(x => [x.name, dash(x.phone)])] : [])]];
   if (tab === 'hotels') return ['معلومات الفنادق', ['makkah', 'madinah'].flatMap(k => [['#h', k === 'makkah' ? 'فنادق مكة المكرمة' : 'فنادق المدينة المنورة'], ...(optsData.hotels?.[k] || []).map(h => [h.name, [h.wifi && 'الواي فاي: ' + h.wifi, h.details].filter(Boolean).join('\n') || '—'])])];
   if (tab === 'buses') return ['الباصات', [['#h', 'قائمة الباصات'], ...optsData.buses.map(b => ['باص ' + b.no, dash(b.title)])]];
   const list = schedData.filter(e => schedAll || (isActive(e) && endOf(e, when(e.Date_Time)) > Date.now()));
@@ -851,8 +886,9 @@ async function admPdf(tab, btn) {
         { head: 'الفنادق والغرف', cols: [{ t: '#', w: .06, align: 'center' }, { t: 'الاسم', w: .25 }, { t: 'فندق مكة', w: .22 }, { t: 'غرفة', w: .1, align: 'center' }, { t: 'فندق المدينة', w: .27 }, { t: 'غرفة', w: .1, align: 'center' }],
           rows: r.items.map((p, i) => [i + 1, p.Name, dash(p.Makkah_Hotel), dash(p.Makkah_Room), dash(p.Madinah_Hotel), dash(p.Madinah_Room)]) }] };
     } else if (tab === 'sups') {
-      cfg = { title: 'المشرفون وشيخ الحملة', sections: [
+      cfg = { title: 'المشرفون وإداريو الحملة والشيخ', sections: [
         { head: 'المشرفون', cols: [{ t: '#', w: .07, align: 'center' }, { t: 'الاسم', w: .35 }, { t: 'الهاتف', w: .26, align: 'center' }, { t: 'رقم معتمر', w: .15, align: 'center' }, { t: 'ملاحظات', w: .17 }], rows: supData.map((x, i) => [i + 1, x.name, dash(x.phone), dash(x.no), dash(x.notes)]) },
+        { head: 'إداريو الحملة', cols: [{ t: '#', w: .07, align: 'center' }, { t: 'الاسم', w: .5 }, { t: 'الهاتف', w: .43, align: 'center' }], rows: mgrData.map((x, i) => [i + 1, x.name, dash(x.phone)]) },
         { head: 'الشيوخ', cols: [{ t: '#', w: .07, align: 'center' }, { t: 'الاسم', w: .5 }, { t: 'الهاتف', w: .43, align: 'center' }], rows: shkData.map((x, i) => [i + 1, x.name, dash(x.phone)]) }] };
     } else if (tab === 'hotels') {
       const hs = k => (optsData.hotels?.[k] || []).map((h, i) => [i + 1, h.name, dash(h.wifi), dash(h.details)]), cols = [{ t: '#', w: .06, align: 'center' }, { t: 'الفندق', w: .32 }, { t: 'الواي فاي', w: .22, align: 'center' }, { t: 'التفاصيل', w: .4 }];

@@ -93,5 +93,19 @@
     opt = opt || {};
     return new Promise(function (res) { q.push({ msg: String(msg), title: opt.title || "تأكيد", icon: opt.danger ? "bi-exclamation-triangle" : "bi-question-circle", btns: [{ t: opt.cancel || "إلغاء", v: false }, { t: opt.ok || "تأكيد", v: true, c: opt.danger ? "d" : "p" }], done: res }); whenReady(next); });
   };
+  // نافذة بأزرار مخصّصة: ixNotice({title,msg,icon,btns:[{t,v,c}]}) → Promise بقيمة الزر المضغوط
+  window.ixNotice = function (o) { return new Promise(function (res) { q.push({ msg: String(o.msg || ""), title: o.title || "إشراق", icon: o.icon || "bi-bell-fill", btns: o.btns || [{ t: "إغلاق", v: true, c: "p" }], done: res }); whenReady(next); }); };
+  // إشعار نُقر عليه: يظهر نصّه في نافذة مع زر إغلاق (وزر فتح إن كان رابطه صفحة أخرى)
+  function showNotif(n) {
+    if (!n) return; var go = false;
+    try { var t = new URL(n.u || "./index.html", location.href); go = t.pathname !== location.pathname || t.search !== location.search; } catch (e) {}
+    var btns = [{ t: "إغلاق", v: false, c: go ? "" : "p" }]; if (go) btns.push({ t: "فتح", v: true, c: "p" });
+    window.ixNotice({ title: n.t || "إشراق", msg: n.b || "", icon: "bi-bell-fill", btns: btns }).then(function (v) { if (v && go) location.href = n.u; });
+  }
+  try {
+    var qs = new URLSearchParams(location.search), raw = qs.get("ixn");
+    if (raw) { qs.delete("ixn"); var s = qs.toString(); try { history.replaceState(null, "", location.pathname + (s ? "?" + s : "") + location.hash); } catch (e) {} var n0; try { n0 = JSON.parse(raw); } catch (e) {} if (n0) showNotif(n0); }
+    if (navigator.serviceWorker) navigator.serviceWorker.addEventListener("message", function (e) { if (e.data && e.data.type === "ix-notif") showNotif({ t: e.data.title, b: e.data.body, u: e.data.url }); });
+  } catch (e) {}
   window.alert = function (msg) { q.push({ msg: String(msg), title: "إشراق", icon: "bi-stars", btns: [{ t: "حسناً", v: true, c: "p" }], done: function () {} }); whenReady(next); };
 })();

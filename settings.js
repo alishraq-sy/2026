@@ -349,12 +349,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!ixPush.supported()) { t.disabled = true; if (d) d.textContent = "متصفحك لا يدعم الإشعارات. على الآيفون أضف التطبيق إلى الشاشة الرئيسية أولًا."; return; }
     if (ixPush.permission() === "denied") { t.disabled = true; if (d) d.textContent = "الإشعارات محظورة من إعدادات المتصفح لهذا الموقع. فعّلها من هناك ثم أعد المحاولة."; }
     t.checked = ixPush.on();
+    var on = ixPush.on();
+    Array.prototype.forEach.call(document.querySelectorAll("[data-px]"), function (c) { c.checked = on && ixPush.pref(c.getAttribute("data-px")); if (ixPush.permission() === "denied" || !ixPush.supported()) c.disabled = true; });
   }
+  window.togglePx = async function (cb) {
+    var k = cb.getAttribute("data-px"); cb.disabled = true;
+    try {
+      if (cb.checked && !ixPush.on()) await ixPush.enable();
+      ixPush.setPref(k, cb.checked);
+      var r = await ixPush.sync(true);
+      if (cb.checked && r && r.approx && !localStorage.getItem("ix_px_approx")) { try { localStorage.setItem("ix_px_approx", "1"); } catch (e) {} alert("ما قدرنا نعرف موقعك، فاستخدمنا دمشق مؤقتًا. اختر مدينتك من «أوقات الصلاة والموقع» أدناه لتصلك الأوقات الصحيحة."); }
+    } catch (e) { cb.checked = !cb.checked; ixPush.setPref(k, cb.checked); alert(e && e.message === "denied" ? "لم يُسمح بالإشعارات. فعّلها من إعدادات المتصفح لهذا الموقع." : "تعذّر التفعيل الآن، حاول لاحقًا."); }
+    cb.disabled = false; sync();
+  };
   window.toggleServerPush = async function (cb) {
     cb.disabled = true;
     try {
       if (cb.checked) { await ixPush.enable(); alert("تم تفعيل إشعارات إشراق ✅"); }
-      else await ixPush.disable();
+      else { await ixPush.disable(); }
     } catch (e) { cb.checked = false; alert(e && e.message === "denied" ? "لم يُسمح بالإشعارات. فعّلها من إعدادات المتصفح." : "تعذّر التفعيل الآن، حاول لاحقًا."); }
     cb.disabled = false; sync();
   };
