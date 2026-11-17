@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ishraq-cache-v44';
+const CACHE_NAME = 'ishraq-cache-v45';
 const assetsToCache = [
   './',
   './index.html',
@@ -75,7 +75,9 @@ const assetsToCache = [
   './js/pages/adiya.js',
   './js/pages/favorites.js',
   './img/app-icon.png',
-  './img/logo.png'
+  './img/logo.png',
+  './img/icon-192.png',
+  './img/icon-512.png'
 ];
 
 // تثبيت الكاش وتخزين الملفات
