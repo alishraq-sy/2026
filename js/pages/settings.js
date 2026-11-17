@@ -1,0 +1,376 @@
+// ===================================================================
+// إعدادات التطبيق - إشراق
+// ===================================================================
+
+// 1. تفعيل / إلغاء تنبيهات أوقات الصلاة
+async function togglePrayerNotifications(checkbox) {
+    if (checkbox.checked) {
+        if (!("Notification" in window)) {
+            alert("متصفحك لا يدعم إشعارات سطح المكتب.");
+            checkbox.checked = false;
+            return;
+        }
+
+        try {
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+                localStorage.setItem('prayer_notifications_enabled', 'true');
+                if (typeof showAppNotification === "function") {
+                    showAppNotification("تطبيق إشراق", {
+                        body: "تم تفعيل تنبيهات أوقات الصلاة بنجاح 🌙",
+                        icon: "./img/logo.png"
+                    });
+                }
+            } else {
+                alert("يجب السماح بالإشعارات من إعدادات المتصفح.");
+                checkbox.checked = false;
+                localStorage.setItem('prayer_notifications_enabled', 'false');
+            }
+        } catch (error) {
+            console.error("خطأ في إذن الإشعارات:", error);
+            checkbox.checked = false;
+            localStorage.setItem('prayer_notifications_enabled', 'false');
+        }
+    } else {
+        localStorage.setItem('prayer_notifications_enabled', 'false');
+    }
+}
+
+// 2. تذكير السبحة المسائي (تفعيل/إلغاء منفصل عن صلاحية الإشعارات الأساسية)
+function toggleTasbeehReminder(checkbox) {
+    localStorage.setItem('tasbeeh_reminder_enabled', checkbox.checked ? 'true' : 'false');
+}
+
+// 3. تذكير الجمعة الأسبوعي
+function toggleFridayReminder(checkbox) {
+    localStorage.setItem('friday_reminder_enabled', checkbox.checked ? 'true' : 'false');
+}
+
+// 4. طريقة حساب مواقيت الصلاة (تُقرأ من ./js/core/prayer.js)
+function setPrayerMethod(value) {
+    localStorage.setItem('eshraq_prayer_method', value);
+}
+function setPrayerCity(value) {
+    localStorage.setItem('eshraq_prayer_city', value);
+}
+function setPrayerSchool(value) {
+    localStorage.setItem('eshraq_prayer_school', value);
+}
+const PRAYER_TUNE_KEYS = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+function setPrayerTune() {
+    const t = {};
+    PRAYER_TUNE_KEYS.forEach(k => {
+        const el = document.getElementById('tune' + k);
+        let v = parseInt(el && el.value) || 0;
+        v = Math.max(-30, Math.min(30, v));
+        if (el) el.value = v;
+        if (v) t[k] = v;
+    });
+    localStorage.setItem('eshraq_prayer_tune', JSON.stringify(t));
+}
+function resetPrayerTune() {
+    localStorage.removeItem('eshraq_prayer_tune');
+    PRAYER_TUNE_KEYS.forEach(k => { const el = document.getElementById('tune' + k); if (el) el.value = 0; });
+}
+
+// 5. وضع القراءة الليلية
+// ملاحظة: دالة toggleNightReadingMode معرّفة بملف ./js/core/main.js فقط (مشتركة بكل الصفحات)
+function toggleNightReadingMode(checkbox) {
+    if (checkbox.checked) {
+        document.documentElement.setAttribute('data-night-mode', 'true');
+        localStorage.setItem('night_reading_mode', 'true');
+    } else {
+        document.documentElement.removeAttribute('data-night-mode');
+        localStorage.setItem('night_reading_mode', 'false');
+    }
+}
+
+// 6. حجم الخط العام (نفس المفتاح المستخدم بالقرآن/الأذكار/الأوراد/الأدعية)
+function setGlobalFontSize(value) {
+    localStorage.setItem('eshraq_font_size', value);
+    updateFontSizeLabel(value);
+}
+
+function updateFontSizeLabel(value) {
+    const label = document.getElementById('fontSizeValueLabel');
+    if (label) {
+        const percent = Math.round((parseFloat(value) / 1.6) * 100);
+        label.textContent = percent + '%';
+    }
+}
+
+// 7. الرسم العثماني الافتراضي لصفحة القرآن
+function toggleDefaultFontFamily(checkbox) {
+    localStorage.setItem('eshraq_font_family', checkbox.checked ? 'uthmani' : 'amiri');
+}
+
+// 8. القارئ الافتراضي
+function setDefaultReciter(value) {
+    localStorage.setItem('eshraq_reciter', value);
+}
+
+// 9. صوت السبحة الافتراضي
+function setDefaultTasbeehSound(pref) {
+    localStorage.setItem('tasbeeh_sound', pref);
+    updateSoundPickerUI();
+}
+
+function updateSoundPickerUI() {
+    const pref = localStorage.getItem('tasbeeh_sound') || 'silent';
+    document.querySelectorAll('#settingsSoundPicker .btn').forEach(btn => {
+        btn.classList.toggle('active-sound', btn.getAttribute('data-sound') === pref);
+    });
+}
+
+// 10. الهدف اليومي للتسبيح
+function setDefaultTasbeehGoal(value) {
+    const goal = parseInt(value) || 300;
+    localStorage.setItem('tasbeeh_daily_goal', goal);
+}
+
+// 11. تصدير نسخة احتياطية كاملة من بيانات التطبيق
+function exportBackup() {
+    const backup = {};
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        backup[key] = localStorage.getItem(key);
+    }
+
+    const dataStr = JSON.stringify(backup, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `اشراق-نسخة-احتياطية-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// 12. استيراد نسخة احتياطية واستعادتها
+function importBackup(file) {
+    if (!file) return;
+
+    ixAsk("سيتم استبدال بياناتك الحالية بالنسخة المستوردة. هل تريد المتابعة؟", { danger: 1, ok: "استبدال" }).then(function (ok) { if (ok) doImport(file); });
+}
+function doImport(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const backup = JSON.parse(e.target.result);
+            Object.keys(backup).forEach(key => {
+                localStorage.setItem(key, backup[key]);
+            });
+            alert("تم استيراد النسخة الاحتياطية بنجاح! سيتم إعادة تحميل الصفحة.");
+            window.location.reload();
+        } catch (err) {
+            alert("الملف المختار غير صالح أو تالف، تأكد أنه ملف نسخة احتياطية صادر من التطبيق.");
+        }
+    };
+    reader.readAsText(file);
+}
+
+// 13. تحديث ذاكرة التخزين المؤقت فقط (بدون مسح بيانات المستخدم)
+function refreshAppCache() {
+    if ('caches' in window) {
+        caches.keys().then(names => {
+            names.forEach(name => caches.delete(name));
+        }).then(() => {
+            alert("تم تحديث ذاكرة التخزين، سيتم إعادة تحميل الصفحة بأحدث نسخة.");
+            window.location.reload();
+        });
+    } else {
+        window.location.reload();
+    }
+}
+
+// 14. زر مشاركة التطبيق / صدقة جارية
+async function shareApp() {
+    const shareData = {
+        title: 'تطبيق إشراق الإسلامي',
+        text: 'تطبيق إشراق رفيقك اليومي للقرآن، الأذكار، وأوقات الصلاة.',
+        url: window.location.href
+    };
+
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+        } else {
+            throw new Error("المشاركة غير متوفرة");
+        }
+    } catch (err) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                alert("تم نسخ رابط التطبيق إلى الحافظة بنجاح! 🌙");
+                return;
+            } catch (clipErr) {
+                console.error("فشل النسخ", clipErr);
+            }
+        }
+        alert("انسخ الرابط يدوياً:\n" + window.location.href);
+    }
+}
+
+// 15. مسح جميع بيانات التطبيق نهائياً
+function clearAppStorage() {
+    ixAsk("هل أنت متأكد من مسح جميع بيانات التطبيق والإعدادات؟ هذا الإجراء لا يمكن التراجع عنه.", { danger: 1, ok: "مسح الكل" }).then(function (ok) {
+      if (!ok) return;
+        localStorage.clear();
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
+            });
+        }
+        alert("تم مسح البيانات بنجاح، سيتم إعادة تحميل الصفحة.");
+        setTimeout(function () { window.location.reload(); }, 1200);
+    });
+}
+
+// 16. تهيئة الحالة عند فتح الصفحة (ضبط كل عناصر التحكم بقيمها المحفوظة فعلياً)
+document.addEventListener('DOMContentLoaded', () => {
+    // إلغاء إشعارات المتصفح المحلية القديمة (تحتاج بقاء الموقع مفتوحًا): الاعتماد الآن على إشعارات إشراق من الخادم
+    ['prayer_notifications_enabled', 'tasbeeh_reminder_enabled', 'friday_reminder_enabled'].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+    // تنبيهات الصلاة
+    const notifToggle = document.getElementById('prayerNotificationsToggle');
+    if (notifToggle) {
+        const userWantsNotifications = localStorage.getItem('prayer_notifications_enabled') === 'true';
+        const permissionGranted = ("Notification" in window) && Notification.permission === "granted";
+
+        if (userWantsNotifications && permissionGranted) {
+            notifToggle.checked = true;
+        } else {
+            notifToggle.checked = false;
+            if (userWantsNotifications && !permissionGranted) {
+                localStorage.setItem('prayer_notifications_enabled', 'false');
+            }
+        }
+    }
+
+    // تذكير السبحة المسائي (مفعّل افتراضياً إن لم يُحدَّد من قبل)
+    const tasbeehReminderToggle = document.getElementById('tasbeehReminderToggle');
+    if (tasbeehReminderToggle) {
+        tasbeehReminderToggle.checked = localStorage.getItem('tasbeeh_reminder_enabled') !== 'false';
+    }
+
+    // تذكير الجمعة (مفعّل افتراضياً إن لم يُحدَّد من قبل)
+    const fridayReminderToggle = document.getElementById('fridayReminderToggle');
+    if (fridayReminderToggle) {
+        fridayReminderToggle.checked = localStorage.getItem('friday_reminder_enabled') !== 'false';
+    }
+
+    // طريقة حساب المواقيت
+    const prayerMethodSelect = document.getElementById('prayerMethodSelect');
+    if (prayerMethodSelect) {
+        prayerMethodSelect.value = localStorage.getItem('eshraq_prayer_method') || 'auto';
+        if (!prayerMethodSelect.value) prayerMethodSelect.value = 'auto';
+        const cs = document.getElementById('prayerCitySelect'); if (cs) cs.value = localStorage.getItem('eshraq_prayer_city') || 'auto';
+        const ss = document.getElementById('prayerSchoolSelect'); if (ss) ss.value = localStorage.getItem('eshraq_prayer_school') || '0';
+        try {
+            const t = JSON.parse(localStorage.getItem('eshraq_prayer_tune') || '{}') || {};
+            PRAYER_TUNE_KEYS.forEach(k => { const el = document.getElementById('tune' + k); if (el) el.value = t[k] || 0; });
+        } catch (e) {}
+    }
+
+    // الوضع الليلي
+    const nightToggle = document.getElementById('nightModeToggle');
+    if (nightToggle) {
+        const isNightMode = localStorage.getItem('night_reading_mode') === 'true';
+        nightToggle.checked = isNightMode;
+        if (isNightMode) {
+            document.documentElement.setAttribute('data-night-mode', 'true');
+        }
+    }
+
+    // حجم الخط العام
+    const fontSizeSlider = document.getElementById('globalFontSizeSlider');
+    if (fontSizeSlider) {
+        const savedSize = parseFloat(localStorage.getItem('eshraq_font_size')) || 1.6;
+        fontSizeSlider.value = savedSize;
+        updateFontSizeLabel(savedSize);
+    }
+
+    // الرسم العثماني
+    const fontFamilyToggle = document.getElementById('fontFamilyToggle');
+    if (fontFamilyToggle) {
+        fontFamilyToggle.checked = localStorage.getItem('eshraq_font_family') === 'uthmani';
+    }
+
+    // القارئ الافتراضي
+    const reciterSelect = document.getElementById('reciterSelect');
+    if (reciterSelect) {
+        reciterSelect.value = localStorage.getItem('eshraq_reciter') || 'afs';
+    }
+
+    // صوت السبحة
+    updateSoundPickerUI();
+
+    // الهدف اليومي للسبحة
+    const goalInput = document.getElementById('tasbeehGoalInput');
+    if (goalInput) {
+        goalInput.value = parseInt(localStorage.getItem('tasbeeh_daily_goal')) || 300;
+    }
+});
+
+// 17. تثبيت التطبيق (PWA Install Prompt)
+// deferredPrompt معرّف في ./js/core/main.js (تعريفه مرتين كان يمنع تشغيل ./js/core/main.js بصفحة الإعدادات)
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installRow = document.getElementById('installRow');
+    if (installRow) {
+        installRow.style.display = 'flex';
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const installAppBtn = document.getElementById('installAppBtn');
+    const installRow = document.getElementById('installRow');
+
+    if (installAppBtn) {
+        installAppBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log(`نتيجة التثبيت: ${outcome}`);
+                deferredPrompt = null;
+                if (installRow) installRow.style.display = 'none';
+            } else {
+                alert("لتثبيت التطبيق على هاتفك:\n- أندرويد (متصفح كروم): اضغط على نقاط القائمة الثلاث في المتصفح ثم اختر 'تثبيت التطبيق' أو 'إضافة إلى الشاشة الرئيسية'.\n- آيفون (متصفح سفاري): اضغط زر المشاركة ثم اختر 'إضافة إلى الشاشة الرئيسية'.");
+            }
+        });
+    }
+});
+
+/* إشعارات إشراق (FCM الحقيقية) */
+(function () {
+  function sync() {
+    var t = document.getElementById("serverPushToggle"), d = document.getElementById("serverPushDesc"); if (!t || !window.ixPush) return;
+    if (!ixPush.supported()) { t.disabled = true; if (d) d.textContent = "متصفحك لا يدعم الإشعارات. على الآيفون أضف التطبيق إلى الشاشة الرئيسية أولًا."; return; }
+    if (ixPush.permission() === "denied") { t.disabled = true; if (d) d.textContent = "الإشعارات محظورة من إعدادات المتصفح لهذا الموقع. فعّلها من هناك ثم أعد المحاولة."; }
+    t.checked = ixPush.on();
+    var on = ixPush.on();
+    Array.prototype.forEach.call(document.querySelectorAll("[data-px]"), function (c) { c.checked = on && ixPush.pref(c.getAttribute("data-px")); if (ixPush.permission() === "denied" || !ixPush.supported()) c.disabled = true; });
+  }
+  window.togglePx = async function (cb) {
+    var k = cb.getAttribute("data-px"); cb.disabled = true;
+    try {
+      if (cb.checked && !ixPush.on()) await ixPush.enable();
+      ixPush.setPref(k, cb.checked);
+      var r = await ixPush.sync(true);
+      if (cb.checked && r && r.approx && !localStorage.getItem("ix_px_approx")) { try { localStorage.setItem("ix_px_approx", "1"); } catch (e) {} alert("ما قدرنا نعرف موقعك، فاستخدمنا دمشق مؤقتًا. اختر مدينتك من «أوقات الصلاة والموقع» أدناه لتصلك الأوقات الصحيحة."); }
+    } catch (e) { cb.checked = !cb.checked; ixPush.setPref(k, cb.checked); alert(e && e.message === "denied" ? "لم يُسمح بالإشعارات. فعّلها من إعدادات المتصفح لهذا الموقع." : "تعذّر التفعيل الآن، حاول لاحقًا."); }
+    cb.disabled = false; sync();
+  };
+  window.toggleServerPush = async function (cb) {
+    cb.disabled = true;
+    try {
+      if (cb.checked) { await ixPush.enable(); alert("تم تفعيل إشعارات إشراق ✅"); }
+      else { await ixPush.disable(); }
+    } catch (e) { cb.checked = false; alert(e && e.message === "denied" ? "لم يُسمح بالإشعارات. فعّلها من إعدادات المتصفح." : "تعذّر التفعيل الآن، حاول لاحقًا."); }
+    cb.disabled = false; sync();
+  };
+  document.addEventListener("DOMContentLoaded", sync);
+})();

@@ -1,0 +1,91 @@
+/* =====================================================================
+   إشراق — تخطيط اللابتوب والشاشات العريضة (من 992px وفوق فقط)
+   يُحمَّل بـ media="(min-width:992px)" فلا يمسّ الموبايل إطلاقًا
+   ===================================================================== */
+@media (min-width:992px){
+:root{--dk-side:236px}
+body.ix.app{--pg:880px}
+body.ix.app:is(:has(#ix-extras),:has(#surahs-container),:has(#zikr-container),:has(#asma-grid)){--pg:1180px}
+body.ix.app:has(main#wn){--pg:1040px}
+body.ix.app:has(#pilgrimBox){--pg:1180px}
+
+/* ---------- الهيكل: شريط جانبي ثابت على اليمين ---------- */
+body.ix.app{padding-right:var(--dk-side)!important;padding-bottom:40px!important}
+body.ix.app.no-nav{padding-right:0!important}
+.ix .bottom-nav,.ix.app .bottom-nav.d-md-none{
+  display:flex!important;flex-direction:column;position:fixed;top:0;bottom:0;right:0;left:auto;width:var(--dk-side);
+  border:0;border-left:1px solid #cf9f5230;border-radius:0!important;box-shadow:-10px 0 40px #0008;clip-path:none;
+  padding:96px 14px 20px;background:#101012f2;overflow-y:auto}
+.ix .bottom-nav .container{display:flex!important;flex-direction:column;justify-content:flex-start!important;align-items:stretch!important;gap:6px;max-width:none!important;width:100%;padding:0!important}
+.ix .nav-item-bottom{display:flex!important;flex-direction:row;align-items:center;gap:14px;flex:none;text-align:right!important;
+  padding:13px 16px!important;border-radius:16px;font-size:1rem;transition:background .2s,color .2s}
+.ix .nav-item-bottom .bi{display:inline-block!important;font-size:1.35rem!important;width:26px;text-align:center}
+.ix .nav-item-bottom .active-icon{display:none!important}
+.ix .nav-item-bottom span{font-size:1rem!important;margin:0!important;font-weight:700}
+.ix .nav-item-bottom:hover{background:#ffffff0d;color:var(--a2)!important}
+.ix .nav-item-bottom.active,.ix .nav-item-bottom.active-page{background:linear-gradient(90deg,#d6ac5214,#d6ac5230)}
+.ix .nav-item-bottom.active .active-icon{display:inline-block!important}
+.ix .nav-item-bottom.active>.bi:not(.active-icon){display:none!important}
+.ix .nav-item-bottom.active::before{top:12px!important;bottom:12px;right:0;left:auto;width:3px!important;height:auto!important;border-radius:3px 0 0 3px!important}
+/* شعار أعلى الشريط */
+.ix .bottom-nav::before{content:"إشراق";position:absolute;top:26px;right:0;left:0;text-align:center;font-family:"Reem Kufi",Cairo,sans-serif;font-size:1.9rem;font-weight:700;color:var(--a2);letter-spacing:1px}
+
+/* ---------- الشريط العلوي والمحتوى ---------- */
+.app-bar{background:linear-gradient(180deg,#0b0b0cf5 70%,#0b0b0c00);right:var(--dk-side)!important;left:0!important;width:auto!important}
+body.ix.app.no-nav .app-bar{right:0!important}
+.app-bar .in{max-width:var(--pg);padding:10px 36px 0}
+.app-bar .logo img{height:60px}
+.ix.app main.ix-wrap,.ix.app .ix-wrap,.ix.app>.container,.ix.app main>.container,.ix.app>main{max-width:var(--pg)!important;padding-inline:36px!important}
+.ix.app .container{max-width:var(--pg)}
+.ix.app.reader{--pg:900px!important}
+.ix.app .ix-foot{grid-column:1/-1}
+/* المشغّل العائم يبتعد عن الشريط الجانبي */
+.ix .ix-player,#hz-bar{right:calc(var(--dk-side) + 16px)!important;left:16px!important;bottom:18px!important;max-width:760px}
+body.ix.app #toast{left:50%}
+#ix-more .sheet,#ix-utabs .sheet{max-width:560px;bottom:auto;top:90px;border-radius:24px}
+
+.ix.app main>.container{padding-inline:0!important}
+.ix.app .container{padding-inline:0}
+.ix.app .container>.row>.col-lg-9,.ix.app .container>.row>.col-12.col-lg-9{flex:0 0 100%;max-width:100%;width:100%}
+
+/* ---------- الأذكار / الأوراد / الأدعية: عمودان ---------- */
+.ix.app #zikr-container{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+.ix.app #zikr-container>*{margin:0!important;min-width:0}
+.ix.app #zikr-container>:not(.zikr-card):not(.supplication-box):not(.supplication-box-1){grid-column:1/-1}
+
+/* ---------- الأسماء الحسنى ---------- */
+.as-grid{grid-template-columns:repeat(6,1fr)}
+
+/* ---------- الإعدادات: عمودان ---------- */
+.ix.app main#wn>.container{column-count:2;column-gap:32px}
+.ix.app main#wn>.container>*{break-inside:avoid}
+.ix.app main#wn>.container>.whats-new-card,.ix.app main#wn>.container>.ix-qhead,.ix.app main#wn>.container>h1,.ix.app main#wn>.container>.app-hero{column-span:all}
+.ix.app main#wn .settings-section-title{break-after:avoid}
+
+/* ---------- الرئيسية: شبكة 12 عمودًا ---------- */
+.ix.app main.ix-wrap:has(#ix-extras){display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:26px 24px;align-items:start}
+.ix.app main.ix-wrap:has(#ix-extras)>*{grid-column:span 12;margin:0!important;min-width:0}
+.ix.app main.ix-wrap:has(#ix-extras)>#ix-time,.ix.app main.ix-wrap:has(#ix-extras)>#ix-time+.ix-sec,.ix.app main.ix-wrap:has(#ix-extras)>#ix-asma,.ix.app main.ix-wrap:has(#ix-extras)>#ix-ramadan{grid-column:span 6}
+.ix.app main.ix-wrap:has(#ix-extras)>#ix-time[style*="none"]+.ix-sec{grid-column:span 12}
+.ix.app main.ix-wrap:has(#ix-extras)>#ix-asma:last-of-type{grid-column:span 6}
+#ix-extras{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 22px;align-items:start}
+#ix-extras>:not(.x-card):not(.x-daily){grid-column:1/-1}
+#ix-extras>.x-daily{margin-top:0}
+.ix.app .ix-grid{grid-template-columns:repeat(5,1fr);gap:14px}
+@media (min-width:1280px){.ix.app .ix-grid{grid-template-columns:repeat(9,1fr);gap:12px}.ix.app .ix-tile{aspect-ratio:1/1.1}}
+.ix.app .ix-tile{aspect-ratio:1/.92}
+.ix.app .prayer-card{padding-inline:28px}
+
+/* ---------- بوابة العمرة: عمودان (والإدارة بعرض كامل) ---------- */
+.ix.app main:has(#pilgrimBox){column-count:2;column-gap:28px}
+.ix.app main:has(#pilgrimBox)>*{break-inside:avoid;-webkit-column-break-inside:avoid}
+.ix.app main:has(#pilgrimBox)>.text-center,.ix.app main:has(#pilgrimBox)>#uSecHead,.ix.app main:has(#pilgrimBox)>#tabsBar{column-span:all}
+.ix.app main:has(#adminBox:not(.d-none)){column-count:1}
+.ix.app main:has(#pilgrimBox) #quickActs{flex-wrap:wrap;overflow:visible}
+
+/* ---------- لوحة الإدارة ---------- */
+#admTabs{flex-wrap:wrap!important;overflow:visible!important}
+#pList,#supBox+div,#mgrBox+div,#shkBox+div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+#pList>*{margin:0!important}
+#admBody .u-box,#admBody .u-in{max-width:100%}
+}
