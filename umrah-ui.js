@@ -39,6 +39,8 @@
       }
     }
     qa.innerHTML = a.join("");
+    var qm = $("quickMore");
+    if (!qm) { qm = document.createElement("button"); qm.type = "button"; qm.id = "quickMore"; qm.className = "qa-more"; qm.innerHTML = '<i class="bi bi-grid-fill ms-2"></i>المزيد'; qa.parentNode.insertBefore(qm, qa.nextSibling); qm.addEventListener("click", function () { var t = $("umrah-tabs-btn"); if (t) t.click(); }); }
   }
   qa.addEventListener("click", function (e) {
     var g = e.target.closest("[data-go]"); if (g) { buzz(12); setView(g.dataset.go); return; }
@@ -128,8 +130,8 @@
 
   /* ---------- العرض: الرئيسية + أقسام «المزيد» الخاصة بالمستخدم ---------- */
   var view = "home", tb = $("umrah-tabs-btn");
-  var ICON = { bus: "bi-bus-front-fill", sup: "bi-people-fill", hotel: "bi-building-fill", prog: "bi-calendar-event", rites: "bi-check2-square", ask: "bi-chat-dots", fatwa: "bi-question-circle", rate: "bi-star", admin: "bi-speedometer2", sheikh: "bi-book" };
-  var TOP = ["pilgrimBox", "quickActs", "nextBox", "lostBox", "notifyBar"];
+  var ICON = { rawda: "bi-moon-stars", bus: "bi-bus-front-fill", sup: "bi-people-fill", hotel: "bi-building-fill", prog: "bi-calendar-event", rites: "bi-check2-square", ask: "bi-chat-dots", fatwa: "bi-question-circle", rate: "bi-star", admin: "bi-speedometer2", sheikh: "bi-book" };
+  var TOP = ["pilgrimBox", "quickActs", "quickMore", "nextBox", "lostBox", "notifyBar"];
   function visible(el) { return el && !el.classList.contains("d-none"); }
   function sections() { // أقسام المستخدم الحالي فقط
     if (typeof me === "undefined" || !me) return [];
@@ -137,7 +139,7 @@
     if (role === "admin") list = (typeof ADM_TABS !== "undefined" ? ADM_TABS : [["today", "لوحة المشرف", "bi-speedometer2"]]).map(function (t) { return ["adm:" + t[0], t[1], t[2]]; }).concat([["prog", "برنامج الرحلة"]]);
     else if (role === "sheikh") list = [["sheikh", "لوحة الشيخ"], ["prog", "برنامج الرحلة"]];
     else {
-      var has = { bus: visible($("busBox")), sup: visible($("mySupBox")), hotel: visible($("hotelBox")) };
+      var has = { bus: visible($("busBox")), sup: visible($("mySupBox")), hotel: visible($("hotelBox")), rawda: visible($("rawdaBox")) };
       list = (typeof TABS !== "undefined" ? TABS : []).filter(function (t) { return t[0] !== "all" && has[t[0]] !== false; });
     }
     return list;
@@ -149,6 +151,7 @@
     TOP.forEach(function (id) { var e = $(id); if (e) e.classList.toggle("uv-off", view !== "home"); });
     document.querySelectorAll("[data-sec]").forEach(function (e) { e.classList.toggle("uv-off", view === "home" || e.dataset.sec !== (view.indexOf("adm:") === 0 ? "admin" : view)); });
     tb.classList.toggle("d-none", !(logged && secs.length));
+    var qm0 = $("quickMore"); if (qm0) qm0.classList.toggle("d-none", !(logged && secs.length));
     var head = $("uSecHead");
     if (!head) { head = document.createElement("div"); head.id = "uSecHead"; head.className = "u-sechead"; $("app").insertBefore(head, $("app").firstChild); }
     var cur = secs.filter(function (s) { return s[0] === view; })[0];

@@ -205,16 +205,11 @@ const qrPayload = () => {
   return L.join('\n');
 };
 const roomAr = r => { r = String(r || '').trim(); return r ? 'غرفة ' + r.replace(/ي$/, 'ية') : ''; }; // رباعي → غرفة رباعية
-const ticketRows = () => {
+const ticketRows = () => { // اسم المعتمر ورقمه في رأس البطاقة؛ هنا فندق مكة والمدينة مع الغرفة ورقم المشرف فقط
   const r = [];
-  [['فندق مكة المكرمة', 'Makkah'], ['فندق المدينة المنورة', 'Madinah']].forEach(([n, k]) => {
+  [['فندق مكة', 'Makkah'], ['فندق المدينة', 'Madinah']].forEach(([n, k]) => {
     if (me[k + '_Hotel'] || me[k + '_Room']) r.push([n, `${me[k + '_Hotel'] || '—'}${me[k + '_Room'] ? ' — غرفة ' + me[k + '_Room'] : ''}`]);
   });
-  if (me.Room_Type) r.push(['نوع الغرفة', roomAr(me.Room_Type)]);
-  if (me.Rawda_Status) r.push(['حجز الروضة الشريفة', me.Rawda_Status]);
-  const bus = [me.Bus_Title, me.Bus_No && 'رقم ' + me.Bus_No].filter(Boolean).join(' — ');
-  if (bus) r.push(['باص الرحلة', bus]);
-  if (me.Supervisor_Name) r.push(['المشرف', me.Supervisor_Name]);
   if (me.Supervisor_Phone) r.push(['رقم المشرف', me.Supervisor_Phone]);
   return r;
 };
@@ -248,7 +243,7 @@ function renderMe() {
     <div class="head d-flex justify-content-between align-items-center"><div><small>أهلًا بك</small><div class="h5 fw-bold mb-0">${esc(me.Name)}</div></div>
       <div class="text-center"><small>رقم المعتمر</small><div class="no">${esc(me.PilgrimNo)}</div></div></div>
     <div class="perf"></div>
-    <div class="body"><img class="wm" src="./5b862b4281f64fd884b11984846f0e97.png" alt="" aria-hidden="true">${ticketRows().map(([k, v]) => `<p><b>${esc(k)}</b><bdi dir="${/^[+\d\s-]+$/.test(v) ? 'ltr' : 'rtl'}">${esc(v)}</bdi></p>`).join('')}${links ? `<p>${links}</p>` : ''}
+    <div class="body"><img class="wm" src="./5b862b4281f64fd884b11984846f0e97.png" alt="" aria-hidden="true">${ticketRows().map(([k, v]) => `<p><b>${esc(k)}</b><bdi dir="${/^[+\d\s-]+$/.test(v) ? 'ltr' : 'rtl'}">${esc(v)}</bdi></p>`).join('')}
       <div id="qrWrap" class="text-center my-3"><div id="qrBox" class="d-inline-block bg-white p-2 rounded"></div><small class="d-block mt-1" style="opacity:.75">رمز الحضور — اعرضه للمشرف عند صعود الباص</small></div>
       <div class="d-grid gap-2">
         <button type="button" class="btn btn-dark" id="saveCard"><i class="bi bi-download ms-1"></i>حفظ البطاقة كصورة</button>
@@ -336,6 +331,29 @@ function renderHotels() {
     ${isUrl(x.l) ? `<a href="${esc(x.l)}" target="_blank" rel="noopener" class="btn btn-sm btn-gold-outline rounded-pill mt-2"><i class="bi bi-map ms-1"></i>الموقع على الخريطة</a>` : ''}</div>` : '';
   b.innerHTML = `<h2><i class="bi bi-buildings ms-2"></i>معلومات الفنادق</h2>${block('فندق مكة المكرمة', f[0])}${block('فندق المدينة المنورة', f[1])}${imgBtn('hotel')}`;
 }
+let rawdaSrc = '';
+function renderRawda() {
+  const b = $('rawdaBox'), ok = me && role === 'pilgrim';
+  b.classList.toggle('d-none', !ok);
+  if (!ok) return;
+  const st = me.Rawda_Status || 'لم يتم الحجز بعد', done = st === 'تم الحجز بنجاح', cls = done ? 'bg-success' : st === 'جاري الحجز' ? 'bg-warning text-dark' : 'bg-secondary';
+  b.innerHTML = `<h2><i class="bi bi-moon-stars ms-2"></i>حجز الروضة الشريفة</h2>
+    <div class="d-flex align-items-center gap-2 mb-2"><span>حالة الحجز:</span><span class="badge ${cls} fs-6">${esc(st)}</span></div>
+    ${done && me.Rawda_At ? `<div class="mb-2"><i class="bi bi-calendar-event ms-1 gold"></i>${esc(fmtDay(String(me.Rawda_At).replace('T', ' ')))}</div>` : ''}
+    ${done && me.Rawda_Img ? `<div id="rawdaImg" class="text-center mt-2"><button type="button" class="btn btn-gold-outline rounded-pill" data-rawda><i class="bi bi-image ms-1"></i>عرض صورة الحجز</button></div>` : ''}
+    ${!done ? '<small class="d-block" style="opacity:.8">ستظهر هنا صورة الحجز وموعده عند إتمام الحجز.</small>' : ''}`;
+}
+$('rawdaBox').onclick = async e => {
+  const bt = e.target.closest('[data-rawda]'); if (!bt) return;
+  bt.disabled = true;
+  try {
+    const r = await post({ action: 'rawda_img', code }); if (!r.ok) throw 0;
+    if (rawdaSrc) URL.revokeObjectURL(rawdaSrc);
+    const bin = atob(r.data), u8 = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    rawdaSrc = URL.createObjectURL(new Blob([u8], { type: r.mime }));
+    $('rawdaImg').innerHTML = r.mime === 'application/pdf' ? `<a class="btn btn-gold-solid rounded-pill" href="${rawdaSrc}" target="_blank" rel="noopener">فتح ملف الحجز</a>` : `<img src="${rawdaSrc}" alt="صورة حجز الروضة" class="img-fluid rounded-3" style="max-height:70vh">`;
+  } catch { toast('تعذّر فتح صورة الحجز'); bt.disabled = false; }
+};
 $('hotelBox').onclick = e => { const b = e.target.closest('[data-copy]'); if (b) copyText(b.dataset.copy); };
 
 /* ---------- أنا تائه + ردّ المشرف ---------- */
@@ -388,7 +406,8 @@ function renderInq() {
 /* ---------- تنبيهات التعديلات والمزامنة ---------- */
 function notify(msgs) {
   if (!msgs.length) return;
-  toast(msgs.join(' • '), 8000); navigator.vibrate?.(150);
+  navigator.vibrate?.(150);
+  if (typeof ixNotice === 'function') ixNotice({ title: 'حملة الإشراق', msg: msgs.join('\n\n'), icon: 'bi-bell-fill', btns: [{ t: 'إغلاق', v: 0, c: 'p' }] }); else toast(msgs.join(' • '), 8000);
   if ('Notification' in window && Notification.permission === 'granted')
     msgs.forEach(m => { try { new Notification('حملة الإشراق', { body: m, tag: m, icon: './5b862b4281f64fd884b11984846f0e97.png' }); } catch {} });
 }
@@ -432,7 +451,7 @@ async function sync(forceInq) {
       if (lost?.status === 'responding' && was !== 'responding') msgs.push('ردّ المشرف: ' + (lost.reply || 'نحن في طريقنا إليك'));
       renderLost();
     }
-    if (r.mine && Object.keys(r.mine).some(k => me[k] !== r.mine[k])) { Object.assign(me, r.mine); renderMe(); renderBus(); renderSup(); renderHotels(); renderTabs(); save(); }
+    if (r.mine && Object.keys(r.mine).some(k => me[k] !== r.mine[k])) { Object.assign(me, r.mine); renderMe(); renderBus(); renderSup(); renderHotels(); renderRawda(); renderTabs(); save(); }
     if (r.hi && Object.keys(r.hi).some(k => me[k] !== r.hi[k])) { Object.assign(me, r.hi); renderMe(); renderHotels(); renderTabs(); } // تحديث واي فاي/موقع الفندق
     save(); notify(msgs);
   } catch {} finally { syncing = false; }
@@ -443,12 +462,12 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) sync
 
 /* ---------- علامات التبويب ---------- */
 let curTab = 'all';
-const TABS = [['all', 'الكل'], ['bus', 'باص الرحلة'], ['sup', 'المشرفون'], ['hotel', 'معلومات الفنادق'], ['prog', 'برنامج الرحلة'], ['rites', 'مناسكي وتجهيزاتي'], ['ask', 'ملاحظات واستفسارات'], ['fatwa', 'الأسئلة الشرعية'], ['rate', 'تقييم الرحلة']];
+const TABS = [['all', 'الكل'], ['bus', 'باص الرحلة'], ['sup', 'المشرفون'], ['hotel', 'معلومات الفنادق'], ['rawda', 'حجز الروضة الشريفة'], ['prog', 'برنامج الرحلة'], ['rites', 'مناسكي وتجهيزاتي'], ['ask', 'ملاحظات واستفسارات'], ['fatwa', 'الأسئلة الشرعية'], ['rate', 'تقييم الرحلة']];
 function renderTabs() {
   const on = me && role === 'pilgrim';
   $('tabsBar').classList.toggle('d-none', !on);
   if (!on) { document.querySelectorAll('[data-sec]').forEach(el => el.classList.remove('tab-off')); return; }
-  const has = { bus: !$('busBox').classList.contains('d-none'), sup: !$('mySupBox').classList.contains('d-none'), hotel: !$('hotelBox').classList.contains('d-none') };
+  const has = { bus: !$('busBox').classList.contains('d-none'), sup: !$('mySupBox').classList.contains('d-none'), hotel: !$('hotelBox').classList.contains('d-none'), rawda: !$('rawdaBox').classList.contains('d-none') };
   if (curTab !== 'all' && has[curTab] === false) curTab = 'all';
   $('tabs').innerHTML = TABS.filter(([k]) => has[k] !== false).map(([k, l]) =>
     `<li class="nav-item"><button type="button" class="nav-link${k === curTab ? ' active' : ''}" data-t="${k}">${l}</button></li>`).join('');
@@ -470,7 +489,7 @@ function render() {
   $('app').classList.toggle('d-none', !me);
   ['rateBox', 'askBox', 'fatwaBox'].forEach(i => $(i).classList.toggle('d-none', adm));
   $('adminBox').classList.toggle('d-none', !(me && adm));
-  applyBanner(); renderBus(); renderSup(); renderHotels(); renderLost(); renderInq(); updateNotifyBar(); renderTabs();
+  applyBanner(); renderBus(); renderSup(); renderHotels(); renderRawda(); renderLost(); renderInq(); updateNotifyBar(); renderTabs();
   applySchedule();
   if (me && adm && typeof adminRender === 'function') adminRender();
   if (typeof fatwaRender === 'function') fatwaRender();

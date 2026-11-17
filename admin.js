@@ -149,6 +149,7 @@ const PFIELDS = [['Code', 'الرقم السري للدخول'], ['PilgrimNo', '
   ['Supervisor_Name', 'اسم المشرف'], ['Supervisor_Phone', 'هاتف المشرف'], ['Manager_Name', 'إداري الحملة'], ['Manager_Phone', 'هاتف الإداري'], ['Makkah_Hotel', 'فندق مكة'], ['Makkah_Room', 'غرفة مكة'], ['Madinah_Hotel', 'فندق المدينة'], ['Madinah_Room', 'غرفة المدينة'], ['Room_Type', 'نوع الغرفة'], ['Rawda_Status', 'حجز الروضة']];
 const ROOMS = ['إفرادي', 'ثنائي', 'ثلاثي', 'رباعي', 'خماسي'], RAWDA = ['لم يتم الحجز بعد', 'جاري الحجز', 'تم الحجز بنجاح'];
 const RAWDA_CLS = ['bg-secondary', 'bg-warning text-dark', 'bg-success'];
+const RAWDA_DOC = ['rawda', 'Rawda_Id', 'صورة حجز الروضة الشريفة', 'bi-image'];
 const DOCS = [['photo', 'Photo_Id', 'الصورة الشخصية', 'bi-person-bounding-box'], ['passport', 'Passport_Id', 'صورة جواز السفر', 'bi-passport'], ['visa', 'Visa_Id', 'الفيزا', 'bi-card-heading']];
 let pUp = 0;
 async function admPpl() {
@@ -211,6 +212,9 @@ async function pForm(p) {
   const nw = p ? 0 : 1;
   $('pBox').innerHTML = `<div class="u-box mb-3" style="border-color:#edcea0"><div class="gold fw-bold mb-2">${p ? 'تعديل معتمر' : 'إضافة معتمر'}</div><div class="row g-2">
     ${PFIELDS.filter(([k]) => hs.includes(k) && !(k === 'Bus_Title' && hasBus)).map(([k, l]) => field(k, l)).join('')}</div>
+    ${hs.includes('Rawda_Id') ? `<div class="gold fw-bold mt-3 mb-2"><i class="bi bi-image ms-1"></i>حجز الروضة الشريفة</div><div class="row g-2">${docBox(...RAWDA_DOC.slice(0, 4), p ? String(p.Rawda_Id ?? '') : '')}
+      <div class="col-12"><label class="small">وقت وتاريخ الحجز</label><input type="datetime-local" class="form-control u-in form-control-sm" data-k="Rawda_At" value="${esc(toLocal(p ? p.Rawda_At : ''))}"></div></div>
+      <small class="d-block mt-1" style="color:#d3d3c7">تظهر هذه الصورة والموعد للمعتمر في تبويب «حجز الروضة الشريفة».</small>` : ''}
     ${hs.includes('Photo_Id') ? `<div class="gold fw-bold mt-3 mb-2"><i class="bi bi-paperclip ms-1"></i>المرفقات</div><div class="row g-2">${DOCS.map(([kd, col, lab, ic]) => docBox(kd, col, lab, ic, p ? String(p[col] ?? '') : '')).join('')}</div>
       <small class="d-block mt-1" style="color:#d3d3c7">صورة أو PDF. تُضغط الصور تلقائيًا، وتُحفظ بخصوصية في Google Drive ولا تظهر للمعتمر.</small>` : ''}
     ${!o.makkah.length || !o.madinah.length || !hasBus || !hasSup || !hasMgr ? '<small class="d-block mt-2" style="color:#d3d3c7">لتفعيل القوائم المنسدلة أضف الفنادق والباصات والمشرفين من تبويبات «الفنادق» و«الباصات» و«المشرفون» (المشرفون وإداريو الحملة).</small>' : ''}
@@ -380,7 +384,8 @@ function sForm(e) {
     <label class="small">الانتهاء (اختياري)</label><input type="datetime-local" class="form-control u-in mb-2" data-k="End_Time" value="${e ? toLocal(e.End_Time, st) : ''}">
     <input class="form-control u-in mb-2" data-k="Location" placeholder="المكان" value="${esc(e?.Location)}">
     <textarea class="form-control u-in mb-2" data-k="Notes" rows="2" placeholder="ملاحظات">${esc(e?.Notes)}</textarea>
-    <select class="form-select u-in mb-3" data-k="Status"><option value="Active"${!e || isActive(e) ? ' selected' : ''}>فعّال</option><option value="Inactive"${e && !isActive(e) ? ' selected' : ''}>ملغي</option></select>
+    <select class="form-select u-in mb-2" data-k="Status"><option value="Active"${!e || isActive(e) ? ' selected' : ''}>فعّال</option><option value="Inactive"${e && !isActive(e) ? ' selected' : ''}>ملغي</option></select>
+    ${e ? '' : `<label class="small">إشعار عند الإضافة</label><select id="sNotify" class="form-select u-in mb-3"><option value="">بدون إشعار</option><option value="umrah">إشعار للمعتمرين فقط</option><option value="all">إشعار لجميع مستخدمي التطبيق</option></select>`}
     <div class="d-flex gap-2"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="s-save">حفظ</button><button type="button" class="btn btn-outline-light" data-act="s-cancel">إلغاء</button></div></div>`;
   $('sBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
@@ -435,7 +440,7 @@ async function admSups() {
     <div id="mgrBox"></div>
     ${mgrData.map((x, i) => `<div class="ev" style="display:block"><div class="d-flex justify-content-between align-items-center"><b class="text-light">${esc(x.name)}</b>
         <span class="d-flex gap-1"><button type="button" class="btn btn-sm btn-gold-outline py-0" data-act="mgr-edit" data-i="${i}" aria-label="تعديل"><i class="bi bi-pencil"></i></button>${delBtn(`data-act="mgr-del" data-i="${i}"`)}</span></div>
-      <small class="d-block">${x.phone ? `<a href="${phoneHref(x.phone)}" class="gold" dir="ltr">${esc(x.phone)}</a>` : 'بلا هاتف'}</small></div>`).join('') || '<small class="desc-text">لا إداري مضاف بعد. يظهر اسمه ورقمه في قائمة «إداري الحملة» عند إضافة المعتمرين ويُملأ الرقم تلقائيًا.</small>'}
+      <small class="d-block">${x.phone ? `<a href="${phoneHref(x.phone)}" class="gold" dir="ltr">${esc(x.phone)}</a>` : 'بلا هاتف'}${x.no ? ' · رقم معتمر ' + esc(x.no) : ''}</small>${x.notes ? `<small class="d-block">${esc(x.notes)}</small>` : ''}</div>`).join('') || '<small class="desc-text">لا إداري مضاف بعد. يظهر اسمه ورقمه في قائمة «إداري الحملة» عند إضافة المعتمرين ويُملأ الرقم تلقائيًا.</small>'}
     <hr class="border-secondary"><div class="d-flex gap-2 mb-3"><div class="gold fw-bold flex-grow-1 align-self-center"><i class="bi bi-book ms-1"></i>شيخ الحملة</div>
       <button type="button" class="btn btn-sm btn-gold-solid" data-act="shk-add"><i class="bi bi-plus-lg ms-1"></i>إضافة شيخ</button></div>
     <div id="shkBox"></div>
@@ -457,11 +462,20 @@ function supForm(x) {
   if (!x) supGen();
 }
 function mgrForm(x) {
-  $('mgrBox').innerHTML = `<div class="u-box mb-3" style="border-color:#edcea0" data-id="${x ? x.id : ''}" data-old="${esc(x?.name)}"><div class="gold fw-bold mb-2">${x ? 'تعديل إداري' : 'إضافة إداري'}</div>
+  $('mgrBox').innerHTML = `<div class="u-box mb-3" style="border-color:#edcea0" data-id="${x ? x.id : ''}" data-old="${esc(x?.name)}"><div class="gold fw-bold mb-2">${x ? 'تعديل إداري حملة' : 'إضافة إداري حملة'}</div>
     <input class="form-control u-in mb-2" data-k="name" placeholder="اسم إداري الحملة" maxlength="100" value="${esc(x?.name)}">
-    <input class="form-control u-in mb-3" data-k="phone" type="tel" dir="ltr" placeholder="رقم الهاتف (يُفضّل دوليًا +9665…)" maxlength="40" value="${esc(x?.phone)}">
+    <input class="form-control u-in mb-2" data-k="phone" type="tel" dir="ltr" placeholder="رقم الهاتف (يُفضّل دوليًا +9665…)" maxlength="40" value="${esc(x?.phone)}">
+    <input class="form-control u-in mb-2" data-k="no" placeholder="رقم المعتمر (اختياري)" maxlength="30" value="${esc(x?.no)}">
+    <div class="input-group mb-2"><input class="form-control u-in" data-k="newCode" dir="ltr" maxlength="20" autocomplete="off" placeholder="${x ? 'رقم سري جديد (اتركه فارغًا للإبقاء على الحالي)' : 'الرقم السري للدخول'}">
+      <button type="button" class="btn btn-gold-outline" data-act="mgr-gen" aria-label="توليد رقم عشوائي"><i class="bi bi-dice-5"></i></button></div>
+    <textarea class="form-control u-in mb-3" data-k="notes" rows="2" maxlength="300" placeholder="المهمة أو ملاحظات">${esc(x?.notes)}</textarea>
     <div class="d-flex gap-2"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="mgr-save">حفظ</button><button type="button" class="btn btn-outline-light" data-act="mgr-cancel">إلغاء</button></div></div>`;
   $('mgrBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (!x) mgrGen();
+}
+async function mgrGen() {
+  try { const r = await admPost('adm_gen_code', { len: 8, alpha: true }), i = $('mgrBox').querySelector('[data-k="newCode"]'); if (i) i.value = r.code; }
+  catch (e) { toast(e.message || 'تعذّر توليد الرقم'); }
 }
 function shkForm(x) {
   $('shkBox').innerHTML = `<div class="u-box mb-3" style="border-color:#edcea0" data-id="${x ? x.id : ''}" data-old="${esc(x?.name)}"><div class="gold fw-bold mb-2">${x ? 'تعديل شيخ' : 'إضافة شيخ'}</div>
@@ -493,7 +507,8 @@ async function admNews() {
     <div class="gold fw-bold mb-2">شريط الأخبار العاجل</div>
     <div class="small mb-2">${on ? `<span class="text-success">ظاهر للمعتمرين الآن</span>${exp ? ' حتى ' + esc(when) : ' (بدون انتهاء تلقائي)'}` : '<span class="text-secondary">لا يوجد خبر ظاهر</span>'}</div>
     <textarea id="newsTxt" class="form-control u-in mb-2" rows="3" maxlength="300" placeholder="اكتب الخبر العاجل…">${esc(on ? r.text : '')}</textarea>
-    <select id="newsH" class="form-select u-in mb-3">${hrs.map(([v, l]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${l}</option>`).join('')}</select>
+    <select id="newsH" class="form-select u-in mb-2">${hrs.map(([v, l]) => `<option value="${v}"${v === cur ? ' selected' : ''}>${l}</option>`).join('')}</select>
+    <label class="small">إشعار عند النشر</label><select id="newsNotify" class="form-select u-in mb-3"><option value="">بدون إشعار</option><option value="umrah">إشعار للمعتمرين فقط</option><option value="all">إشعار لجميع مستخدمي التطبيق</option></select>
     <div class="d-flex gap-2"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="news-save"><i class="bi bi-megaphone ms-1"></i>نشر الخبر</button>
       <button type="button" class="btn btn-outline-danger" data-act="news-clear">إزالة الشريط</button></div>
     <div class="small mt-2" style="color:#d3d3c7">يصل المعتمرين تنبيه خلال دقيقة إلى دقيقتين إن كانت صفحتهم مفتوحة.</div>`;
@@ -713,6 +728,7 @@ async function admClick(e) {
   if (act === 'sup-gen') return supGen();
   if (act === 'mgr-add') return mgrForm(null);
   if (act === 'mgr-edit') return mgrForm(mgrData[+b.dataset.i]);
+  if (act === 'mgr-gen') return mgrGen();
   if (act === 'mgr-cancel') { $('mgrBox').innerHTML = ''; return; }
   if (act === 'shk-add') return shkForm(null);
   if (act === 'shk-edit') return shkForm(shkData[+b.dataset.i]);
@@ -775,7 +791,7 @@ async function admClick(e) {
     }
     else if (act === 'mgr-save') {
       const f = collect(card);
-      await admPost('adm_mgr_save', { id: card.dataset.id, oldName: card.dataset.old, ...f }); toast(card.dataset.id ? 'تم الحفظ' : 'تمت الإضافة'); await admSups();
+      await admPost('adm_mgr_save', { id: card.dataset.id, oldName: card.dataset.old, ...f }); toast(card.dataset.id ? 'تم الحفظ' : 'تمت الإضافة — أبلغ الإداري برقمه السري'); await admSups();
     }
     else if (act === 'mgr-del') {
       const x = mgrData[+b.dataset.i];
@@ -810,7 +826,7 @@ async function admClick(e) {
     else if (act === 'news-save') {
       const text = $('newsTxt').value.trim();
       if (!text) { toast('اكتب الخبر أولًا'); return; }
-      await admPost('adm_news_set', { text, hours: $('newsH').value }); toast('تم نشر الخبر'); await admNews();
+      await admPost('adm_news_set', { text, hours: $('newsH').value, notify: $('newsNotify').value }); toast('تم نشر الخبر'); await admNews();
     }
     else if (act === 'news-clear') {
       if (!await askConfirm('إزالة الشريط؟', 'سيختفي الخبر من صفحات المعتمرين.', 'نعم، أزل')) return;
@@ -824,7 +840,7 @@ async function admClick(e) {
     }
     else if (act === 's-save') {
       const box = card, data = collect(box);
-      await admPost('adm_s_save', { id: id || '', data }); toast(id ? 'تم التعديل — سيصل التنبيه للمعتمرين' : 'تمت الإضافة — سيصل التنبيه للمعتمرين'); await admSched();
+      await admPost('adm_s_save', { id: id || '', data, notify: $('sNotify')?.value || '' }); toast(id ? 'تم التعديل — سيصل التنبيه للمعتمرين' : 'تمت الإضافة — سيصل التنبيه للمعتمرين'); await admSched();
     }
     else if (act === 's-shift') {
       const m = +b.dataset.min; await admPost('adm_s_shift', { id, min: m }); toast((m > 0 ? 'تم التأجيل ' : 'تم التقديم ') + Math.abs(m) + ' دقيقة'); await admSched();

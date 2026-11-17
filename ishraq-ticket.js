@@ -80,10 +80,9 @@
     x.fillStyle = CREAM; x.fillRect(0, bodyTop, W, H - bodyTop);
     // شعار شفاف بشكل فني (زاوية الجسم) + نسخة صغيرة أخرى
     if (lg) {
-      var lw2 = 250 * S, lh2 = lw2 * lg.height / lg.width;
+      var lw2 = W * .82, lh2 = lw2 * lg.height / lg.width;
       x.save(); x.beginPath(); x.rect(0, bodyTop, W, H - bodyTop); x.clip();
-      x.globalAlpha = .14; x.drawImage(lg, W - lw2 + 34 * S, H - lh2 + 28 * S, lw2, lh2);
-      x.globalAlpha = .07; x.save(); x.translate(60 * S, bodyTop + 70 * S); x.rotate(-.2); x.drawImage(lg, -60 * S, -60 * S, 120 * S, 120 * S * lg.height / lg.width); x.restore();
+      x.globalAlpha = .12; x.drawImage(lg, -lw2 * .3, bodyTop + (H - bodyTop - lh2) / 2, lw2, lh2);
       x.restore();
     }
     ops.forEach(function (p) {

@@ -551,7 +551,11 @@ body.ix.app>main{width:100%;min-width:0}
 /* v28: شعار شفاف فني داخل بطاقة المعتمر */
 .ix .ticket .body{position:relative;overflow:hidden}
 .ix .ticket .body>*{position:relative}
-.ix .ticket .body>img.wm{position:absolute;inset-inline-start:auto;right:-34px;bottom:-28px;width:250px;height:auto;opacity:.14;pointer-events:none;z-index:0;filter:none}
+.ix .ticket .body>img.wm{position:absolute;inset-inline-start:auto;left:-26%;right:auto;top:50%;transform:translateY(-50%);width:82%;height:auto;opacity:.12;pointer-events:none;z-index:0;filter:none}
 .ix .ticket .body>img.wm+*{margin-top:0}
 .ix .ticket .head .no{white-space:nowrap;font-size:1.55rem;direction:ltr}
 .ix .ticket .body p bdi{unicode-bidi:isolate}
+
+#quickMore{display:block;width:100%;margin:-2px 0 12px;padding:12px;border-radius:18px;border:1px solid #d6ac5280;background:#17181a;color:#edcea0;font-weight:700;font-size:.95rem}
+#quickMore:active{transform:scale(.98)}
+#quickMore.d-none,#quickMore.uv-off{display:none!important}

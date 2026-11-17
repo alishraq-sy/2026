@@ -39,7 +39,7 @@
   function tagUmrah(code, dev) {
     ls("ix_push_umr", JSON.stringify({ code: code, dev: dev }));
     var t = ls(TK); if (!t || permission() !== "granted") return;
-    var k = "ix_push_tag_" + code; if (ls(k) === t) return;
+    var k = "ix_push_tag2_" + code; if (ls(k) === t) return;
     post({ action: "push_reg", token: t, umrah: 1, code: code, dev: dev }).then(function (r) { if (r && r.ok && r.tags && r.tags.indexOf("umrah") >= 0) ls(k, t); }).catch(function () {});
   }
   /* ===== تنبيهات الصلاة والأذكار المجدولة من الخادم =====
