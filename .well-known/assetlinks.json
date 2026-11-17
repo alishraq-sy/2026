@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.alishraq_sy.twa",
+    "sha256_cert_fingerprints": ["A9:1A:04:CC:BA:4C:27:DF:7C:38:12:68:7D:B4:7E:CC:18:C7:9D:03:FC:81:FE:30:AC:3D:BD:F7:90:FE:E9:08"]
+  }
+}]
