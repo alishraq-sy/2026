@@ -8,24 +8,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Reem+Kufi:wght@500;700&family=Amiri+Quran&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<link rel="stylesheet" href="./style.css">
-<link rel="stylesheet" href="./ishraq-ui.css">
-<link rel="stylesheet" href="./ishraq-app.css">
+<link rel="stylesheet" href="./css/style.css">
+<link rel="stylesheet" href="./css/ishraq-ui.css">
+<link rel="stylesheet" href="./css/ishraq-app.css">
 <meta name="theme-color" content="#0b0b0c">
 <style>
-/* قواعد وظيفية يعتمد عليها umrah.js (لا تحذفها) */
+/* قواعد وظيفية يعتمد عليها ./js/umrah/umrah.js (لا تحذفها) */
 .tab-off{display:none!important}
 #app.role-sheikh>:not(#sheikhBox):not(#nextBox):not(#quickActs):not(#notifyBar):not([data-sec="prog"]){display:none!important}
 </style>
-    <link rel="stylesheet" href="./ishraq-light.css" />
-    <script src="./ishraq-theme.js"></script>
+    <link rel="stylesheet" href="./css/ishraq-light.css" />
+    <link rel="stylesheet" href="./css/ishraq-desktop.css" media="(min-width:992px)" />
+    <script src="./js/core/ishraq-theme.js"></script>
   </head>
 <body class="ix no-nav app">
 <div id="banner" class="u-banner d-none"></div>
 <header class="app-bar">
   <div class="in">
     <a class="ab" href="./index.html" aria-label="الرئيسية"><i class="bi bi-house-door"></i></a>
-    <a class="logo" href="./index.html" aria-label="إشراق"><img src="./5b862b4281f64fd884b11984846f0e97.png" alt="إشراق"></a>
+    <a class="logo" href="./index.html" aria-label="إشراق"><img src="./img/logo.png" alt="إشراق"></a>
     <button class="ab d-none" id="umrah-tabs-btn" type="button" aria-label="المزيد"><i class="bi bi-grid-fill"></i></button>
   </div>
 </header>
@@ -129,12 +130,12 @@
 <div id="toast" class="position-fixed start-50 translate-middle-x bottom-0 mb-4 px-4 py-2 d-none text-center" style="z-index:2000;max-width:92vw"></div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
-<script src="./ishraq-push.js"></script>
-<script src="./ishraq-ticket.js"></script>
-<script src="./umrah.js"></script>
-<script src="./umrah-ui.js"></script>
-<script src="./admin.js"></script>
-<script src="./sheikh.js"></script>
-<script src="./ishraq-app.js"></script>
+<script src="./js/core/ishraq-push.js"></script>
+<script src="./js/umrah/ishraq-ticket.js"></script>
+<script src="./js/umrah/umrah.js"></script>
+<script src="./js/umrah/umrah-ui.js"></script>
+<script src="./js/umrah/admin.js"></script>
+<script src="./js/umrah/sheikh.js"></script>
+<script src="./js/core/ishraq-app.js"></script>
 </body>
 </html>

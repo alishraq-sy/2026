@@ -10,9 +10,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Reem+Kufi:wght@500;700&family=Amiri+Quran&family=Tajawal:wght@400;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="./style.css" />
-    <link rel="stylesheet" href="./ishraq-ui.css" />
-    <link rel="stylesheet" href="./ishraq-app.css" />
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/ishraq-ui.css" />
+    <link rel="stylesheet" href="./css/ishraq-app.css" />
     <link rel="manifest" href="./manifest.json" />
     <meta name="theme-color" content="#0b0b0c" />
     <link rel="icon" href="data:," />
@@ -35,8 +35,9 @@
         visibility: hidden;
       }
     </style>
-      <link rel="stylesheet" href="./ishraq-light.css" />
-    <script src="./ishraq-theme.js"></script>
+      <link rel="stylesheet" href="./css/ishraq-light.css" />
+    <link rel="stylesheet" href="./css/ishraq-desktop.css" media="(min-width:992px)" />
+    <script src="./js/core/ishraq-theme.js"></script>
   </head>
   <body class="ix app auth-pendin">
     <!-- شاشة البداية (تظهر مرة واحدة بكل جلسة) -->
@@ -44,7 +45,7 @@
       <svg width="0" height="0" style="position:absolute"><defs><symbol id="ixm" viewBox="-100 -100 200 200"><g fill="none" stroke="currentColor" stroke-width="1.1"><g id="ixr"><path d="M0-96C14-70 14-52 0-34-14-52-14-70 0-96Z"/><path d="M0-80C8-66 8-58 0-48-8-58-8-66 0-80Z" opacity=".7"/></g><use href="#ixr" transform="rotate(22.5)"/><use href="#ixr" transform="rotate(45)"/><use href="#ixr" transform="rotate(67.5)"/><use href="#ixr" transform="rotate(90)"/><use href="#ixr" transform="rotate(112.5)"/><use href="#ixr" transform="rotate(135)"/><use href="#ixr" transform="rotate(157.5)"/><use href="#ixr" transform="rotate(180)"/><use href="#ixr" transform="rotate(202.5)"/><use href="#ixr" transform="rotate(225)"/><use href="#ixr" transform="rotate(247.5)"/><use href="#ixr" transform="rotate(270)"/><use href="#ixr" transform="rotate(292.5)"/><use href="#ixr" transform="rotate(315)"/><use href="#ixr" transform="rotate(337.5)"/><circle r="30"/><circle r="22" opacity=".6"/><circle r="98" opacity=".5"/><path d="M0-30L8-8 30 0 8 8 0 30-8 8-30 0-8-8Z"/></g></symbol></defs></svg>
       <svg class="sp-bg"><use href="#ixm"/></svg>
       <svg class="sp-m"><use href="#ixm"/></svg>
-      <img class="sp-l" src="./5b862b4281f64fd884b11984846f0e97.png" alt="" />
+      <img class="sp-l" src="./img/logo.png" alt="" />
           </div>
     <script>
       (function () {
@@ -58,7 +59,7 @@
     <header class="app-bar">
       <div class="in">
         <a class="ab" href="./settings.html" aria-label="الإعدادات"><i class="bi bi-gear"></i></a>
-        <a class="logo" href="./index.html" aria-label="إشراق"><img src="./5b862b4281f64fd884b11984846f0e97.png" alt="إشراق" /></a>
+        <a class="logo" href="./index.html" aria-label="إشراق"><img src="./img/logo.png" alt="إشراق" /></a>
         <button class="ab" type="button" data-ix-more aria-label="المزيد"><i class="bi bi-grid-fill"></i></button>
       </div>
     </header>
@@ -113,7 +114,7 @@
         </div>
       </section>
 
-      <!-- إنجازات اليوم + آية وحديث اليوم (ishraq-extras.js) -->
+      <!-- إنجازات اليوم + آية وحديث اليوم (./js/core/ishraq-extras.js) -->
       <section class="ix-sec" id="ix-extras"></section>
 
       <!-- وصول سريع -->
@@ -152,7 +153,7 @@
         </div>
       </section>
 
-      <!-- متابعة القراءة (تُحقن من main.js) -->
+      <!-- متابعة القراءة (تُحقن من ./js/core/main.js) -->
       <section class="ix-sec rv" style="margin-top:22px">
         <div id="continue-reading-container"></div>
       </section>
@@ -244,18 +245,18 @@
     <!-- Bootstrap JavaScript Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="./main.js"></script>
-    <script src="./prayer.js"></script>
-    <script src="./qibla.js"></script>
-    <script src="./adiya.js"></script>
-    <script src="./ishraq-ui.js"></script>
-    <script src="./ishraq-app.js"></script>
-    <script src="./ishraq-extras.js"></script>
-    <script src="./ishraq-share.js"></script>
-    <script src="./asma.js"></script>
-    <script src="./ishraq-today.js"></script>
-    <script src="./ishraq-time.js"></script>
-    <script src="./ishraq-push.js"></script>
+    <script src="./js/core/main.js"></script>
+    <script src="./js/core/prayer.js"></script>
+    <script src="./js/pages/qibla.js"></script>
+    <script src="./js/pages/adiya.js"></script>
+    <script src="./js/core/ishraq-ui.js"></script>
+    <script src="./js/core/ishraq-app.js"></script>
+    <script src="./js/core/ishraq-extras.js"></script>
+    <script src="./js/core/ishraq-share.js"></script>
+    <script src="./js/pages/asma.js"></script>
+    <script src="./js/core/ishraq-today.js"></script>
+    <script src="./js/core/ishraq-time.js"></script>
+    <script src="./js/core/ishraq-push.js"></script>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
