@@ -145,9 +145,10 @@ const allSections = r => {
 };
 
 /* ---------- إدارة المعتمرين ---------- */
-const PFIELDS = [['Code', 'الرقم السري للدخول'], ['PilgrimNo', 'رقم المعتمر'], ['Name', 'الاسم'], ['Phone', 'الهاتف'], ['Bus_No', 'رقم الباص'], ['Bus_Title', 'عنوان الباص'],
+const PFIELDS = [['Code', 'الرقم السري للدخول'], ['PilgrimNo', 'رقم المعتمر'], ['Name', 'الاسم'], ['Gender', 'الجنس'], ['Nationality', 'الجنسية'], ['Birth_Date', 'تاريخ الميلاد'], ['Passport_Expiry', 'تاريخ انتهاء الجواز'], ['Phone', 'الهاتف'], ['Email', 'البريد الإلكتروني'], ['Bus_No', 'رقم الباص'], ['Bus_Title', 'عنوان الباص'],
   ['Supervisor_Name', 'اسم المشرف'], ['Supervisor_Phone', 'هاتف المشرف'], ['Manager_Name', 'إداري الحملة'], ['Manager_Phone', 'هاتف الإداري'], ['Makkah_Hotel', 'فندق مكة'], ['Makkah_Room', 'غرفة مكة'], ['Madinah_Hotel', 'فندق المدينة'], ['Madinah_Room', 'غرفة المدينة'], ['Room_Type', 'نوع الغرفة'], ['Rawda_Status', 'حجز الروضة']];
 const ROOMS = ['إفرادي', 'ثنائي', 'ثلاثي', 'رباعي', 'خماسي'], RAWDA = ['لم يتم الحجز بعد', 'جاري الحجز', 'تم الحجز بنجاح'];
+const GENDERS = ['ذكر', 'أنثى'], NATS = ['عربي سوري', 'فلسطيني سوري'];
 const RAWDA_CLS = ['bg-secondary', 'bg-warning text-dark', 'bg-success'];
 const RAWDA_DOC = ['rawda', 'Rawda_Id', 'صورة حجز الروضة الشريفة', 'bi-image'];
 const DOCS = [['photo', 'Photo_Id', 'الصورة الشخصية', 'bi-person-bounding-box'], ['passport', 'Passport_Id', 'صورة جواز السفر', 'bi-passport'], ['visa', 'Visa_Id', 'الفيزا', 'bi-card-heading']];
@@ -196,6 +197,16 @@ async function pForm(p) {
       ctl = `<input class="form-control u-in form-control-sm" data-k="Manager_Phone" id="pMgrPhone" value="${esc(v)}" readonly placeholder="يُدخل تلقائيًا">`;
     } else if (k === 'Supervisor_Phone' && hasSup) {
       ctl = `<input class="form-control u-in form-control-sm" data-k="Supervisor_Phone" id="pSupPhone" value="${esc(v)}" readonly placeholder="يُدخل تلقائيًا">`;
+    } else if (k === 'Email') {
+      ctl = `<input class="form-control u-in form-control-sm" data-k="Email" id="pEmail" dir="ltr" value="${esc(v)}" placeholder="يُملأ تلقائيًا">`;
+    } else if (k === 'Gender') {
+      ctl = `<select class="form-select form-select-sm u-in" data-k="Gender"><option value="">— اختر —</option>${GENDERS.map(n => opt(n, v)).join('')}</select>`;
+    } else if (k === 'Nationality') {
+      const oth = v && !NATS.includes(v), sel = oth ? 'أخرى' : v;
+      ctl = `<select class="form-select form-select-sm u-in" id="pNatSel"><option value="">— اختر —</option>${NATS.concat('أخرى').map(n => opt(n, sel)).join('')}</select>
+        <input class="form-control u-in form-control-sm mt-1${oth ? '' : ' d-none'}" id="pNatOther" placeholder="اكتب الجنسية" maxlength="60" value="${oth ? esc(v) : ''}">`;
+    } else if (k === 'Birth_Date' || k === 'Passport_Expiry') {
+      ctl = `<input type="date" class="form-control u-in form-control-sm" data-k="${k}" dir="ltr" value="${esc(toDate(v))}">`;
     } else if (k === 'Room_Type') {
       ctl = `<select class="form-select form-select-sm u-in" data-k="Room_Type"><option value="">— اختر —</option>${ROOMS.map(n => opt(n, v)).join('')}</select>`;
     } else if (k === 'Rawda_Status') {
@@ -225,8 +236,9 @@ async function pForm(p) {
       <button type="button" class="btn btn-sm btn-outline-warning flex-grow-1" data-act="p-sec" data-op="unblock">فك حظر جهاز</button></div>` : ''}
     ${p ? `<button type="button" class="btn btn-outline-danger w-100 mt-2" data-act="p-del" data-no="${esc(p.PilgrimNo)}" data-name="${esc(p.Name)}"><i class="bi bi-trash ms-1"></i>حذف المعتمر</button>` : ''}</div>`;
   $('pBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  if (!p) { await pGen(); try { const n = await admPost('adm_next_no'), i = $('pNo'); if (i) i.value = n.no; } catch {} }
+  if (!p) { await pGen(); try { const n = await admPost('adm_next_no'), i = $('pNo'); if (i) i.value = n.no; const em = $('pEmail'); if (em && !em.value) em.value = pEmailFor(n.no); } catch {} }
 }
+const pEmailFor = no => { const m = /(\d+)\s*$/.exec(String(no || '')); if (!m) return ''; const n = String(Number(m[1])); return 'Alishraq.sy+pl' + (n.length < 2 ? '0' + n : n) + '@gmail.com'; };
 function docBox(kd, col, lab, ic, id) {
   return `<div class="col-12"><div class="ev" style="display:block;margin:0" data-doc="${kd}"><div class="d-flex align-items-center gap-2 flex-wrap">
     <i class="bi ${ic} gold fs-5"></i><b class="text-light flex-grow-1">${lab}</b><span class="small doc-st" style="color:#d3d3c7">${id ? 'مرفوعة ✓' : 'غير مرفقة'}</span></div>
@@ -278,6 +290,7 @@ async function pGen() { // رقم من 6 خانات محجوز على الخاد
 // قيمة الباص تُخزَّن برقمه، ويُشتقّ عنوانه من قائمة الباصات
 function pCollect() {
   const d = collect($('pBox'));
+  const ns = $('pNatSel'); if (ns) d.Nationality = ns.value === 'أخرى' ? ($('pNatOther').value.trim() || '') : ns.value;
   if (optsData?.buses.length && 'Bus_No' in d) { const b = optsData.buses.find(x => x.no === d.Bus_No); if (b) d.Bus_Title = b.title; else if (!d.Bus_No) d.Bus_Title = ''; }
   return d;
 }
@@ -365,6 +378,11 @@ function paintSched() {
         <button type="button" class="btn btn-sm btn-gold-solid py-0" data-act="s-edit">تعديل</button>
         <button type="button" class="btn btn-sm ${isActive(e) ? 'btn-outline-danger' : 'btn-outline-success'} py-0" data-act="s-toggle" data-on="${isActive(e) ? 0 : 1}">${isActive(e) ? 'إلغاء' : 'تفعيل'}</button></div></div>`).join('') || '<p class="desc-text">لا أنشطة.</p>'}`;
 }
+const toDate = s => { // أي تاريخ مخزّن → yyyy-mm-dd لحقل date
+  s = String(s || '').trim(); let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/); return m ? `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` : '';
+};
 const toLocal = (s, base) => {
   s = String(s || '').trim();
   if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s) && base) return base.slice(0, 10) + 'T' + s.slice(0, 5).padStart(5, '0');
@@ -699,6 +717,7 @@ function admChange(e) {
   else if (t.id === 'sAll') { schedAll = t.checked; paintSched(); }
   else if (t.id === 'pFile' && t.files[0]) pParse(t.files[0]);
   else if (t.dataset.docFile) docUpload(t);
+  else if (t.id === 'pNatSel') $('pNatOther').classList.toggle('d-none', t.value !== 'أخرى');
   else if (t.id === 'pSupSel') $('pSupPhone').value = t.selectedOptions[0]?.dataset.phone || '';
   else if (t.id === 'pMgrSel') $('pMgrPhone').value = t.selectedOptions[0]?.dataset.phone || '';
 }
