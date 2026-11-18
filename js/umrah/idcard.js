@@ -1,7 +1,7 @@
 /* مولّد بطاقة المعتمر: يرسم المعلومات فوق تصميم img/pilgrim-card.jpg (1049×1500) ثم يخرجها صورة أو PDF.
    الإحداثيات مقاسة على التصميم نفسه. لتعديل مكان أي خانة غيّر الأرقام في BOX فقط. */
 (function () {
-  const W = 1049, H = 1500, NAVY = '#0b2a5b', FF = 'Tajawal, sans-serif', EMERGENCY = '+966551771250';
+  const W = 1049, H = 1500, NAVY = '#0b2a5b', FF = 'Cairo, Tajawal, sans-serif', EMERGENCY = '+966551771250';
   // x1,x2 = حدود مساحة النص داخل الخانة البيضاء، y = منتصفها، size = أكبر حجم خط، ltr = أرقام/لاتيني
   const BOX = {
     name:  { x1: 45,  x2: 718, y: 615, size: 48 },
@@ -17,7 +17,7 @@
   let tpl = null;
   const loadTpl = () => tpl || (tpl = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = './img/pilgrim-card.jpg'; }));
   const T = v => String(v == null ? '' : v).trim();
-  const fonts = () => Promise.all([document.fonts.load(`700 30px Tajawal`), document.fonts.load('800 30px Tajawal')]).catch(() => {});
+  const fonts = () => Promise.all([document.fonts.load('700 30px Cairo', 'ابجد0123'), document.fonts.load('900 30px Cairo', 'ابجد0123')]).catch(() => {});
 
   // نفس محتوى QR الموجود في بطاقة المعتمر داخل التطبيق
   function payload(p) {
