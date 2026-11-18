@@ -5,7 +5,7 @@
   // x1,x2 = حدود مساحة النص داخل الخانة البيضاء، y = منتصفها، size = أكبر حجم خط، ltr = أرقام/لاتيني
   const BOX = {
     name:  { x1: 45,  x2: 718, y: 615, size: 48 },
-    nat:   { x1: 40,  x2: 232, y: 706, size: 30 },
+    nat:   { x1: 36,  x2: 238, y: 706, size: 42 },
     no:    { x1: 512, x2: 724, y: 707, size: 34, ltr: true },
     mk:    { x1: 512, x2: 902, y: 810, size: 44 },
     md:    { x1: 512, x2: 902, y: 922, size: 44 },
@@ -13,7 +13,7 @@
     mgr:   { x1: 138, x2: 664, y: 1096, size: 44, ltr: true },
     emg:   { x1: 60,  x2: 640, y: 1180, size: 46, ltr: true },
   };
-  const QR = { cx: 158, cy: 1366, size: 250 }; // يسار الشريط السفلي (قبل الخط الفاصل عند x≈315)
+  const QR = { cx: 158, cy: 1362, size: 252 }; // يسار الشريط السفلي (قبل الخط الفاصل عند x≈315)
   let tpl = null;
   const loadTpl = () => tpl || (tpl = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = './img/pilgrim-card.jpg'; }));
   const T = v => String(v == null ? '' : v).trim();
@@ -42,11 +42,13 @@
     try {
       if (qrcode.stringToBytesFuncs && qrcode.stringToBytesFuncs['UTF-8']) qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
       const q = qrcode(0, 'M'); q.addData(payload(p)); q.make();
-      const n = q.getModuleCount(), pad = 12, cell = Math.floor((QR.size - 2 * pad) / n), sz = cell * n, box = QR.size, off = (box - sz) / 2;
-      const bx = QR.cx - box / 2, by = QR.cy - box / 2;
+      const n = q.getModuleCount(), pad = 8, box = QR.size, inner = box - 2 * pad, bx = QR.cx - box / 2, by = QR.cy - box / 2;
+      // نرسم الرمز بدقة عالية ثم نصغّره ليملأ المربع تمامًا بحواف بيضاء رفيعة
+      const k = 10, o = document.createElement('canvas'); o.width = o.height = n * k; const ox = o.getContext('2d');
+      ox.fillStyle = '#fff'; ox.fillRect(0, 0, n * k, n * k); ox.fillStyle = '#000';
+      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) ox.fillRect(c * k, r * k, k, k);
       x.fillStyle = '#fff'; x.beginPath(); x.roundRect ? x.roundRect(bx, by, box, box, 14) : x.rect(bx, by, box, box); x.fill();
-      x.fillStyle = '#000';
-      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) x.fillRect(bx + off + c * cell, by + off + r * cell, cell, cell);
+      x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high'; x.drawImage(o, bx + pad, by + pad, inner, inner);
     } catch (e) {}
   }
   async function canvas(p) {
