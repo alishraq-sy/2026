@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ishraq-cache-v52';
+const CACHE_NAME = 'ishraq-cache-v53';
 const assetsToCache = [
   './',
   './index.html',
