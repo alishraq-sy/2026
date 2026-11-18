@@ -215,6 +215,12 @@ const ticketRows = () => { // اسم المعتمر ورقمه في رأس ال�
 };
 const qrURL = (cell = 6) => { try { if (qrcode.stringToBytesFuncs && qrcode.stringToBytesFuncs['UTF-8']) qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8']; const q = qrcode(0, 'L'); q.addData(qrPayload()); q.make(); return q.createDataURL(cell, 2); } catch { return null; } };
 
+// بانر تفعيل إشعارات الجهاز (للمعتمر والمشرف والشيخ) — وللمشرف/الإداري يوسَم الجهاز كي تصله بلاغات التائه والمتأخر
+function pushPrompt(t, msg) {
+  if (!(window.ixPush && ixPush.supported() && ixPush.permission() !== 'denied')) return;
+  if (ixPush.on()) { ixPush.tagUmrah(code, DEV); return; }
+  t.insertAdjacentHTML('afterbegin', `<div class="p-3 mb-3 rounded-4 d-flex align-items-center gap-3" style="border:1px solid rgba(214,172,82,.45);background:rgba(214,172,82,.08)"><i class="bi bi-bell-fill fs-3 gold"></i><div class="flex-grow-1"><b>فعّل إشعارات الجهاز</b><div class="small" style="opacity:.8">${msg}</div></div><button type="button" class="btn btn-sm btn-gold-solid" id="pushOn">تفعيل</button></div>`);
+}
 function renderMe() {
   fillWho();
   const t = $('ticket');
@@ -228,6 +234,7 @@ function renderMe() {
         <a class="btn btn-dark" href="./scan.html"><i class="bi bi-qr-code-scan ms-1"></i>صفحة مسح الحضور</a>
         <button type="button" class="btn btn-outline-dark" id="logout">تسجيل خروج</button></div></div></div>`;
     $('logout').onclick = logout;
+    pushPrompt(t, 'لتصلك فورًا بلاغات «أنا تائه» و«أنا متأخر» والاستفسارات والتقييمات.');
     return;
   }
   if (role === 'sheikh') {
@@ -236,6 +243,7 @@ function renderMe() {
       <div class="perf"></div>
       <div class="body"><div class="d-grid"><button type="button" class="btn btn-outline-dark" id="logout">تسجيل خروج</button></div></div></div>`;
     $('logout').onclick = logout;
+    pushPrompt(t, 'لتصلك إشعارات الحملة.');
     return;
   }
   const links = ['Makkah', 'Madinah'].map(k => isUrl(me[k + '_Location']) ? `<a href="${esc(me[k + '_Location'])}" target="_blank" rel="noopener" class="text-dark fw-bold small d-inline-block ms-3"><i class="bi bi-map ms-1"></i>${k === 'Makkah' ? 'موقع فندق مكة' : 'موقع فندق المدينة'}</a>` : '').join('');
