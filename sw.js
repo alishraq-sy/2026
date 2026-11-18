@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ishraq-cache-v45';
+const CACHE_NAME = 'ishraq-cache-v47';
 const assetsToCache = [
   './',
   './index.html',
@@ -116,7 +116,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('push', (event) => {
   let p = {}; try { p = event.data ? event.data.json() : {}; } catch (e) { try { p = { data: { title: 'إشراق', body: event.data.text() } }; } catch (_) {} }
   const d = p.data || p.notification || p || {};
-  const title = d.title || 'إشراق', opts = { body: d.body || '', icon: './img/app-icon.png', badge: './img/app-icon.png', dir: 'rtl', lang: 'ar', tag: d.tag || undefined, data: { url: d.url || './index.html' } };
+  const title = d.title || 'إشراق', opts = { body: d.body || '', icon: './img/app-icon.png', badge: './img/app-icon.png', dir: 'rtl', lang: 'ar', tag: d.tag ? d.tag + '-' + Date.now() : undefined, renotify: !!d.tag, data: { url: d.url || './index.html' } };
   event.waitUntil(self.registration.showNotification(title, opts));
 });
 self.addEventListener('notificationclick', (event) => {
