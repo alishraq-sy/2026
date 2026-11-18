@@ -145,7 +145,7 @@ const allSections = r => {
 };
 
 /* ---------- إدارة المعتمرين ---------- */
-const PFIELDS = [['Code', 'الرقم السري للدخول'], ['PilgrimNo', 'رقم المعتمر'], ['Name', 'الاسم'], ['Gender', 'الجنس'], ['Nationality', 'الجنسية'], ['Birth_Date', 'تاريخ الميلاد'], ['Passport_Expiry', 'تاريخ انتهاء الجواز'], ['Phone', 'الهاتف'], ['Email', 'البريد الإلكتروني'], ['Bus_No', 'رقم الباص'], ['Bus_Title', 'عنوان الباص'],
+const PFIELDS = [['Code', 'الرقم السري للدخول'], ['PilgrimNo', 'رقم المعتمر'], ['Name', 'الاسم'], ['Gender', 'الجنس'], ['Nationality', 'الجنسية'], ['Birth_Date', 'تاريخ الميلاد'], ['Passport_Expiry', 'تاريخ انتهاء الجواز'], ['Phone', 'الهاتف'], ['Email', 'البريد الإلكتروني'], ['Email_Pass', 'كلمة مرور البريد'], ['Visa_No', 'رقم الفيزا'], ['Bus_No', 'رقم الباص'], ['Bus_Title', 'عنوان الباص'],
   ['Supervisor_Name', 'اسم المشرف'], ['Supervisor_Phone', 'هاتف المشرف'], ['Manager_Name', 'إداري الحملة'], ['Manager_Phone', 'هاتف الإداري'], ['Makkah_Hotel', 'فندق مكة'], ['Makkah_Room', 'غرفة مكة'], ['Madinah_Hotel', 'فندق المدينة'], ['Madinah_Room', 'غرفة المدينة'], ['Room_Type', 'نوع الغرفة'], ['Rawda_Status', 'حجز الروضة']];
 const ROOMS = ['إفرادي', 'ثنائي', 'ثلاثي', 'رباعي', 'خماسي'], RAWDA = ['لم يتم الحجز بعد', 'جاري الحجز', 'تم الحجز بنجاح'];
 const GENDERS = ['ذكر', 'أنثى'], NATS = ['عربي سوري', 'فلسطيني سوري'];
@@ -168,6 +168,7 @@ async function pplLoad(q) {
   $('pCount').textContent = `${r.total} معتمر${!q && r.items.length < r.total ? ' — يُعرض أول 30، استخدم البحث' : ''}`;
   $('pList').innerHTML = r.items.map((p, i) => `<div class="ev" style="display:block"><div class="d-flex justify-content-between align-items-center"><b class="text-light">${esc(p.Name)}</b>
     <span class="d-flex gap-1"><button type="button" class="btn btn-sm btn-gold-outline py-0" data-act="p-edit" data-i="${i}" aria-label="تعديل"><i class="bi bi-pencil"></i></button>
+      ${p.Email_Pass !== undefined ? `<button type="button" class="btn btn-sm btn-outline-success py-0" data-act="p-nusk" data-i="${i}" aria-label="إرسال معلومات نسك"><i class="bi bi-whatsapp"></i></button>` : ''}
       ${delBtn(`data-act="p-del" data-no="${esc(p.PilgrimNo)}" data-name="${esc(p.Name)}"`)}</span></div>
     <small>رقم ${esc(p.PilgrimNo)}${p.Bus_No ? ' · باص ' + esc(p.Bus_No) : ''}${p.Makkah_Room ? ' · مكة غرفة ' + esc(p.Makkah_Room) : ''}${p.Madinah_Room ? ' · المدينة غرفة ' + esc(p.Madinah_Room) : ''}${p.Room_Type ? ' · غرفة ' + esc(p.Room_Type) : ''}${p.Devices ? ' · أجهزة ' + p.Devices.split(',').filter(Boolean).length + '/2' : ''}</small>
     ${p.Rawda_Status ? `<span class="badge ${RAWDA_CLS[Math.max(0, RAWDA.indexOf(p.Rawda_Status))]} me-1">الروضة: ${esc(p.Rawda_Status)}</span>` : ''}${DOCS.filter(d => p[d[1]]).map(d => `<span class="badge bg-dark border border-secondary me-1"><i class="bi ${d[3]} ms-1"></i>${d[2].replace('صورة ', '')}</span>`).join('')}</div>`).join('') || '<p class="desc-text">لا نتائج.</p>';
@@ -197,6 +198,8 @@ async function pForm(p) {
       ctl = `<input class="form-control u-in form-control-sm" data-k="Manager_Phone" id="pMgrPhone" value="${esc(v)}" readonly placeholder="يُدخل تلقائيًا">`;
     } else if (k === 'Supervisor_Phone' && hasSup) {
       ctl = `<input class="form-control u-in form-control-sm" data-k="Supervisor_Phone" id="pSupPhone" value="${esc(v)}" readonly placeholder="يُدخل تلقائيًا">`;
+    } else if (k === 'Email_Pass') {
+      ctl = `<input class="form-control u-in form-control-sm" data-k="Email_Pass" id="pEmailPass" dir="ltr" value="${esc(v)}" placeholder="تُملأ تلقائيًا" autocomplete="off">`;
     } else if (k === 'Email') {
       ctl = `<input class="form-control u-in form-control-sm" data-k="Email" id="pEmail" dir="ltr" value="${esc(v)}" placeholder="يُملأ تلقائيًا">`;
     } else if (k === 'Gender') {
@@ -232,11 +235,54 @@ async function pForm(p) {
     <div class="d-flex gap-2 mt-3 flex-wrap"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="p-save" data-new="${nw}">حفظ</button>
       <button type="button" class="btn btn-success flex-grow-1" data-act="p-save" data-send="1" data-new="${nw}"><i class="bi bi-whatsapp ms-1"></i>حفظ وإرسال</button>
       <button type="button" class="btn btn-outline-light" data-act="p-cancel">إلغاء</button></div>
+    ${hs.includes('Email_Pass') ? '<button type="button" class="btn btn-outline-success w-100 mt-2" data-act="p-nusk"><i class="bi bi-whatsapp ms-1"></i>إرسال معلومات نسك</button>' : ''}
     ${p ? `<div class="d-flex gap-2 mt-2"><button type="button" class="btn btn-sm btn-outline-warning flex-grow-1" data-act="p-sec" data-op="dev" data-no="${esc(p.PilgrimNo)}">تصفير الأجهزة (${p.Devices ? p.Devices.split(',').filter(Boolean).length : 0}/2)</button>
       <button type="button" class="btn btn-sm btn-outline-warning flex-grow-1" data-act="p-sec" data-op="unblock">فك حظر جهاز</button></div>` : ''}
     ${p ? `<button type="button" class="btn btn-outline-danger w-100 mt-2" data-act="p-del" data-no="${esc(p.PilgrimNo)}" data-name="${esc(p.Name)}"><i class="bi bi-trash ms-1"></i>حذف المعتمر</button>` : ''}</div>`;
+  passDirty = !!(p && p.Email_Pass);
   $('pBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
-  if (!p) { await pGen(); try { const n = await admPost('adm_next_no'), i = $('pNo'); if (i) i.value = n.no; const em = $('pEmail'); if (em && !em.value) em.value = pEmailFor(n.no); } catch {} }
+  if (!p) { await pGen(); try { const n = await admPost('adm_next_no'), i = $('pNo'); if (i) i.value = n.no; const em = $('pEmail'); if (em && !em.value) em.value = pEmailFor(n.no); pPassFill(); } catch {} }
+}
+/* كلمة مرور البريد: الاسم الأول (حرف كبير) + الاسم الأخير + "-" + رقم المعتمر، مثل Ali + taha → Alitaha-1 (قابلة للتعديل يدويًا) */
+const AR_NAMES = { 'علي': 'Ali', 'محمد': 'Muhammad', 'احمد': 'Ahmad', 'عمر': 'Omar', 'عثمان': 'Othman', 'يوسف': 'Yousef', 'ابراهيم': 'Ibrahim', 'خالد': 'Khaled', 'حسن': 'Hasan', 'حسين': 'Hussein', 'محمود': 'Mahmoud', 'مصطفى': 'Mustafa', 'عبدالله': 'Abdullah', 'سعيد': 'Saeed', 'ياسر': 'Yasser', 'طه': 'Taha', 'فاطمه': 'Fatima', 'عايشه': 'Aisha', 'عائشه': 'Aisha', 'خديجه': 'Khadija', 'مريم': 'Maryam' };
+const AR_MAP = { 'ا': 'a', 'أ': 'a', 'إ': 'i', 'آ': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th', 'ج': 'j', 'ح': 'h', 'خ': 'kh', 'د': 'd', 'ذ': 'dh', 'ر': 'r', 'ز': 'z', 'س': 's', 'ش': 'sh', 'ص': 's', 'ض': 'd', 'ط': 't', 'ظ': 'z', 'ع': 'a', 'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'ل': 'l', 'م': 'm', 'ن': 'n', 'ه': 'h', 'ة': 'a', 'و': 'w', 'ي': 'y', 'ى': 'a', 'ئ': 'y', 'ؤ': 'w' };
+function arLatin(w) {
+  w = String(w || '').replace(/[\u064B-\u0652\u0640]/g, '');
+  const key = w.replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/^عبد (?=\S)/, 'عبد');
+  if (AR_NAMES[key] || AR_NAMES[w]) return AR_NAMES[key] || AR_NAMES[w];
+  if (/^[\x00-\x7f]+$/.test(w)) return w.toLowerCase();
+  w = w.replace(/^ال(?=..)/, '');
+  let o = '';
+  for (const ch of w) { const m = AR_MAP[ch]; if (m == null) continue; if (o && !/[aeiou]$/.test(o) && !/^[aeiou]/.test(m)) o += 'a'; o += m; }
+  return o.replace(/y$/, 'i');
+}
+function genPass(name, no) {
+  const ws = String(name || '').trim().split(/\s+/).filter(Boolean), m = /(\d+)\s*$/.exec(String(no || ''));
+  if (!ws.length || !m) return '';
+  const f = arLatin(ws[0]), l = ws.length > 1 ? arLatin(ws[ws.length - 1]).toLowerCase() : '';
+  return (f.charAt(0).toUpperCase() + f.slice(1).toLowerCase()) + l + '-' + Number(m[1]);
+}
+let passDirty = false;
+function pPassFill() { const e = $('pEmailPass'); if (!e || passDirty) return; const n = $('pBox').querySelector('[data-k="Name"]'), no = $('pNo'); if (n && no) e.value = genPass(n.value, no.value); }
+document.addEventListener('input', e => {
+  if (e.target.id === 'pEmailPass') passDirty = true;
+  else if (e.target.matches?.('#pBox [data-k="Name"]')) { const pe = $('pEmailPass'); if (pe && !pe.dataset.had) pPassFill(); }
+});
+/* رسالة معلومات تطبيق نسك عبر واتساب (ضع روابط التطبيق هنا) */
+const NUSK_ANDROID = 'https://play.google.com/store/apps/details?id=com.moh.nusukapp', NUSK_IOS = 'https://apps.apple.com/us/app/nusuk-%D9%86%D8%B3%D9%83/id6469515422';
+function nuskSend(d) {
+  const num = waNumber(d.Phone);
+  if (!num) return toast('اكتب هاتف المعتمر بصيغة دولية (مثل +9639…) لإرسال واتساب', 7000);
+  if (!d.Email || !d.Email_Pass) return toast('أكمل البريد وكلمة المرور أولًا', 5000);
+  const L = ['*حملة الإشراق للحج والعمرة*🕋', 'السلام عليكم ورحمة الله وبركاته', `*الأخ المعتمر :* ${d.Name || ''}`, '',
+    'نسعد بإبلاغكم بأنه تم إنشاء حسابكم على تطبيق نسك بنجاح، وتجهيز بيانات الدخول الخاصة بكم.', '',
+    '🔐 بيانات حسابكم:', `👤 *الاسم:* ${d.Name || ''}`, `📧 *البريد الإلكتروني:* ${d.Email}`, `🔑 *كلمة المرور:* ${d.Email_Pass}`, '',
+    'يرجى الاحتفاظ ببيانات الدخول وعدم مشاركتها مع الآخرين، وتغيير كلمة المرور بعد تسجيل الدخول الأول.', '',
+    'نسأل الله أن يكتب لكم تمام الأجر والقبول، وأن يرزقكم الصلاة في الروضة الشريفة، وزيارة مسجد رسوله ﷺ بقلوب عامرة بالإيمان.', ''];
+  if (NUSK_ANDROID) L.push(`حمل تطبيق نسك *للاندرويد* من متجر بلاي عبر الرابط : ${NUSK_ANDROID}`);
+  if (NUSK_IOS) L.push(`*وللايفون * من ابل ستور عبر الرابط:  ${NUSK_IOS}`);
+  L.push('مع خالص محبتنا وتقديرنا', '*الفريق التقني لحملة الإشراق للحج والعمرة*');
+  window.open(`https://wa.me/${num}?text=${encodeURIComponent(L.join('\n'))}`, '_blank');
 }
 const pEmailFor = no => { const m = /(\d+)\s*$/.exec(String(no || '')); if (!m) return ''; const n = String(Number(m[1])); return 'Alishraq.sy+pl' + (n.length < 2 ? '0' + n : n) + '@gmail.com'; };
 function docBox(kd, col, lab, ic, id) {
@@ -728,6 +774,7 @@ async function admClick(e) {
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, card = b.closest('[data-id]'), id = card?.dataset.id;
   if (act === 'p-gen') return pGen();
+  if (act === 'p-nusk') return nuskSend(b.dataset.i != null ? pplData.items[+b.dataset.i] : collect($('pBox')));
   if (act === 'doc-view') { const id = b.closest('[data-doc]').querySelector('[data-k]').value; return docView(id).catch(er => toast(er.message || 'تعذّر فتح الملف')); }
   if (act === 'doc-clear') { const bx = b.closest('[data-doc]'); bx.querySelector('[data-k]').value = ''; bx.querySelector('.doc-st').textContent = 'سيُحذف عند الحفظ'; bx.querySelectorAll('[data-act]').forEach(x => x.classList.add('d-none')); return; }
   if (act === 'pdf') return admPdf(b.dataset.pdf, b);
