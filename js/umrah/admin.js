@@ -1,6 +1,8 @@
 // لوحة المشرف الإداري — تعتمد على متغيرات ./js/umrah/umrah.js ($, esc, post, code, role, me, toast, phoneHref, STATUS_CLS, when, endOf, loadImg, askConfirm)
 let admTab = 'today', admLabel = '', admData = null, optsData = null, supData = [], shkData = [], mgrData = [], lessonsPend = [], pplData = null, schedData = [], schedAll = false, impRows = null, auditData = [];
 
+const QRLIB = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';
+const IDCARD = './js/umrah/idcard.js';
 const JSPDF = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
 const XLSX_URL = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
 const loadLib = (src, ok) => ok() ? Promise.resolve() : new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
@@ -235,6 +237,7 @@ async function pForm(p) {
     <div class="d-flex gap-2 mt-3 flex-wrap"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="p-save" data-new="${nw}">حفظ</button>
       <button type="button" class="btn btn-success flex-grow-1" data-act="p-save" data-send="1" data-new="${nw}"><i class="bi bi-whatsapp ms-1"></i>حفظ وإرسال</button>
       <button type="button" class="btn btn-outline-light" data-act="p-cancel">إلغاء</button></div>
+    <button type="button" class="btn btn-outline-warning w-100 mt-2" data-act="p-card"><i class="bi bi-person-vcard ms-1"></i>توليد بطاقة المعتمر (صورة)</button>
     ${hs.includes('Email_Pass') ? '<button type="button" class="btn btn-outline-success w-100 mt-2" data-act="p-nusk"><i class="bi bi-whatsapp ms-1"></i>إرسال معلومات نسك</button>' : ''}
     ${p ? `<div class="d-flex gap-2 mt-2"><button type="button" class="btn btn-sm btn-outline-warning flex-grow-1" data-act="p-sec" data-op="dev" data-no="${esc(p.PilgrimNo)}">تصفير الأجهزة (${p.Devices ? p.Devices.split(',').filter(Boolean).length : 0}/2)</button>
       <button type="button" class="btn btn-sm btn-outline-warning flex-grow-1" data-act="p-sec" data-op="unblock">فك حظر جهاز</button></div>` : ''}
@@ -393,7 +396,8 @@ async function pDoImport() {
   pplLoad($('pQ').value.trim());
 }
 function pPrintBox() {
-  $('pBox').innerHTML = `<div class="u-box mb-3" style="border-color:#edcea0"><div class="gold fw-bold mb-2">طباعة بطاقات QR (ملف PDF)</div>
+  $('pBox').innerHTML = `<div class="u-box mb-3" style="border-color:#edcea0"><div class="gold fw-bold mb-2">طباعة البطاقات (ملف PDF)</div>
+    <select id="pKind" class="form-select u-in mb-2"><option value="qr">بطاقات QR للصعود (8 بالصفحة A4)</option><option value="id">بطاقات هوية المعتمر (4 بالصفحة A3)</option></select>
     <select id="pBus" class="form-select u-in mb-2"><option value="*">كل المعتمرين</option>${pplData.buses.map(b => `<option value="${esc(b)}">${esc(busName(b))}</option>`).join('')}</select>
     <div class="d-flex gap-2"><button type="button" class="btn btn-gold-solid flex-grow-1" data-act="p-do-print">إنشاء PDF</button><button type="button" class="btn btn-outline-light" data-act="p-cancel">إغلاق</button></div></div>`;
 }
@@ -773,6 +777,13 @@ async function admClick(e) {
   const t = e.target.closest('[data-tab]'); if (t) return admGo(t.dataset.tab);
   const b = e.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act, card = b.closest('[data-id]'), id = card?.dataset.id;
+  if (act === 'p-card') {
+    const d = collect($('pBox')), ns = $('pNatSel'); if (ns) d.Nationality = ns.value === 'أخرى' ? ($('pNatOther').value.trim() || '') : ns.value;
+    if (!d.Name || !d.PilgrimNo) return toast('اكتب الاسم أولًا', 3000);
+    toast('جارٍ توليد البطاقة…', 2500);
+    await loadLib(IDCARD, () => window.ixCard); await loadLib(QRLIB, () => window.qrcode);
+    return ixCard.savePNG(d);
+  }
   if (act === 'p-gen') return pGen();
   if (act === 'p-nusk') return nuskSend(b.dataset.i != null ? pplData.items[+b.dataset.i] : collect($('pBox')));
   if (act === 'doc-view') { const id = b.closest('[data-doc]').querySelector('[data-k]').value; return docView(id).catch(er => toast(er.message || 'تعذّر فتح الملف')); }
@@ -902,7 +913,11 @@ async function admClick(e) {
     else if (act === 'p-do-print') {
       const bus = $('pBus').value, all = (await admPost('adm_p_list', { all: true })).items;
       const list = all.filter(p => bus === '*' || String(p.Bus_No).trim() === bus);
-      if (!list.length) toast('لا معتمرين'); else await admPrintCards(list);
+      if (!list.length) toast('لا معتمرين');
+      else if ($('pKind').value === 'id') {
+        await loadLib(JSPDF, () => window.jspdf); await loadLib(QRLIB, () => window.qrcode); await loadLib(IDCARD, () => window.ixCard); await admFonts();
+        await ixCard.savePDF(list, (a, n) => toast(`جارٍ إنشاء الملف ${a} / ${n}`, 2500));
+      } else await admPrintCards(list);
     }
     else if (act === 's-save') {
       const box = card, data = collect(box);
