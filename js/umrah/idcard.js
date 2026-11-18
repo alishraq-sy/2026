@@ -4,16 +4,16 @@
   const W = 1049, H = 1500, NAVY = '#0b2a5b', FF = 'Tajawal, sans-serif', EMERGENCY = '+966551771250';
   // x1,x2 = حدود مساحة النص داخل الخانة البيضاء، y = منتصفها، size = أكبر حجم خط، ltr = أرقام/لاتيني
   const BOX = {
-    name:  { x1: 45,  x2: 720, y: 615, size: 38 },
+    name:  { x1: 45,  x2: 718, y: 615, size: 48 },
     nat:   { x1: 40,  x2: 232, y: 706, size: 30 },
     no:    { x1: 512, x2: 724, y: 707, size: 34, ltr: true },
-    mk:    { x1: 515, x2: 898, y: 810, size: 33 },
-    md:    { x1: 515, x2: 898, y: 922, size: 33 },
-    sup:   { x1: 140, x2: 665, y: 1016, size: 34, ltr: true },
-    mgr:   { x1: 140, x2: 665, y: 1096, size: 34, ltr: true },
+    mk:    { x1: 512, x2: 902, y: 810, size: 44 },
+    md:    { x1: 512, x2: 902, y: 922, size: 44 },
+    sup:   { x1: 138, x2: 664, y: 1016, size: 44, ltr: true },
+    mgr:   { x1: 138, x2: 664, y: 1096, size: 44, ltr: true },
     emg:   { x1: 60,  x2: 640, y: 1180, size: 46, ltr: true },
   };
-  const QR = { cx: 158, cy: 1366, size: 200 }; // يسار الشريط السفلي (قبل الخط الفاصل عند x≈315)
+  const QR = { cx: 158, cy: 1366, size: 250 }; // يسار الشريط السفلي (قبل الخط الفاصل عند x≈315)
   let tpl = null;
   const loadTpl = () => tpl || (tpl = new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = './img/pilgrim-card.jpg'; }));
   const T = v => String(v == null ? '' : v).trim();
@@ -34,17 +34,19 @@
     const w = b.x2 - b.x1; let size = b.size;
     x.direction = b.ltr ? 'ltr' : 'rtl'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = NAVY;
     for (; size > 14; size -= 1) { x.font = `700 ${size}px ${FF}`; if (x.measureText(s).width <= w) break; }
-    x.fillText(s, (b.x1 + b.x2) / 2, b.y + 2);
+    x.textBaseline = 'alphabetic'; // نقيس ارتفاع حروف مرجعية بلا ذيول كي تتوسّط كل النصوص عموديًا بنفس الطريقة
+    const cy = x.measureText('الأ0H').actualBoundingBoxAscent / 2;
+    x.fillText(s, (b.x1 + b.x2) / 2, b.y + cy);
   }
   function drawQR(x, p) {
     try {
       if (qrcode.stringToBytesFuncs && qrcode.stringToBytesFuncs['UTF-8']) qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
       const q = qrcode(0, 'M'); q.addData(payload(p)); q.make();
-      const n = q.getModuleCount(), pad = 14, cell = Math.floor((QR.size - 2 * pad) / n), sz = cell * n, box = sz + 2 * pad;
+      const n = q.getModuleCount(), pad = 12, cell = Math.floor((QR.size - 2 * pad) / n), sz = cell * n, box = QR.size, off = (box - sz) / 2;
       const bx = QR.cx - box / 2, by = QR.cy - box / 2;
       x.fillStyle = '#fff'; x.beginPath(); x.roundRect ? x.roundRect(bx, by, box, box, 14) : x.rect(bx, by, box, box); x.fill();
       x.fillStyle = '#000';
-      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) x.fillRect(bx + pad + c * cell, by + pad + r * cell, cell, cell);
+      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) x.fillRect(bx + off + c * cell, by + off + r * cell, cell, cell);
     } catch (e) {}
   }
   async function canvas(p) {
