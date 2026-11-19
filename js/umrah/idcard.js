@@ -20,13 +20,13 @@
   const fonts = () => Promise.all([document.fonts.load('700 30px Cairo', 'ابجد0123'), document.fonts.load('900 30px Cairo', 'ابجد0123')]).catch(() => {});
 
   // نفس محتوى QR الموجود في بطاقة المعتمر داخل التطبيق
-  function payload(p) {
+  function payload(p) { // السطر الأول رمز المسح عند صعود الباص (scan.html)، والباقي معلومات تظهر لمن يمسحه بأي كاميرا
     const L = ['UMRAH:' + T(p.PilgrimNo), 'المعتمر: ' + T(p.Name)];
-    [['مكة', 'Makkah'], ['المدينة', 'Madinah']].forEach(([n, k]) => {
-      if (T(p[k + '_Hotel'])) L.push(`فندق ${n}: ${T(p[k + '_Hotel'])}${T(p[k + '_Room']) ? ' (غرفة ' + T(p[k + '_Room']) + ')' : ''}`);
-      if (/^https?:\/\//i.test(T(p[k + '_Location']))) L.push(T(p[k + '_Location']));
-    });
+    if (T(p.Makkah_Hotel)) L.push('فندق مكة: ' + T(p.Makkah_Hotel));
+    if (T(p.Madinah_Hotel)) L.push('فندق المدينة: ' + T(p.Madinah_Hotel));
     if (T(p.Supervisor_Name) || T(p.Supervisor_Phone)) L.push('المشرف: ' + [T(p.Supervisor_Name), T(p.Supervisor_Phone)].filter(Boolean).join(' - '));
+    if (T(p.Manager_Name) || T(p.Manager_Phone)) L.push('الإداري: ' + [T(p.Manager_Name), T(p.Manager_Phone)].filter(Boolean).join(' - '));
+    L.push('الطوارئ: ' + EMERGENCY);
     return L.join('\n');
   }
   function text(x, s, b) {
@@ -41,7 +41,7 @@
   function drawQR(x, p) {
     try {
       if (qrcode.stringToBytesFuncs && qrcode.stringToBytesFuncs['UTF-8']) qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
-      const q = qrcode(0, 'M'); q.addData(payload(p)); q.make();
+      const q = qrcode(0, 'L'); q.addData(payload(p)); q.make();
       const n = q.getModuleCount(), pad = 8, box = QR.size, inner = box - 2 * pad, bx = QR.cx - box / 2, by = QR.cy - box / 2;
       // نرسم الرمز بدقة عالية ثم نصغّره ليملأ المربع تمامًا بحواف بيضاء رفيعة
       const k = 10, o = document.createElement('canvas'); o.width = o.height = n * k; const ox = o.getContext('2d');

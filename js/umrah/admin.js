@@ -911,7 +911,7 @@ async function admClick(e) {
     }
     else if (act === 'p-do-import') await pDoImport();
     else if (act === 'p-do-print') {
-      const bus = $('pBus').value, all = (await admPost('adm_p_list', { all: true })).items;
+      const bus = $('pBus').value, all = (await admPost('adm_p_list', $('pKind').value === 'id' ? { full: true } : { all: true })).items; // البطاقة تحتاج كل الأعمدة (الفنادق، المشرف...)
       const list = all.filter(p => bus === '*' || String(p.Bus_No).trim() === bus);
       if (!list.length) toast('لا معتمرين');
       else if ($('pKind').value === 'id') {
